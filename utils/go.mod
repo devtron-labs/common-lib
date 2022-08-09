@@ -1,4 +1,4 @@
-module github.com/devtron-labs/common-lib/logger
+module github.com/devtron-labs/common-lib/utils
 
 require go.uber.org/zap v1.21.0
 
