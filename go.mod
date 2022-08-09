@@ -1,8 +1,6 @@
-module github.com/devtron-labs/common-lib/nats-lib
+module github.com/devtron-labs/common-lib
 
 go 1.18
-
-//replace github.com/devtron-labs/common-lib/utils => ../utils
 
 require github.com/nats-io/nats.go v1.15.0
 
@@ -11,7 +9,6 @@ require go.uber.org/zap v1.21.0
 require github.com/caarlos0/env v3.5.0+incompatible
 
 require (
-	github.com/devtron-labs/common-lib/utils v0.0.0-20220809122455-e1475e085b53 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/nats-io/nats-server/v2 v2.8.4 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect

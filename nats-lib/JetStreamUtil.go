@@ -15,7 +15,7 @@
  *
  */
 
-package main
+package nats_lib
 
 import (
 	"log"

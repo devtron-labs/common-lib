@@ -1,8 +1,8 @@
-package main
+package nats_lib
 
 import (
 	"fmt"
-	utils "github.com/devtron-labs/common-lib/utils/src"
+	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
 
 	"testing"
