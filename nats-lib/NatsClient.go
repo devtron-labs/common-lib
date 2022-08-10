@@ -18,6 +18,7 @@
 package nats_lib
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/caarlos0/env"
@@ -26,13 +27,15 @@ import (
 )
 
 type PubSubClient struct {
-	logger     *zap.SugaredLogger
-	JetStrCtxt nats.JetStreamContext
-	Conn       nats.Conn
+	logger       *zap.SugaredLogger
+	JetStrCtxt   nats.JetStreamContext
+	streamConfig *nats.StreamConfig
+	Conn         nats.Conn
 }
 
 type PubSubConfig struct {
-	NatsServerHost string `env:"NATS_SERVER_HOST" envDefault:"nats://localhost:4222"`
+	NatsServerHost   string `env:"NATS_SERVER_HOST" envDefault:"nats://localhost:4222"`
+	NatsStreamConfig string `env:"NATS_STREAM_CONFIG" envDefault:"{}"`
 }
 
 /* #nosec */
@@ -43,6 +46,15 @@ func NewPubSubClient(logger *zap.SugaredLogger) (*PubSubClient, error) {
 	if err != nil {
 		logger.Error("err", err)
 		return &PubSubClient{}, err
+	}
+
+	configJson := cfg.NatsStreamConfig
+	streamCfg := &nats.StreamConfig{}
+	if configJson != "" {
+		err := json.Unmarshal([]byte(configJson), streamCfg)
+		if err != nil {
+			logger.Errorw("error occurred while parsing streamConfigJson ", "configJson", configJson, "reason", err)
+		}
 	}
 
 	//Connect to NATS
@@ -70,8 +82,9 @@ func NewPubSubClient(logger *zap.SugaredLogger) (*PubSubClient, error) {
 	}
 
 	natsClient := &PubSubClient{
-		logger:     logger,
-		JetStrCtxt: js,
+		logger:       logger,
+		JetStrCtxt:   js,
+		streamConfig: streamCfg,
 	}
 	return natsClient, nil
 }

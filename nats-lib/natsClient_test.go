@@ -4,50 +4,34 @@ import (
 	"fmt"
 	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
-
+	"strconv"
 	"testing"
 	"time"
 )
 
 func TestNewPubSubClient(t *testing.T) {
 
-	t.SkipNow()
 	const payload = "stop-msg"
 	var globalVal = 0
 
 	t.Run("subscriber", func(t *testing.T) {
-		sugaredLogger, _ := utils.NewSugardLogger()
-		pubSubClient, _ := NewPubSubClient(sugaredLogger)
-		globalVar := false
+		queueSubscriber(payload, true)
+	})
 
-		_ = AddStream(pubSubClient.JetStrCtxt, CI_RUNNER_STREAM)
-		subs, err := pubSubClient.JetStrCtxt.QueueSubscribe("CI-COMPLETE", "CI-COMPLETE_GROUP-1", func(msg *nats.Msg) {
-			println("msg received")
-			defer msg.Ack()
-			println(string(msg.Data))
-			if string(msg.Data) == payload {
-				globalVar = true
-			}
-		}, nats.Durable(WORKFLOW_STATUS_UPDATE_DURABLE), nats.DeliverLast(), nats.ManualAck(), nats.BindStream(CI_RUNNER_STREAM))
-		if err != nil {
-			fmt.Println("error is ", err)
-			return
-		}
-		for true {
-			if globalVar {
-				break
-			}
-			fmt.Println("looping & checking subs status: ", subs.IsValid())
-			time.Sleep(5 * time.Second)
-		}
+	t.Run("subscriber1", func(t *testing.T) {
+		queueSubscriber(payload, false)
+	})
+
+	t.Run("subscriber2", func(t *testing.T) {
+		queueSubscriber(payload, false)
 	})
 
 	t.Run("pullSubscriber", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		pubSubClient, _ := NewPubSubClient(sugaredLogger)
 
-		_ = AddStream(pubSubClient.JetStrCtxt, ORCHESTRATOR_STREAM)
-		subs, err := pubSubClient.JetStrCtxt.PullSubscribe("CD.TRIGGER", WORKFLOW_STATUS_UPDATE_DURABLE, nats.BindStream(ORCHESTRATOR_STREAM))
+		_ = AddStream(pubSubClient.JetStrCtxt, pubSubClient.streamConfig, "New_Stream_2")
+		subs, err := pubSubClient.JetStrCtxt.PullSubscribe("hello.world", WORKFLOW_STATUS_UPDATE_DURABLE, nats.BindStream("New_Stream_2"))
 		if err != nil {
 			fmt.Println("error occurred while subscribing pull reason: ", err)
 			return
@@ -73,18 +57,7 @@ func TestNewPubSubClient(t *testing.T) {
 	})
 
 	t.Run("publisher", func(t *testing.T) {
-		sugaredLogger, _ := utils.NewSugardLogger()
-		pubSubClient, _ := NewPubSubClient(sugaredLogger)
-		//topic := "CD.TRIGGER"
-		//topic := "CI-COMPLETE"
-		topic := "hello.world"
-		//streamName := util1.ORCHESTRATOR_STREAM
-		//streamName := util1.CI_RUNNER_STREAM
-		streamName := "New_Stream_2"
-
-		globalVal++
-		helloWorld := "Hello World " + string(rune(globalVal))
-		WriteNatsEvent(pubSubClient, topic, helloWorld, streamName)
+		publishMsg(globalVal)
 	})
 
 	t.Run("stopPublisher", func(t *testing.T) {
@@ -99,12 +72,69 @@ func TestNewPubSubClient(t *testing.T) {
 	})
 }
 
+func publishMsg(globalVal int) {
+	go handlePanic()
+	sugaredLogger, _ := utils.NewSugardLogger()
+	pubSubClient, _ := NewPubSubClient(sugaredLogger)
+	//topic := "CD.TRIGGER"
+	//topic := "CI-COMPLETE"
+	topic := "hello.world"
+	//streamName := util1.ORCHESTRATOR_STREAM
+	//streamName := util1.CI_RUNNER_STREAM
+	streamName := "New_Stream_2"
+
+	for true {
+		globalVal++
+		helloWorld := "Hello World " + strconv.Itoa(globalVal)
+		WriteNatsEvent(pubSubClient, topic, helloWorld, streamName)
+	}
+}
+
+func queueSubscriber(payload string, durable1 bool) {
+	sugaredLogger, _ := utils.NewSugardLogger()
+	pubSubClient, _ := NewPubSubClient(sugaredLogger)
+	globalVar := false
+
+	_ = AddStream(pubSubClient.JetStrCtxt, pubSubClient.streamConfig, "New_Stream_2")
+	durable := "WORKFLOW_STATUS_UPDATE_DURABLE-1"
+	if durable1 {
+		durable = "WORKFLOW_STATUS_UPDATE_DURABLE-2"
+	}
+	subs, err := pubSubClient.JetStrCtxt.QueueSubscribe("hello.world", "CI-COMPLETE_GROUP-1", func(msg *nats.Msg) {
+		println("msg received")
+		defer msg.Ack()
+		println(string(msg.Data))
+		if string(msg.Data) == payload {
+			globalVar = true
+		}
+	}, nats.Durable(durable), nats.DeliverAll(), nats.ManualAck(), nats.BindStream("New_Stream_2"))
+	if err != nil {
+		fmt.Println("error is ", err)
+		return
+	}
+	for true {
+		if globalVar {
+			break
+		}
+		fmt.Println("looping & checking subs status: ", subs.IsValid())
+		time.Sleep(5 * time.Second)
+	}
+}
+
 func WriteNatsEvent(psc *PubSubClient, topic string, payload string, streamName string) {
-	_ = AddStream(psc.JetStrCtxt, streamName)
+	_ = AddStream(psc.JetStrCtxt, psc.streamConfig, streamName)
 	//Generate random string for passing as Header Id in message
-	randString := "MsgHeaderId-" + string(1)
+	randString := "MsgHeaderId-" + utils.Generate(10)
 	_, err := psc.JetStrCtxt.Publish(topic, []byte(payload), nats.MsgId(randString))
 	if err != nil {
 		fmt.Println("error occurred while publishing event reason: ", err)
+	} else {
+		fmt.Println("msg published " + payload)
+	}
+}
+
+func handlePanic() {
+	if err := recover(); err != nil {
+		fmt.Println("panic occurred:", err)
 	}
 }
