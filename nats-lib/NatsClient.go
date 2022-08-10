@@ -26,26 +26,26 @@ import (
 	"go.uber.org/zap"
 )
 
-type PubSubClient struct {
+type NatsClient struct {
 	logger       *zap.SugaredLogger
 	JetStrCtxt   nats.JetStreamContext
 	streamConfig *nats.StreamConfig
 	Conn         nats.Conn
 }
 
-type PubSubConfig struct {
+type NatsClientConfig struct {
 	NatsServerHost   string `env:"NATS_SERVER_HOST" envDefault:"nats://localhost:4222"`
 	NatsStreamConfig string `env:"NATS_STREAM_CONFIG" envDefault:"{}"`
 }
 
 /* #nosec */
-func NewPubSubClient(logger *zap.SugaredLogger) (*PubSubClient, error) {
+func NewNatsClient(logger *zap.SugaredLogger) (*NatsClient, error) {
 
-	cfg := &PubSubConfig{}
+	cfg := &NatsClientConfig{}
 	err := env.Parse(cfg)
 	if err != nil {
 		logger.Error("err", err)
-		return &PubSubClient{}, err
+		return &NatsClient{}, err
 	}
 
 	configJson := cfg.NatsStreamConfig
@@ -71,7 +71,7 @@ func NewPubSubClient(logger *zap.SugaredLogger) (*PubSubClient, error) {
 		}))
 	if err != nil {
 		logger.Error("err", err)
-		return &PubSubClient{}, err
+		return &NatsClient{}, err
 	}
 
 	//Create a jetstream context
@@ -81,7 +81,7 @@ func NewPubSubClient(logger *zap.SugaredLogger) (*PubSubClient, error) {
 		logger.Errorw("Error while creating jetstream context", "error", err)
 	}
 
-	natsClient := &PubSubClient{
+	natsClient := &NatsClient{
 		logger:       logger,
 		JetStrCtxt:   js,
 		streamConfig: streamCfg,

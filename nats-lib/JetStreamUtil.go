@@ -20,8 +20,6 @@ package nats_lib
 import (
 	"github.com/nats-io/nats.go"
 	"log"
-	"os"
-	"strconv"
 	"time"
 )
 
@@ -62,17 +60,12 @@ const (
 	NEW_CI_MATERIAL_TOPIC_DURABLE     string = "NEW-CI-MATERIAL_DURABLE-1"
 	CD_SUCCESS                        string = "CD.TRIGGER"
 	WEBHOOK_EVENT_TOPIC               string = "WEBHOOK_EVENT"
-	MSG_MAX_AGE                       int    = 86400
 )
 
 var ORCHESTRATOR_SUBJECTS = []string{BULK_APPSTORE_DEPLOY_TOPIC, BULK_DEPLOY_TOPIC, BULK_HIBERNATE_TOPIC, CD_SUCCESS, WEBHOOK_EVENT_TOPIC}
-var ORCHESTRATOR_CONSUMERS = []string{BULK_APPSTORE_DEPLOY_DURABLE, BULK_DEPLOY_DURABLE, BULK_HIBERNATE_DURABLE}
 var CI_RUNNER_SUBJECTS = []string{CI_COMPLETE_TOPIC, CD_STAGE_COMPLETE_TOPIC}
-var CI_RUNNER_CONSUMERS = []string{CI_COMPLETE_DURABLE, CD_COMPLETE_DURABLE}
 var KUBEWATCH_SUBJECTS = []string{APPLICATION_STATUS_UPDATE_TOPIC, CRON_EVENTS, WORKFLOW_STATUS_UPDATE_TOPIC, CD_WORKFLOW_STATUS_UPDATE}
-var KUBEWATCH_CONSUMERS = []string{APPLICATION_STATUS_UPDATE_DURABLE, CRON_EVENTS_DURABLE, WORKFLOW_STATUS_UPDATE_DURABLE, CD_WORKFLOW_STATUS_UPDATE_DURABLE}
 var GIT_SENSOR_SUBJECTS = []string{NEW_CI_MATERIAL_TOPIC}
-var GIT_SENSOR_CONSUMERS = []string{NEW_CI_MATERIAL_TOPIC_DURABLE}
 
 func GetStreamSubjects(streamName string) []string {
 	var subjArr []string
@@ -89,23 +82,6 @@ func GetStreamSubjects(streamName string) []string {
 		subjArr = []string{"hello.world"}
 	}
 	return subjArr
-}
-
-func GetStreamConsumers(streamName string) []string {
-	var consArr []string
-	switch streamName {
-	case ORCHESTRATOR_STREAM:
-		consArr = ORCHESTRATOR_CONSUMERS
-	case CI_RUNNER_STREAM:
-		consArr = CI_RUNNER_CONSUMERS
-	case KUBEWATCH_STREAM:
-		consArr = KUBEWATCH_CONSUMERS
-	case GIT_SENSOR_STREAM:
-		consArr = GIT_SENSOR_CONSUMERS
-	default:
-		consArr = []string{WORKFLOW_STATUS_UPDATE_DURABLE}
-	}
-	return consArr
 }
 
 func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, streamNames ...string) error {
@@ -128,27 +104,14 @@ func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, stream
 			if checkConfigChangeReqd(&config, streamConfig) {
 				streamConfig.Name = streamName
 				streamConfig.Subjects = GetStreamSubjects(streamName)
-				_, err := js.UpdateStream(streamConfig)
-				if err != nil {
-					log.Println("error occurred while updating stream config", "streamName", streamName, "streamConfig", streamConfig, "error", err)
+				_, err1 := js.UpdateStream(streamConfig)
+				if err1 != nil {
+					log.Println("error occurred while updating stream config", "streamName", streamName, "streamConfig", streamConfig, "error", err1)
 				} else {
 					log.Println("stream config updated successfully", "config", config, "new", streamConfig)
 				}
 			}
 		}
-		//consumers := GetStreamConsumers(streamName)
-		//for _, consumer := range consumers {
-		//	consumerInfo, err := js.ConsumerInfo(streamName, consumer)
-		//	if err == nats.ErrConsumerNotFound && consumerInfo == nil {
-		//		_, err := js.AddConsumer(streamName, &nats.ConsumerConfig{
-		//			Durable:   consumer,
-		//			AckPolicy: nats.AckExplicitPolicy,
-		//		})
-		//		if err != nil {
-		//			//TODO handle error case
-		//		}
-		//	}
-		//}
 	}
 	return err
 }
@@ -161,17 +124,6 @@ func checkConfigChangeReqd(existingConfig *nats.StreamConfig, toUpdateConfig *na
 		toUpdateConfig.MaxAge = existingConfig.MaxAge
 	}
 
-	//if toUpdateConfig.Replicas != 0 && toUpdateConfig.Replicas != existingConfig.Replicas {
-	//	configChanged = true
-	//} else {
-	//	toUpdateConfig.Replicas = existingConfig.Replicas
-	//} commented as retention policy cannot be updated
-
-	//if toUpdateConfig.Retention != existingConfig.Retention {
-	//	configChanged = true
-	//} else {
-	//	toUpdateConfig.Retention = existingConfig.Retention
-	//} commented as retention policy cannot be updated
 	return configChanged
 }
 
@@ -192,14 +144,4 @@ func getNewConfig(streamName string, toUpdateConfig *nats.StreamConfig) *nats.St
 	}
 	cfg.Retention = nats.RetentionPolicy(2)
 	return cfg
-}
-
-func getMaxAge() time.Duration {
-	natsMaxAgeStr := os.Getenv("NATS_STREAM_MAX_AGE")
-	msgMaxAge, err := strconv.Atoi(natsMaxAgeStr)
-	if err != nil {
-		log.Println("error occurred while converting maxAge to integer", "natsMaxAgeStr", natsMaxAgeStr, "error", err)
-		msgMaxAge = MSG_MAX_AGE
-	}
-	return time.Duration(msgMaxAge) * time.Second
 }

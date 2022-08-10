@@ -28,7 +28,7 @@ func TestNewPubSubClient(t *testing.T) {
 
 	t.Run("pullSubscriber", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
-		pubSubClient, _ := NewPubSubClient(sugaredLogger)
+		pubSubClient, _ := NewNatsClient(sugaredLogger)
 
 		_ = AddStream(pubSubClient.JetStrCtxt, pubSubClient.streamConfig, "New_Stream_2")
 		subs, err := pubSubClient.JetStrCtxt.PullSubscribe("hello.world", WORKFLOW_STATUS_UPDATE_DURABLE, nats.BindStream("New_Stream_2"))
@@ -62,7 +62,7 @@ func TestNewPubSubClient(t *testing.T) {
 
 	t.Run("stopPublisher", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
-		pubSubClient, _ := NewPubSubClient(sugaredLogger)
+		pubSubClient, _ := NewNatsClient(sugaredLogger)
 		topic := "CD.TRIGGER" // for pull subs
 		//topic := "CI-COMPLETE"
 		streamName := ORCHESTRATOR_STREAM
@@ -75,7 +75,7 @@ func TestNewPubSubClient(t *testing.T) {
 func publishMsg(globalVal int) {
 	go handlePanic()
 	sugaredLogger, _ := utils.NewSugardLogger()
-	pubSubClient, _ := NewPubSubClient(sugaredLogger)
+	pubSubClient, _ := NewNatsClient(sugaredLogger)
 	//topic := "CD.TRIGGER"
 	//topic := "CI-COMPLETE"
 	topic := "hello.world"
@@ -92,7 +92,7 @@ func publishMsg(globalVal int) {
 
 func queueSubscriber(payload string, durable1 bool) {
 	sugaredLogger, _ := utils.NewSugardLogger()
-	pubSubClient, _ := NewPubSubClient(sugaredLogger)
+	pubSubClient, _ := NewNatsClient(sugaredLogger)
 	globalVar := false
 
 	_ = AddStream(pubSubClient.JetStrCtxt, pubSubClient.streamConfig, "New_Stream_2")
@@ -121,7 +121,7 @@ func queueSubscriber(payload string, durable1 bool) {
 	}
 }
 
-func WriteNatsEvent(psc *PubSubClient, topic string, payload string, streamName string) {
+func WriteNatsEvent(psc *NatsClient, topic string, payload string, streamName string) {
 	_ = AddStream(psc.JetStrCtxt, psc.streamConfig, streamName)
 	//Generate random string for passing as Header Id in message
 	randString := "MsgHeaderId-" + utils.Generate(10)
