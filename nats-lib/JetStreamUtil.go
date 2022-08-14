@@ -60,26 +60,52 @@ const (
 	NEW_CI_MATERIAL_TOPIC_DURABLE     string = "NEW-CI-MATERIAL_DURABLE-1"
 	CD_SUCCESS                        string = "CD.TRIGGER"
 	WEBHOOK_EVENT_TOPIC               string = "WEBHOOK_EVENT"
+
+	DEVTRON_TEST_TOPIC    string = "Test_Topic"
+	DEVTRON_TEST_STREAM   string = "Devtron_Test_Stream"
+	DEVTRON_TEST_QUEUE    string = "Test_Topic_Queue"
+	DEVTRON_TEST_CONSUMER string = "Test_Topic_Consumer"
 )
 
-var ORCHESTRATOR_SUBJECTS = []string{BULK_APPSTORE_DEPLOY_TOPIC, BULK_DEPLOY_TOPIC, BULK_HIBERNATE_TOPIC, CD_SUCCESS, WEBHOOK_EVENT_TOPIC}
-var CI_RUNNER_SUBJECTS = []string{CI_COMPLETE_TOPIC, CD_STAGE_COMPLETE_TOPIC}
-var KUBEWATCH_SUBJECTS = []string{APPLICATION_STATUS_UPDATE_TOPIC, CRON_EVENTS, WORKFLOW_STATUS_UPDATE_TOPIC, CD_WORKFLOW_STATUS_UPDATE}
-var GIT_SENSOR_SUBJECTS = []string{NEW_CI_MATERIAL_TOPIC}
+type NatsTopic struct {
+	topicName    string
+	streamName   string
+	queueName    string // needed for load balancing
+	consumerName string
+}
+
+var natsTopicMapping = map[string]NatsTopic{
+
+	BULK_APPSTORE_DEPLOY_TOPIC: {topicName: BULK_APPSTORE_DEPLOY_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: BULK_APPSTORE_DEPLOY_GROUP, consumerName: BULK_APPSTORE_DEPLOY_DURABLE},
+	BULK_DEPLOY_TOPIC:          {topicName: BULK_DEPLOY_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: BULK_DEPLOY_GROUP, consumerName: BULK_DEPLOY_DURABLE},
+	BULK_HIBERNATE_TOPIC:       {topicName: BULK_HIBERNATE_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: BULK_HIBERNATE_GROUP, consumerName: BULK_HIBERNATE_DURABLE},
+	CD_SUCCESS:                 {topicName: CD_SUCCESS, streamName: ORCHESTRATOR_STREAM},
+	WEBHOOK_EVENT_TOPIC:        {topicName: WEBHOOK_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM},
+
+	CI_COMPLETE_TOPIC:       {topicName: CI_COMPLETE_TOPIC, streamName: CI_RUNNER_STREAM, queueName: CI_COMPLETE_GROUP, consumerName: CI_COMPLETE_DURABLE},
+	CD_STAGE_COMPLETE_TOPIC: {topicName: CD_STAGE_COMPLETE_TOPIC, streamName: CI_RUNNER_STREAM, queueName: CD_COMPLETE_GROUP, consumerName: CD_COMPLETE_DURABLE},
+
+	APPLICATION_STATUS_UPDATE_TOPIC: {topicName: APPLICATION_STATUS_UPDATE_TOPIC, streamName: KUBEWATCH_STREAM, queueName: APPLICATION_STATUS_UPDATE_GROUP, consumerName: APPLICATION_STATUS_UPDATE_DURABLE},
+	CRON_EVENTS:                     {topicName: CRON_EVENTS, streamName: KUBEWATCH_STREAM, queueName: CRON_EVENTS_GROUP, consumerName: CRON_EVENTS_DURABLE},
+	WORKFLOW_STATUS_UPDATE_TOPIC:    {topicName: WORKFLOW_STATUS_UPDATE_TOPIC, streamName: KUBEWATCH_STREAM, queueName: WORKFLOW_STATUS_UPDATE_GROUP, consumerName: WORKFLOW_STATUS_UPDATE_DURABLE},
+	CD_WORKFLOW_STATUS_UPDATE:       {topicName: CD_WORKFLOW_STATUS_UPDATE, streamName: KUBEWATCH_STREAM, queueName: CD_WORKFLOW_STATUS_UPDATE_GROUP, consumerName: CD_WORKFLOW_STATUS_UPDATE_DURABLE},
+
+	NEW_CI_MATERIAL_TOPIC: {topicName: NEW_CI_MATERIAL_TOPIC, streamName: GIT_SENSOR_STREAM, queueName: NEW_CI_MATERIAL_TOPIC_GROUP, consumerName: NEW_CI_MATERIAL_TOPIC_DURABLE},
+
+	DEVTRON_TEST_TOPIC: {topicName: DEVTRON_TEST_TOPIC, streamName: DEVTRON_TEST_STREAM, queueName: DEVTRON_TEST_QUEUE, consumerName: DEVTRON_TEST_CONSUMER},
+}
+
+func GetNatsTopic(topicName string) NatsTopic {
+	return natsTopicMapping[topicName]
+}
 
 func GetStreamSubjects(streamName string) []string {
 	var subjArr []string
-	switch streamName {
-	case ORCHESTRATOR_STREAM:
-		subjArr = ORCHESTRATOR_SUBJECTS
-	case CI_RUNNER_STREAM:
-		subjArr = CI_RUNNER_SUBJECTS
-	case KUBEWATCH_STREAM:
-		subjArr = KUBEWATCH_SUBJECTS
-	case GIT_SENSOR_STREAM:
-		subjArr = GIT_SENSOR_SUBJECTS
-	default:
-		subjArr = []string{"hello.world"}
+
+	for _, natsTopic := range natsTopicMapping {
+		if natsTopic.streamName == streamName {
+			subjArr = append(subjArr, natsTopic.topicName)
+		}
 	}
 	return subjArr
 }

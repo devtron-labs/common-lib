@@ -7,12 +7,12 @@ import (
 )
 
 type PubSubClientService interface {
-	Publish(streamName string, subject string, msg string) error
-	Subscribe(streamName string, subject string, callback func(msg PubSubMsg)) error
+	Publish(topic string, msg string) error
+	Subscribe(topic string, callback func(msg PubSubMsg)) error
 }
 
 type PubSubMsg struct {
-	msg string
+	Data string
 }
 
 type PubSubClientServiceImpl struct {
@@ -32,31 +32,38 @@ func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) *PubSubClientServiceI
 	return pubSubClient
 }
 
-func (impl PubSubClientServiceImpl) Publish(streamName string, subject string, msg string) error {
+func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	natsClient := impl.natsClient
 	jetStrCtxt := natsClient.JetStrCtxt
+	natsTopic := GetNatsTopic(topic)
+	streamName := natsTopic.streamName
 	_ = AddStream(jetStrCtxt, natsClient.streamConfig, streamName)
 	//Generate random string for passing as Header Id in message
 	randString := "MsgHeaderId-" + utils.Generate(10)
-	_, err := jetStrCtxt.Publish(CRON_EVENTS, []byte(msg), nats.MsgId(randString))
+	_, err := jetStrCtxt.Publish(topic, []byte(msg), nats.MsgId(randString))
 	if err != nil {
-		impl.logger.Errorw("error while publishing message", "stream", streamName, "subject", subject, "error", err)
+		//TODO need to handle retry specially for timeout cases
+		impl.logger.Errorw("error while publishing message", "stream", streamName, "topic", topic, "error", err)
 		return err
 	}
 	return nil
 }
 
-func (impl PubSubClientServiceImpl) Subscribe(streamName string, subject string, callback func(msg *PubSubMsg)) error {
+func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *PubSubMsg)) error {
+	natsTopic := GetNatsTopic(topic)
+	streamName := natsTopic.streamName
+	queueName := natsTopic.queueName
+	consumerName := natsTopic.consumerName
 	_ = AddStream(impl.natsClient.JetStrCtxt, impl.natsClient.streamConfig, streamName)
-	_, err := impl.natsClient.JetStrCtxt.QueueSubscribe(subject, WORKFLOW_STATUS_UPDATE_GROUP, func(msg *nats.Msg) {
+	_, err := impl.natsClient.JetStrCtxt.QueueSubscribe(topic, queueName, func(msg *nats.Msg) {
 		defer msg.Ack()
-		subMsg := &PubSubMsg{msg: string(msg.Data)}
+		subMsg := &PubSubMsg{Data: string(msg.Data)}
 		callback(subMsg)
-	})
+	}, nats.Durable(consumerName), nats.DeliverAll(), nats.ManualAck(), nats.BindStream(streamName))
 	if err != nil {
-		impl.logger.Fatalw("error while subscribing", "stream", streamName, "subject", subject, "error", err)
+		impl.logger.Fatalw("error while subscribing", "stream", streamName, "topic", topic, "error", err)
 		return err
 	}
-	
+
 	return nil
 }
