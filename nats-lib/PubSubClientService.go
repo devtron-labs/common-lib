@@ -8,7 +8,7 @@ import (
 
 type PubSubClientService interface {
 	Publish(topic string, msg string) error
-	Subscribe(topic string, callback func(msg PubSubMsg)) error
+	Subscribe(topic string, callback func(msg *PubSubMsg)) error
 }
 
 type PubSubMsg struct {
