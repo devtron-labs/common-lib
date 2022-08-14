@@ -13,7 +13,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 	t.SkipNow()
 	t.Run("PubAndSub", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
-		pubSubClient := NewPubSubClientServiceImpl(sugaredLogger)
+		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
 		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *PubSubMsg) {
 			fmt.Println("Data received:", msg.Data)
 		})
