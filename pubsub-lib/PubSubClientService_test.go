@@ -1,4 +1,4 @@
-package nats_lib
+package pubsub_lib
 
 import (
 	"fmt"
