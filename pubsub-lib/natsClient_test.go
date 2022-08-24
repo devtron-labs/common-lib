@@ -38,6 +38,7 @@ func TestNewPubSubClient(t *testing.T) {
 			return
 		}
 		for subs.IsValid() {
+			fmt.Println("fetching msgs")
 			msgs, err := subs.Fetch(10)
 			if err != nil && err == nats.ErrTimeout {
 				fmt.Println(" timeout occurred but we have to try again")
@@ -54,6 +55,7 @@ func TestNewPubSubClient(t *testing.T) {
 				}
 				defer nxtMsg.Ack()
 			}
+			time.Sleep(5 * time.Second)
 		}
 	})
 
