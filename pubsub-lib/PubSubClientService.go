@@ -78,28 +78,24 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *P
 
 func (impl PubSubClientServiceImpl) startListeningForEvents(processingBatchSize int, channel chan *nats.Msg, callback func(msg *PubSubMsg)) {
 	wg := new(sync.WaitGroup)
-	wg.Add(processingBatchSize)
-	index := 0
+
+	for index := 0; index < processingBatchSize; index++ {
+		wg.Add(1)
+		go processMessages(wg, channel, callback)
+	}
+	wg.Wait()
+}
+
+func processMessages(wg *sync.WaitGroup, channel chan *nats.Msg, callback func(msg *PubSubMsg)) {
+	defer wg.Done()
 	for msg := range channel {
-		go processMsg(wg, msg, callback)
-		index++
-		if index == processingBatchSize {
-			wg.Wait()
-			wg = new(sync.WaitGroup)
-			wg.Add(processingBatchSize)
-			index = 0
-		}
+		processMsg(msg, callback)
 	}
 }
 
 //TODO need to extend msg ack depending upon response from callback like error scenario
-func processMsg(wg *sync.WaitGroup, msg *nats.Msg, callback func(msg *PubSubMsg)) {
-	defer completeState(wg, msg)
+func processMsg(msg *nats.Msg, callback func(msg *PubSubMsg)) {
+	defer msg.Ack()
 	subMsg := &PubSubMsg{Data: string(msg.Data)}
 	callback(subMsg)
-}
-
-func completeState(wg *sync.WaitGroup, msg *nats.Msg) {
-	msg.Ack()
-	wg.Done()
 }

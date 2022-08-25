@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
+	"go.uber.org/zap"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -40,10 +42,6 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
-		//err = pubSubClient.Publish(DEVTRON_TEST_TOPIC, "published Msg "+strconv.Itoa(time.Now().Second()))
-		//if err != nil {
-		//	sugaredLogger.Fatalw("error occurred while publishing to topic")
-		//}
 		time.Sleep(time.Duration(500) * time.Second)
 	})
 
@@ -62,10 +60,6 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
-		//err = pubSubClient.Publish(DEVTRON_TEST_TOPIC, "published Msg "+strconv.Itoa(time.Now().Second()))
-		//if err != nil {
-		//	sugaredLogger.Fatalw("error occurred while publishing to topic")
-		//}
 		time.Sleep(time.Duration(500) * time.Second)
 	})
 
@@ -105,27 +99,32 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 	t.Run("PubOnly", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
-		Published_Counter := 0
-		//err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *PubSubMsg) {
-		//	fmt.Println("Data received:", msg.Data)
-		//})
-		//if err != nil {
-		//	sugaredLogger.Fatalw("error occurred while subscribing to topic")
-		//}
-
-		lock := &sync.Mutex{}
-		for true {
-			msg := "published Msg " + strconv.Itoa(time.Now().Second())
-			err := pubSubClient.Publish(DEVTRON_TEST_TOPIC, msg)
-			if err != nil {
-				sugaredLogger.Fatalw("error occurred while publishing to topic")
-			}
-			lock.Lock()
-			Published_Counter++
-			lock.Unlock()
-			fmt.Println("msg ", msg, " count ", Published_Counter)
-			time.Sleep(1 * time.Second)
+		var ops uint64
+		var msgId uint64
+		channel := make(chan string, 64)
+		wg := new(sync.WaitGroup)
+		for index := 0; index < 3; index++ {
+			wg.Add(1)
+			go publishNatsMsg(pubSubClient, sugaredLogger, &ops, wg, channel)
 		}
-		time.Sleep(time.Duration(5) * time.Second)
+		for true {
+			atomic.AddUint64(&msgId, 1)
+			msg := "published Msg " + strconv.FormatUint(msgId, 10)
+			channel <- msg
+			//time.Sleep(1 * time.Second)
+		}
+		wg.Wait()
 	})
+}
+
+func publishNatsMsg(pubSubClient *PubSubClientServiceImpl, sugaredLogger *zap.SugaredLogger, publishedCounter *uint64, wg *sync.WaitGroup, channel chan string) {
+	defer wg.Done()
+	for natsMsg := range channel {
+		err := pubSubClient.Publish(DEVTRON_TEST_TOPIC, natsMsg)
+		if err != nil {
+			sugaredLogger.Fatalw("error occurred while publishing to topic")
+		}
+		atomic.AddUint64(publishedCounter, 1)
+		fmt.Println("msg ", natsMsg, " count ", *publishedCounter)
+	}
 }
