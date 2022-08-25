@@ -64,7 +64,8 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *P
 		deliveryOption = nats.DeliverAll()
 	}
 	processingBatchSize := natsClient.NatsMsgProcessingBatchSize
-	channel := make(chan *nats.Msg, 64)
+	msgBufferSize := natsClient.NatsMsgBufferSize
+	channel := make(chan *nats.Msg, msgBufferSize)
 	_, err := natsClient.JetStrCtxt.ChanQueueSubscribe(topic, queueName, channel, nats.Durable(consumerName), deliveryOption, nats.ManualAck(),
 		nats.BindStream(streamName))
 	if err != nil {
@@ -91,6 +92,7 @@ func (impl PubSubClientServiceImpl) startListeningForEvents(processingBatchSize 
 	}
 }
 
+//TODO need to extend msg ack depending upon response from callback like error scenario
 func processMsg(wg *sync.WaitGroup, msg *nats.Msg, callback func(msg *PubSubMsg)) {
 	defer completeState(wg, msg)
 	subMsg := &PubSubMsg{Data: string(msg.Data)}

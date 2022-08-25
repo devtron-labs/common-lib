@@ -14,7 +14,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 
 	const payload = "stop-msg"
 
-	//t.SkipNow()
+	t.SkipNow()
 	t.Run("PubAndSub", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
