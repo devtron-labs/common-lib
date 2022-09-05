@@ -1,7 +1,11 @@
 package blob_storage
 
 import (
+	"context"
 	"fmt"
+	"github.com/Azure/azure-storage-blob-go/azblob"
+	"github.com/Azure/go-autorest/autorest/adal"
+	"github.com/Azure/go-autorest/autorest/azure"
 	"log"
 	"net/url"
 	"os"
@@ -13,10 +17,18 @@ import (
 type AzureBlob struct {
 }
 
+type AzureBlobConfig struct {
+	Enabled              bool   `json:"enabled"`
+	AccountName          string `json:"accountName"`
+	BlobContainerCiLog   string `json:"blobContainerCiLog"`
+	BlobContainerCiCache string `json:"blobContainerCiCache"`
+	AccountKey           string `json:"accountKey"`
+}
+
 func (impl *AzureBlob) getSharedCredentials(accountName, accountKey string) (*azblob.SharedKeyCredential, error) {
 	credential, err := azblob.NewSharedKeyCredential(accountName, accountKey)
 	if err != nil {
-		log.Println(util.DEVTRON, "Invalid credentials with error: "+err.Error())
+		log.Println("Invalid credentials with error: " + err.Error())
 	}
 	return credential, err
 }
@@ -87,7 +99,7 @@ func (impl *AzureBlob) DownloadBlob(context context.Context, blobName string, co
 			break
 		}
 	}
-	log.Println(util.DEVTRON, " latest version", latestVersion)
+	log.Println("latest version", latestVersion)
 	blobURL := containerURL.NewBlobURL(blobName).WithVersionID(latestVersion)
 	err = azblob.DownloadBlobToFile(context, blobURL, 0, azblob.CountToEnd, file, azblob.DownloadFromBlobOptions{})
 	return true, err
@@ -99,7 +111,7 @@ func (impl *AzureBlob) UploadBlob(context context.Context, blobName string, conf
 		return err
 	}
 	blobURL := containerURL.NewBlockBlobURL(blobName)
-	log.Println(util.DEVTRON, "upload blob url ", blobURL, "file", inputFileName)
+	log.Println("upload blob url ", blobURL, "file", inputFileName)
 
 	file, err := os.Open(inputFileName)
 	if err != nil {

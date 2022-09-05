@@ -1,7 +1,15 @@
 package blob_storage
 
 type BlobStorageRequest struct {
-	storageType BlobStorageType
+	StorageType          BlobStorageType
+	Region               string
+	Endpoint             string // for s3 compatible storage
+	BucketName           string
+	Key                  string
+	AccessKey            string
+	Passkey              string
+	FileDownloadLocation string
+	AzureBlobConfig      *AzureBlobConfig
 }
 
 type BlobStorageType string
