@@ -25,6 +25,9 @@ type BlobStorageServiceImpl struct {
 }
 
 func NewBlobStorageServiceImpl(logger *zap.SugaredLogger) *BlobStorageServiceImpl {
+	if logger == nil {
+		logger, _ = utils.NewSugardLogger()
+	}
 	impl := &BlobStorageServiceImpl{
 		logger: logger,
 	}
