@@ -5,7 +5,8 @@ type BlobStorageRequest struct {
 	Region               string
 	Endpoint             string // for s3 compatible storage
 	BucketName           string
-	Key                  string
+	SourceKey            string
+	DestinationKey       string
 	Source               string
 	Destination          string
 	AccessKey            string

@@ -38,14 +38,14 @@ func (impl *BlobStorageServiceImpl) PutWithCommand(request *BlobStorageRequest) 
 	var err error
 	switch request.StorageType {
 	case BLOB_STORAGE_S3:
-		cachePush := exec.Command("aws", "s3", "cp", request.Key, "s3://"+request.BucketName+"/"+request.Key)
+		cachePush := exec.Command("aws", "s3", "cp", request.SourceKey, "s3://"+request.BucketName+"/"+request.DestinationKey)
 		err = utils.RunCommand(cachePush)
 	case BLOB_STORAGE_MINIO:
-		cachePush := exec.Command("aws", "--endpoint-url", request.Endpoint, "s3", "cp", request.Key, "s3://"+request.BucketName+"/"+request.Key)
+		cachePush := exec.Command("aws", "--endpoint-url", request.Endpoint, "s3", "cp", request.SourceKey, "s3://"+request.BucketName+"/"+request.DestinationKey)
 		err = utils.RunCommand(cachePush)
 	case BLOB_STORAGE_AZURE:
 		b := AzureBlob{}
-		err = b.UploadBlob(context.Background(), request.Key, request.AzureBlobConfig, request.Key, request.AzureBlobConfig.BlobContainerCiCache)
+		err = b.UploadBlob(context.Background(), request.DestinationKey, request.AzureBlobConfig, request.SourceKey, request.AzureBlobConfig.BlobContainerCiCache)
 	default:
 		return fmt.Errorf("cloudprovider %s not supported", request.StorageType)
 	}
@@ -80,7 +80,7 @@ func (impl *BlobStorageServiceImpl) Get(request *BlobStorageRequest) (bool, int6
 		downloadSuccess, numBytes, err = DownLoadFromS3(file, request, sess)
 	case BLOB_STORAGE_AZURE:
 		b := AzureBlob{}
-		downloadSuccess, err = b.DownloadBlob(context.Background(), request.Key, request.AzureBlobConfig, file)
+		downloadSuccess, err = b.DownloadBlob(context.Background(), request.SourceKey, request.AzureBlobConfig, file)
 	default:
 		return downloadSuccess, numBytes, fmt.Errorf("cloudprovider %s not supported", request.StorageType)
 	}
@@ -92,7 +92,7 @@ func DownLoadFromS3(file *os.File, request *BlobStorageRequest, sess *session.Se
 	svc := s3.New(sess)
 	input := &s3.ListObjectVersionsInput{
 		Bucket: aws.String(request.BucketName),
-		Prefix: aws.String(request.Key),
+		Prefix: aws.String(request.SourceKey),
 	}
 	result, err := svc.ListObjectVersions(input)
 	if err != nil {
@@ -110,7 +110,7 @@ func DownLoadFromS3(file *os.File, request *BlobStorageRequest, sess *session.Se
 	var version *string
 	var size int64
 	for _, v := range result.Versions {
-		if *v.IsLatest && *v.Key == request.Key {
+		if *v.IsLatest && *v.Key == request.SourceKey {
 			version = v.VersionId
 			log.Println("selected version ", v.VersionId, " last modified ", v.LastModified)
 			size = *v.Size
@@ -122,7 +122,7 @@ func DownLoadFromS3(file *os.File, request *BlobStorageRequest, sess *session.Se
 	numBytes, err := downloader.Download(file,
 		&s3.GetObjectInput{
 			Bucket:    aws.String(request.BucketName),
-			Key:       aws.String(request.Key),
+			Key:       aws.String(request.SourceKey),
 			VersionId: version,
 		})
 	if err != nil {
