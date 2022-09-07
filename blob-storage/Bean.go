@@ -30,6 +30,8 @@ type AwsS3BaseConfig struct {
 	AccessKey   string `json:"accessKey"`
 	Passkey     string `json:"passkey"`
 	EndpointUrl string `json:"endpointUrl"`
+	BucketName  string `json:"bucketName"`
+	Region      string `json:"region"`
 	//CiLogBucketName      string `json:"ciLogBucketName"`
 	//CiLogRegion          string `json:"ciLogRegion"`
 	//CiCacheBucketName    string `json:"ciCacheBucketName"`
