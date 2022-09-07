@@ -7,12 +7,22 @@ type BlobStorageRequest struct {
 	BucketName           string
 	SourceKey            string
 	DestinationKey       string
-	Source               string
-	Destination          string
 	AccessKey            string
 	Passkey              string
 	FileDownloadLocation string
 	AzureBlobConfig      *AzureBlobConfig
+}
+
+type AwsS3Config struct {
+	AccessKey            string `json:"accessKey"`
+	Passkey              string `json:"passkey"`
+	EndpointUrl          string `json:"endpointUrl"`
+	CiLogBucketName      string `json:"ciLogBucketName"`
+	CiLogRegion          string `json:"ciLogRegion"`
+	CiCacheBucketName    string `json:"ciCacheBucketName"`
+	CiCacheRegion        string `json:"ciCacheRegion"`
+	CiArtifactBucketName string `json:"ciArtifactBucketName"`
+	CiArtifactRegion     string `json:"ciArtifactRegion"`
 }
 
 type BlobStorageType string
