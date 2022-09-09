@@ -66,16 +66,10 @@ func (impl *BlobStorageServiceImpl) Get(request *BlobStorageRequest) (bool, int6
 
 	downloadSuccess := false
 	numBytes := int64(0)
-	var file *os.File
-	var err error
-	if request.DestinationFile != nil {
-		file = request.DestinationFile
-	} else {
-		file, err := os.Create("/" + request.DestinationKey)
-		defer file.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
+	file, err := os.Create("/" + request.DestinationKey)
+	defer file.Close()
+	if err != nil {
+		log.Fatal(err)
 	}
 	switch request.StorageType {
 	case BLOB_STORAGE_S3:
