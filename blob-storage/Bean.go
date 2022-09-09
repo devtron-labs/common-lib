@@ -1,9 +1,12 @@
 package blob_storage
 
+import "os"
+
 type BlobStorageRequest struct {
 	StorageType     BlobStorageType
 	SourceKey       string
 	DestinationKey  string
+	DestinationFile *os.File
 	AwsS3BaseConfig *AwsS3BaseConfig
 	AzureBlobConfig *AzureBlobConfig
 }
