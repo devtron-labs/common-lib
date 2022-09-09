@@ -49,11 +49,6 @@ func (impl *BlobStorageServiceImpl) PutWithCommand(request *BlobStorageRequest) 
 			cmdArgs = append(cmdArgs, "--region", s3BaseConfig.Region)
 		}
 		command := exec.Command("aws", cmdArgs...)
-		if s3BaseConfig.AccessKey != "" {
-			command.Env = os.Environ()
-			command.Env = append(command.Env, "AWS_ACCESS_KEY_ID="+s3BaseConfig.AccessKey)
-			command.Env = append(command.Env, "AWS_SECRET_ACCESS_KEY="+s3BaseConfig.Passkey)
-		}
 		err = utils.RunCommand(command)
 	case BLOB_STORAGE_AZURE:
 		b := AzureBlob{}
