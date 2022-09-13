@@ -103,11 +103,10 @@ func (impl *GCPBlob) createGcpClient(ctx context.Context, config *GcpBlobBaseCon
 	var storageClient *storage.Client
 	var err error
 	if config.CredentialFileJsonData != "" {
-
+		storageClient, err = storage.NewClient(ctx, option.WithCredentialsJSON([]byte(config.CredentialFileJsonData)))
 	} else {
-
+		storageClient, err = storage.NewClient(ctx)
 	}
-	storageClient, err = storage.NewClient(ctx, option.WithCredentialsJSON([]byte(config.CredentialFileJsonData)))
 	if err != nil {
 		return nil, err
 	}

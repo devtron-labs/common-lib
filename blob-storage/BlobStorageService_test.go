@@ -7,7 +7,7 @@ import (
 
 func TestBlobStorageService(t *testing.T) {
 
-	//t.SkipNow()
+	t.SkipNow()
 	t.Run("Azure command exec", func(t *testing.T) {
 		var azureBlobBaseConfig *AzureBlobBaseConfig
 		azureBlobBaseConfig = &AzureBlobBaseConfig{
