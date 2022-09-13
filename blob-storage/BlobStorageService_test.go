@@ -18,10 +18,10 @@ func TestBlobStorageService(t *testing.T) {
 		}
 
 		request := &BlobStorageRequest{
-			StorageType:     BLOB_STORAGE_AZURE,
-			SourceKey:       "devtron/cd-artifacts/110/110.zip",
-			DestinationKey:  "job-artifact.zip",
-			AzureBlobConfig: azureBlobBaseConfig,
+			StorageType:         BLOB_STORAGE_AZURE,
+			SourceKey:           "devtron/cd-artifacts/110/110.zip",
+			DestinationKey:      "job-artifact.zip",
+			AzureBlobBaseConfig: azureBlobBaseConfig,
 		}
 		blobStorageServiceImpl := NewBlobStorageServiceImpl(nil)
 		_, _, err := blobStorageServiceImpl.Get(request)
@@ -29,8 +29,8 @@ func TestBlobStorageService(t *testing.T) {
 	})
 	t.Run("S3 command exec", func(t *testing.T) {
 		awsS3BaseConfig := &AwsS3BaseConfig{
-			AccessKey:   "ZFRSVmt2WGZQMERuRVdTZ1BjY0VjMzFxamRJPQo",
-			Passkey:     "QTdpSGY2RmR2OXQ3eVRod1Azcllhbzk3a0U4PQo",
+			AccessKey:   "",
+			Passkey:     "",
 			EndpointUrl: "devtron-minio.devtroncd:9000",
 			BucketName:  "devtron-ci-log",
 			Region:      "us-east-2",
@@ -44,6 +44,40 @@ func TestBlobStorageService(t *testing.T) {
 		}
 		err := blobStorageServiceImpl.PutWithCommand(request)
 		fmt.Println(err)
+	})
+
+	t.Run("Gcp Upload Command exec", func(t *testing.T) {
+		gcpConfig := &GcpBlobBaseConfig{
+			CredentialFileJsonData: "",
+			BucketName:             "kb-devtron-log",
+			//BucketName: "kb-devtron-wo-version",
+		}
+		blobStorageServiceImpl := NewBlobStorageServiceImpl(nil)
+		request := &BlobStorageRequest{
+			StorageType:       BLOB_STORAGE_GCP,
+			SourceKey:         "",
+			DestinationKey:    "",
+			GcpBlobBaseConfig: gcpConfig,
+		}
+		err := blobStorageServiceImpl.PutWithCommand(request)
+		fmt.Println(err)
+	})
+
+	t.Run("Gcp Download Command exec", func(t *testing.T) {
+		gcpConfig := &GcpBlobBaseConfig{
+			CredentialFileJsonData: "",
+			BucketName:             "kb-devtron-log",
+			//BucketName: "kb-devtron-wo-version",
+		}
+		blobStorageServiceImpl := NewBlobStorageServiceImpl(nil)
+		request := &BlobStorageRequest{
+			StorageType:       BLOB_STORAGE_GCP,
+			SourceKey:         "sample.go",
+			DestinationKey:    "sample.go",
+			GcpBlobBaseConfig: gcpConfig,
+		}
+		success, totalBytes, err := blobStorageServiceImpl.Get(request)
+		fmt.Println(success, totalBytes, err)
 	})
 
 }
