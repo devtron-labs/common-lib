@@ -7,7 +7,7 @@ import (
 
 func TestBlobStorageService(t *testing.T) {
 
-	t.SkipNow()
+	//t.SkipNow()
 	t.Run("Azure command exec", func(t *testing.T) {
 		var azureBlobBaseConfig *AzureBlobBaseConfig
 		azureBlobBaseConfig = &AzureBlobBaseConfig{
@@ -49,14 +49,14 @@ func TestBlobStorageService(t *testing.T) {
 	t.Run("Gcp Upload Command exec", func(t *testing.T) {
 		gcpConfig := &GcpBlobBaseConfig{
 			CredentialFileJsonData: "",
-			//BucketName:             "kb-devtron-log",
-			BucketName: "kb-devtron-wo-version",
+			BucketName:             "kb-devtron-log",
+			//BucketName: "kb-devtron-wo-version",
 		}
 		blobStorageServiceImpl := NewBlobStorageServiceImpl(nil)
 		request := &BlobStorageRequest{
 			StorageType:       BLOB_STORAGE_GCP,
 			SourceKey:         "/Users/kripanshbanga/Desktop/out_self_cm.yaml",
-			DestinationKey:    "out_self_cm.yaml",
+			DestinationKey:    "abcd/efg/out_self_cm.yaml",
 			GcpBlobBaseConfig: gcpConfig,
 		}
 		err := blobStorageServiceImpl.PutWithCommand(request)
@@ -66,13 +66,13 @@ func TestBlobStorageService(t *testing.T) {
 	t.Run("Gcp Download Command exec", func(t *testing.T) {
 		gcpConfig := &GcpBlobBaseConfig{
 			CredentialFileJsonData: "",
-			//BucketName:             "kb-devtron-log",
-			BucketName: "kb-devtron-wo-version",
+			BucketName:             "kb-devtron-log",
+			//BucketName: "kb-devtron-wo-version",
 		}
 		blobStorageServiceImpl := NewBlobStorageServiceImpl(nil)
 		request := &BlobStorageRequest{
 			StorageType:       BLOB_STORAGE_GCP,
-			SourceKey:         "out_self_cm.yaml",
+			SourceKey:         "abcd/efg/out_self_cm.yaml",
 			DestinationKey:    "out_self_cm.yaml",
 			GcpBlobBaseConfig: gcpConfig,
 		}
