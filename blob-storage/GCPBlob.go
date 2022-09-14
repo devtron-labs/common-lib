@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"io"
+	"log"
 	"os"
 )
 
@@ -56,8 +57,11 @@ func (impl *GCPBlob) DownloadBlob(request *BlobStorageRequest, file *os.File) (b
 	if err != nil {
 		return false, 0, err
 	}
-	defer objectReader.Close()
 	writtenBytes, err := io.Copy(file, objectReader)
+	err = objectReader.Close()
+	if err != nil {
+		fmt.Println("error occurred while downloading blob", err)
+	}
 	return err == nil, writtenBytes, err
 }
 
@@ -99,7 +103,7 @@ func (impl *GCPBlob) getGcpObject(storageClient *storage.Client, config *GcpBlob
 }
 
 func (impl *GCPBlob) createGcpClient(ctx context.Context, config *GcpBlobBaseConfig) (*storage.Client, error) {
-	fmt.Println("going to create gcp client for bucket", config.BucketName)
+	log.Println("going to create gcp client")
 	var storageClient *storage.Client
 	var err error
 	if config.CredentialFileJsonData != "" {
