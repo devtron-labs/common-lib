@@ -41,7 +41,7 @@ func (impl *BlobStorageServiceImpl) PutWithCommand(request *BlobStorageRequest) 
 		gcpBlob := GCPBlob{}
 		err = gcpBlob.UploadBlob(request)
 	default:
-		return fmt.Errorf("cloudprovider %s not supported", request.StorageType)
+		return fmt.Errorf("blob-storage %s not supported", request.StorageType)
 	}
 	if err != nil {
 		log.Println(" -----> push err", err)
