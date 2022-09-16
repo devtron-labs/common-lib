@@ -71,7 +71,7 @@ func (impl *BlobStorageServiceImpl) Get(request *BlobStorageRequest) (bool, int6
 		gcpBlob := &GCPBlob{}
 		downloadSuccess, numBytes, err = gcpBlob.DownloadBlob(request, file)
 	default:
-		return downloadSuccess, numBytes, fmt.Errorf("cloudprovider %s not supported", request.StorageType)
+		return downloadSuccess, numBytes, fmt.Errorf("blob-storage %s not supported", request.StorageType)
 	}
 
 	return downloadSuccess, numBytes, err
