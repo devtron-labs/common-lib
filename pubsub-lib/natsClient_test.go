@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
+	"os"
+	"os/exec"
 	"strconv"
 	"testing"
 	"time"
@@ -14,6 +16,13 @@ func TestNewPubSubClient(t *testing.T) {
 	t.SkipNow()
 	const payload = "stop-msg"
 	var globalVal = 0
+
+	t.Run("command exec", func(t *testing.T) {
+		err := os.Setenv("AWS_ACCESS_KEY_ID", "abcd")
+		command := exec.Command("echo", "$AWS_ACCESS_KEY_ID", ">hello.world")
+		err = command.Run()
+		fmt.Println(err)
+	})
 
 	t.Run("subscriber", func(t *testing.T) {
 		queueSubscriber(payload, true)
