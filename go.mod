@@ -2,7 +2,7 @@ module github.com/devtron-labs/common-lib
 
 go 1.18
 
-require github.com/nats-io/nats.go v1.15.0
+require github.com/nats-io/nats.go v1.19.0
 
 require go.uber.org/zap v1.21.0
 
