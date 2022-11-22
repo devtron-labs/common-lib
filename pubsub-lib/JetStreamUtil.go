@@ -107,6 +107,31 @@ var natsTopicMapping = map[string]NatsTopic{
 	ARGO_PIPELINE_STATUS_UPDATE_TOPIC: {topicName: ARGO_PIPELINE_STATUS_UPDATE_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: ARGO_PIPELINE_STATUS_UPDATE_GROUP, consumerName: ARGO_PIPELINE_STATUS_UPDATE_DURABLE},
 }
 
+var natsStreamWiseConfigMapping = map[string]NatsStreamConfig{
+	ORCHESTRATOR_STREAM:  {},
+	CI_RUNNER_STREAM:     {},
+	KUBEWATCH_STREAM:     {},
+	GIT_SENSOR_STREAM:    {},
+	IMAGE_SCANNER_STREAM: {},
+}
+
+var natsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
+	ARGO_PIPELINE_STATUS_UPDATE_DURABLE: {},
+	TOPIC_CI_SCAN_DURABLE:               {},
+	NEW_CI_MATERIAL_TOPIC_DURABLE:       {},
+	CD_WORKFLOW_STATUS_UPDATE_DURABLE:   {},
+	WORKFLOW_STATUS_UPDATE_DURABLE:      {},
+	CRON_EVENTS_DURABLE:                 {},
+	APPLICATION_STATUS_UPDATE_DURABLE:   {},
+	CD_COMPLETE_DURABLE:                 {},
+	CI_COMPLETE_DURABLE:                 {},
+	WEBHOOK_EVENT_DURABLE:               {},
+	CD_TRIGGER_DURABLE:                  {},
+	BULK_HIBERNATE_DURABLE:              {},
+	BULK_DEPLOY_DURABLE:                 {},
+	BULK_APPSTORE_DEPLOY_DURABLE:        {},
+}
+
 func GetNatsTopic(topicName string) NatsTopic {
 	return natsTopicMapping[topicName]
 }

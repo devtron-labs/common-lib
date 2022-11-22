@@ -36,10 +36,19 @@ type NatsClient struct {
 }
 
 type NatsClientConfig struct {
-	NatsServerHost             string `env:"NATS_SERVER_HOST" envDefault:"nats://devtron-nats.devtroncd:4222"`
-	NatsMsgProcessingBatchSize int    `env:"NATS_MSG_PROCESSING_BATCH_SIZE" envDefault:"1"`
-	NatsMsgBufferSize          int    `env:"NATS_MSG_BUFFER_SIZE" envDefault:"64"`
-	NatsStreamConfig           string `env:"NATS_STREAM_CONFIG" envDefault:"{\"max_age\":86400000000000}"`
+	NatsServerHost string `env:"NATS_SERVER_HOST" envDefault:"nats://devtron-nats.devtroncd:4222"`
+	//consumer wise
+	NatsMsgProcessingBatchSize int `env:"NATS_MSG_PROCESSING_BATCH_SIZE" envDefault:"1"`
+	NatsMsgBufferSize          int `env:"NATS_MSG_BUFFER_SIZE" envDefault:"64"`
+	//stream wise
+	NatsStreamConfig string `env:"NATS_STREAM_CONFIG" envDefault:"{\"max_age\":86400000000000}"`
+}
+type NatsStreamConfig struct {
+	StreamConfig string `json:"streamConfig"`
+}
+type NatsConsumerConfig struct {
+	NatsMsgProcessingBatchSize int `json:"natsMsgProcessingBatchSize"`
+	NatsMsgBufferSize          int `json:"natsMsgBufferSize"`
 }
 
 /* #nosec */
