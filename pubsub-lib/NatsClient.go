@@ -35,6 +35,8 @@ type NatsClient struct {
 	Conn                       nats.Conn
 }
 
+const DefaultMaxAge string = "86400000000000"
+
 type NatsClientConfig struct {
 	NatsServerHost string `env:"NATS_SERVER_HOST" envDefault:"nats://devtron-nats.devtroncd:4222"`
 	//consumer wise
@@ -43,8 +45,11 @@ type NatsClientConfig struct {
 	//stream wise
 	NatsStreamConfig string `env:"NATS_STREAM_CONFIG" envDefault:"{\"max_age\":86400000000000}"`
 }
+type StreamConfig struct {
+	MaxAge string `json:"maxAge"`
+}
 type NatsStreamConfig struct {
-	StreamConfig string `json:"streamConfig"`
+	StreamConfig StreamConfig `json:"streamConfig"`
 }
 type NatsConsumerConfig struct {
 	NatsMsgProcessingBatchSize int `json:"natsMsgProcessingBatchSize"`

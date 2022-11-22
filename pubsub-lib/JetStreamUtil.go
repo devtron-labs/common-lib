@@ -18,6 +18,8 @@
 package pubsub_lib
 
 import (
+	"encoding/json"
+	"github.com/caarlos0/env"
 	"github.com/nats-io/nats.go"
 	"log"
 	"time"
@@ -83,6 +85,10 @@ type NatsTopic struct {
 	queueName    string // needed for load balancing
 	consumerName string
 }
+type ConfigJson struct {
+	StreamConfigJson   string `env:"STREAM_CONFIG_JSON"`
+	ConsumerConfigJson string `env:"CONSUMER_CONFIG_JSON"`
+}
 
 var natsTopicMapping = map[string]NatsTopic{
 
@@ -130,6 +136,80 @@ var natsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
 	BULK_HIBERNATE_DURABLE:              {},
 	BULK_DEPLOY_DURABLE:                 {},
 	BULK_APPSTORE_DEPLOY_DURABLE:        {},
+}
+
+func getConsumerConfigMap(jsonString string) map[string]NatsConsumerConfig {
+	resMap := map[string]NatsConsumerConfig{}
+	if jsonString == "" {
+		return resMap
+	}
+	object := map[string]interface{}{}
+	err := json.Unmarshal([]byte(jsonString), &object)
+	if err != nil {
+		log.Println("error while unmarshalling in getConsumerConfigMap")
+		return resMap
+	}
+
+	for key, val := range object {
+		resMap[key] = val.(NatsConsumerConfig)
+	}
+	return resMap
+}
+
+func getStreamConfigMap(jsonString string) map[string]NatsStreamConfig {
+	resMap := map[string]NatsStreamConfig{}
+	if jsonString == "" {
+		return resMap
+	}
+	object := map[string]interface{}{}
+	err := json.Unmarshal([]byte(jsonString), &object)
+	if err != nil {
+		log.Println("error while unmarshalling in getStreamConfigMap")
+		return resMap
+	}
+
+	for key, val := range object {
+		resMap[key] = val.(NatsStreamConfig)
+	}
+	return resMap
+}
+
+func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
+	configJson := ConfigJson{}
+	err := env.Parse(&configJson)
+	if err != nil {
+		log.Fatal("error while parsing config from environment params")
+	}
+	consumerConfigMap := getConsumerConfigMap(configJson.ConsumerConfigJson)
+	streamConfigMap := getStreamConfigMap(configJson.StreamConfigJson)
+	defaultConfig := NatsClientConfig{}
+	err = env.Parse(&configJson)
+	if err != nil {
+		log.Print("error while parsing config from environment params")
+	}
+
+	defaultStreamConfigVal := NatsStreamConfig{
+		StreamConfig: StreamConfig{MaxAge: DefaultMaxAge},
+	}
+	defaultConsumerConfigVal := NatsConsumerConfig{
+		NatsMsgBufferSize:          defaultConfig.NatsMsgBufferSize,
+		NatsMsgProcessingBatchSize: defaultConfig.NatsMsgProcessingBatchSize,
+	}
+
+	for key, _ := range natsConsumerWiseConfigMapping {
+		if _, ok := consumerConfigMap[key]; ok {
+			defaultConsumerConfigVal = consumerConfigMap[key]
+		}
+		natsConsumerWiseConfigMapping[key] = defaultConsumerConfigVal
+	}
+
+	for key, _ := range natsStreamWiseConfigMapping {
+		if _, ok := streamConfigMap[key]; ok {
+			defaultStreamConfigVal = streamConfigMap[key]
+		}
+		natsStreamWiseConfigMapping[key] = defaultStreamConfigVal
+	}
+
 }
 
 func GetNatsTopic(topicName string) NatsTopic {
