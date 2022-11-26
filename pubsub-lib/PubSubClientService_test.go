@@ -133,6 +133,15 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		for _, streamWiseConfig := range NatsStreamWiseConfigMapping {
 			assert.Equal(t, defaultStreamConfig, streamWiseConfig.StreamConfig)
 		}
+
+		var defaultConsumerConfig = NatsConsumerConfig{
+			NatsMsgBufferSize:          config.NatsMsgBufferSize,
+			NatsMsgProcessingBatchSize: config.NatsMsgProcessingBatchSize,
+		}
+
+		for _, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
+			assert.Equal(t, defaultConsumerConfig, consumerWiseConfig)
+		}
 	})
 
 	t.Run("StreamWiseAndConsumerWiseConfig with json configs", func(t *testing.T) {
