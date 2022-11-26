@@ -113,7 +113,7 @@ var natsTopicMapping = map[string]NatsTopic{
 	ARGO_PIPELINE_STATUS_UPDATE_TOPIC: {topicName: ARGO_PIPELINE_STATUS_UPDATE_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: ARGO_PIPELINE_STATUS_UPDATE_GROUP, consumerName: ARGO_PIPELINE_STATUS_UPDATE_DURABLE},
 }
 
-var natsStreamWiseConfigMapping = map[string]NatsStreamConfig{
+var NatsStreamWiseConfigMapping = map[string]NatsStreamConfig{
 	ORCHESTRATOR_STREAM:  {},
 	CI_RUNNER_STREAM:     {},
 	KUBEWATCH_STREAM:     {},
@@ -121,7 +121,7 @@ var natsStreamWiseConfigMapping = map[string]NatsStreamConfig{
 	IMAGE_SCANNER_STREAM: {},
 }
 
-var natsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
+var NatsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
 	ARGO_PIPELINE_STATUS_UPDATE_DURABLE: {},
 	TOPIC_CI_SCAN_DURABLE:               {},
 	NEW_CI_MATERIAL_TOPIC_DURABLE:       {},
@@ -143,7 +143,7 @@ func getConsumerConfigMap(jsonString string) map[string]NatsConsumerConfig {
 	if jsonString == "" {
 		return resMap
 	}
-	object := map[string]interface{}{}
+	object := map[string]NatsConsumerConfig{}
 	err := json.Unmarshal([]byte(jsonString), &object)
 	if err != nil {
 		log.Println("error while unmarshalling in getConsumerConfigMap")
@@ -151,7 +151,7 @@ func getConsumerConfigMap(jsonString string) map[string]NatsConsumerConfig {
 	}
 
 	for key, val := range object {
-		resMap[key] = val.(NatsConsumerConfig)
+		resMap[key] = val
 	}
 	return resMap
 }
@@ -161,7 +161,7 @@ func getStreamConfigMap(jsonString string) map[string]NatsStreamConfig {
 	if jsonString == "" {
 		return resMap
 	}
-	object := map[string]interface{}{}
+	object := map[string]NatsStreamConfig{}
 	err := json.Unmarshal([]byte(jsonString), &object)
 	if err != nil {
 		log.Println("error while unmarshalling in getStreamConfigMap")
@@ -169,7 +169,7 @@ func getStreamConfigMap(jsonString string) map[string]NatsStreamConfig {
 	}
 
 	for key, val := range object {
-		resMap[key] = val.(NatsStreamConfig)
+		resMap[key] = val
 	}
 	return resMap
 }
@@ -178,14 +178,14 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
 	configJson := ConfigJson{}
 	err := env.Parse(&configJson)
 	if err != nil {
-		log.Fatal("error while parsing config from environment params")
+		log.Fatal("error while parsing config from environment params", "err", err)
 	}
 	consumerConfigMap := getConsumerConfigMap(configJson.ConsumerConfigJson)
 	streamConfigMap := getStreamConfigMap(configJson.StreamConfigJson)
 	defaultConfig := NatsClientConfig{}
-	err = env.Parse(&configJson)
+	err = env.Parse(&defaultConfig)
 	if err != nil {
-		log.Print("error while parsing config from environment params")
+		log.Print("error while parsing config from environment params", "err", err)
 	}
 
 	defaultStreamConfigVal := NatsStreamConfig{
@@ -196,18 +196,20 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
 		NatsMsgProcessingBatchSize: defaultConfig.NatsMsgProcessingBatchSize,
 	}
 
-	for key, _ := range natsConsumerWiseConfigMapping {
+	for key, _ := range NatsConsumerWiseConfigMapping {
+		defaultValue := defaultConsumerConfigVal
 		if _, ok := consumerConfigMap[key]; ok {
-			defaultConsumerConfigVal = consumerConfigMap[key]
+			defaultValue = consumerConfigMap[key]
 		}
-		natsConsumerWiseConfigMapping[key] = defaultConsumerConfigVal
+		NatsConsumerWiseConfigMapping[key] = defaultValue
 	}
 
-	for key, _ := range natsStreamWiseConfigMapping {
+	for key, _ := range NatsStreamWiseConfigMapping {
+		defaultValue := defaultStreamConfigVal
 		if _, ok := streamConfigMap[key]; ok {
-			defaultStreamConfigVal = streamConfigMap[key]
+			defaultValue = streamConfigMap[key]
 		}
-		natsStreamWiseConfigMapping[key] = defaultStreamConfigVal
+		NatsStreamWiseConfigMapping[key] = defaultValue
 	}
 
 }

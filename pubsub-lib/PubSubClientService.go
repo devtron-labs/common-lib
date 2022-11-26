@@ -42,8 +42,8 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	jetStrCtxt := natsClient.JetStrCtxt
 	natsTopic := GetNatsTopic(topic)
 	streamName := natsTopic.streamName
-	//streamConfig := getStreamConfig(streamName)
-	streamConfig := natsClient.streamConfig
+	streamConfig := getStreamConfig(streamName)
+	//streamConfig := natsClient.streamConfig
 	_ = AddStream(jetStrCtxt, streamConfig, streamName)
 	//Generate random string for passing as Header Id in message
 	randString := "MsgHeaderId-" + utils.Generate(10)
@@ -70,8 +70,8 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *P
 	if streamConfig.Retention == nats.WorkQueuePolicy {
 		deliveryOption = nats.DeliverAll()
 	}
-	processingBatchSize := natsConsumerWiseConfigMapping[consumerName].NatsMsgProcessingBatchSize
-	msgBufferSize := natsConsumerWiseConfigMapping[consumerName].NatsMsgBufferSize
+	processingBatchSize := NatsConsumerWiseConfigMapping[consumerName].NatsMsgProcessingBatchSize
+	msgBufferSize := NatsConsumerWiseConfigMapping[consumerName].NatsMsgBufferSize
 	//processingBatchSize := natsClient.NatsMsgProcessingBatchSize
 	//msgBufferSize := natsClient.NatsMsgBufferSize
 	channel := make(chan *nats.Msg, msgBufferSize)
@@ -112,7 +112,7 @@ func processMsg(msg *nats.Msg, callback func(msg *PubSubMsg)) {
 }
 
 func getStreamConfig(streamName string) *nats.StreamConfig {
-	configJson := natsStreamWiseConfigMapping[streamName].StreamConfig
+	configJson := NatsStreamWiseConfigMapping[streamName].StreamConfig
 	streamCfg := &nats.StreamConfig{}
 	data, err := json.Marshal(configJson)
 	if err == nil {
