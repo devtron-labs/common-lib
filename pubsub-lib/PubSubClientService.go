@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"log"
 	"sync"
+	"time"
 )
 
 type PubSubClientService interface {
@@ -106,11 +107,17 @@ func processMessages(wg *sync.WaitGroup, channel chan *nats.Msg, callback func(m
 
 //TODO need to extend msg ack depending upon response from callback like error scenario
 func processMsg(msg *nats.Msg, callback func(msg *PubSubMsg)) {
+	t1 := time.Now()
+	defer printTimeDiff(t1, msg)
 	defer msg.Ack()
 	subMsg := &PubSubMsg{Data: string(msg.Data)}
 	callback(subMsg)
 }
 
+func printTimeDiff(t0 time.Time, msg *nats.Msg) {
+	t1 := time.Since(t0)
+	log.Println("time took to process msg: ", msg, "time :", t1)
+}
 func getStreamConfig(streamName string) *nats.StreamConfig {
 	configJson := NatsStreamWiseConfigMapping[streamName].StreamConfig
 	streamCfg := &nats.StreamConfig{}
