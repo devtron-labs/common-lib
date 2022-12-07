@@ -37,7 +37,7 @@ func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) *PubSubClientServiceI
 }
 
 func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
-	impl.Logger.Infow("Published message on pubsub client", "topic", topic, "msg", msg)
+	impl.Logger.Debugw("Published message on pubsub client", "topic", topic, "msg", msg)
 	natsClient := impl.NatsClient
 	jetStrCtxt := natsClient.JetStrCtxt
 	natsTopic := GetNatsTopic(topic)
