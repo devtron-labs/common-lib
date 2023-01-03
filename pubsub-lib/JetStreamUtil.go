@@ -250,8 +250,6 @@ func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, stream
 				_, err1 := js.UpdateStream(&config)
 				if err1 != nil {
 					log.Println("error occurred while updating stream config", "streamName", streamName, "streamConfig", config, "error", err1)
-				} else {
-					log.Println("stream config updated successfully", "config", config, "new", streamConfig)
 				}
 			}
 		}
