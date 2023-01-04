@@ -25,6 +25,8 @@ type LogsConfig struct {
 	DefaultLogTimeLimit string `env:"DEFAULT_LOG_TIME_LIMIT" envDefault:"1"`
 }
 
+var logsConfig *LogsConfig
+
 type PubSubClientServiceImpl struct {
 	Logger     *zap.SugaredLogger
 	NatsClient *NatsClient
@@ -35,6 +37,12 @@ func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) *PubSubClientServiceI
 	if err != nil {
 		logger.Fatalw("error occurred while creating nats client stopping now!!")
 	}
+	logsConf := &LogsConfig{}
+	err = env.Parse(logsConf)
+	if err != nil {
+		log.Println("error occurred while parsing LogsConfig", "err", err)
+	}
+	logsConfig = logsConf
 	ParseAndFillStreamWiseAndConsumerWiseConfigMaps()
 	pubSubClient := &PubSubClientServiceImpl{
 		Logger:     logger,
@@ -113,11 +121,7 @@ func processMessages(wg *sync.WaitGroup, channel chan *nats.Msg, callback func(m
 
 //TODO need to extend msg ack depending upon response from callback like error scenario
 func processMsg(msg *nats.Msg, callback func(msg *PubSubMsg)) {
-	logsConfig := &LogsConfig{}
-	err := env.Parse(logsConfig)
-	if err != nil {
-		log.Println("error occurred while parsing LogsConfig", "err", err)
-	}
+
 	timeLimit, err := strconv.ParseFloat(logsConfig.DefaultLogTimeLimit, 64)
 	if err != nil {
 		log.Println("error in parsing defaultLogTimeLimit to float64", "defaultLogTimeLimit", logsConfig.DefaultLogTimeLimit)
