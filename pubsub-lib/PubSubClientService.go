@@ -7,7 +7,6 @@ import (
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 	"log"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -22,7 +21,7 @@ type PubSubMsg struct {
 }
 
 type LogsConfig struct {
-	DefaultLogTimeLimit string `env:"DEFAULT_LOG_TIME_LIMIT" envDefault:"1"`
+	DefaultLogTimeLimit int64 `env:"DEFAULT_LOG_TIME_LIMIT" envDefault:"1"`
 }
 
 type PubSubClientServiceImpl struct {
@@ -120,24 +119,17 @@ func (impl PubSubClientServiceImpl) processMessages(wg *sync.WaitGroup, channel 
 
 //TODO need to extend msg ack depending upon response from callback like error scenario
 func (impl PubSubClientServiceImpl) processMsg(msg *nats.Msg, callback func(msg *PubSubMsg)) {
-
-	timeLimit, err := strconv.ParseFloat(impl.logsConfig.DefaultLogTimeLimit, 64)
-	if err != nil {
-		log.Println("error in parsing defaultLogTimeLimit to float64", "defaultLogTimeLimit", impl.logsConfig.DefaultLogTimeLimit)
-		timeLimit = 1
-	}
-
+	timeLimitInMillSecs := impl.logsConfig.DefaultLogTimeLimit * 1000
 	t1 := time.Now()
-	defer printTimeDiff(t1, msg, timeLimit)
+	defer printTimeDiff(t1, msg, timeLimitInMillSecs)
 	defer msg.Ack()
 	subMsg := &PubSubMsg{Data: string(msg.Data)}
 	callback(subMsg)
 }
 
-func printTimeDiff(t0 time.Time, msg *nats.Msg, timeLimit float64) {
-
+func printTimeDiff(t0 time.Time, msg *nats.Msg, timeLimitInMillSecs int64) {
 	t1 := time.Since(t0)
-	if t1.Seconds() > timeLimit {
+	if t1.Milliseconds() > timeLimitInMillSecs {
 		log.Println("time took to process msg: ", msg, "time :", t1)
 	}
 }
