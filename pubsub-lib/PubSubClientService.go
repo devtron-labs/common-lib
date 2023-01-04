@@ -25,11 +25,10 @@ type LogsConfig struct {
 	DefaultLogTimeLimit string `env:"DEFAULT_LOG_TIME_LIMIT" envDefault:"1"`
 }
 
-var logsConfig *LogsConfig
-
 type PubSubClientServiceImpl struct {
 	Logger     *zap.SugaredLogger
 	NatsClient *NatsClient
+	logsConfig *LogsConfig
 }
 
 func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) *PubSubClientServiceImpl {
@@ -37,16 +36,16 @@ func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) *PubSubClientServiceI
 	if err != nil {
 		logger.Fatalw("error occurred while creating nats client stopping now!!")
 	}
-	logsConf := &LogsConfig{}
-	err = env.Parse(logsConf)
+	logsConfig := &LogsConfig{}
+	err = env.Parse(logsConfig)
 	if err != nil {
 		log.Println("error occurred while parsing LogsConfig", "err", err)
 	}
-	logsConfig = logsConf
 	ParseAndFillStreamWiseAndConsumerWiseConfigMaps()
 	pubSubClient := &PubSubClientServiceImpl{
 		Logger:     logger,
 		NatsClient: natsClient,
+		logsConfig: logsConfig,
 	}
 	return pubSubClient
 }
@@ -106,25 +105,25 @@ func (impl PubSubClientServiceImpl) startListeningForEvents(processingBatchSize 
 
 	for index := 0; index < processingBatchSize; index++ {
 		wg.Add(1)
-		go processMessages(wg, channel, callback)
+		go impl.processMessages(wg, channel, callback)
 	}
 	wg.Wait()
 	impl.Logger.Warn("msgs received Done from Nats side, going to end listening!!")
 }
 
-func processMessages(wg *sync.WaitGroup, channel chan *nats.Msg, callback func(msg *PubSubMsg)) {
+func (impl PubSubClientServiceImpl) processMessages(wg *sync.WaitGroup, channel chan *nats.Msg, callback func(msg *PubSubMsg)) {
 	defer wg.Done()
 	for msg := range channel {
-		processMsg(msg, callback)
+		impl.processMsg(msg, callback)
 	}
 }
 
 //TODO need to extend msg ack depending upon response from callback like error scenario
-func processMsg(msg *nats.Msg, callback func(msg *PubSubMsg)) {
+func (impl PubSubClientServiceImpl) processMsg(msg *nats.Msg, callback func(msg *PubSubMsg)) {
 
-	timeLimit, err := strconv.ParseFloat(logsConfig.DefaultLogTimeLimit, 64)
+	timeLimit, err := strconv.ParseFloat(impl.logsConfig.DefaultLogTimeLimit, 64)
 	if err != nil {
-		log.Println("error in parsing defaultLogTimeLimit to float64", "defaultLogTimeLimit", logsConfig.DefaultLogTimeLimit)
+		log.Println("error in parsing defaultLogTimeLimit to float64", "defaultLogTimeLimit", impl.logsConfig.DefaultLogTimeLimit)
 		timeLimit = 1
 	}
 
