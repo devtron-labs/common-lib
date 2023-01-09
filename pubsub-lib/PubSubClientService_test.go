@@ -1,10 +1,15 @@
 package pubsub_lib
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/caarlos0/env"
 	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"log"
+	"os"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -16,7 +21,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 
 	const payload = "stop-msg"
 
-	t.SkipNow()
+	//t.SkipNow()
 	t.Run("PubAndSub", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
@@ -114,6 +119,65 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 			//time.Sleep(1 * time.Second)
 		}
 		wg.Wait()
+	})
+
+	t.Run("StreamWiseAndConsumerWiseConfig with default configs", func(t *testing.T) {
+		ParseAndFillStreamWiseAndConsumerWiseConfigMaps()
+		config := NatsClientConfig{}
+		err := env.Parse(&config)
+		if err != nil {
+			log.Fatal("error occurred while parsing nats client config", "err", err)
+		}
+		var defaultStreamConfig = StreamConfig{}
+		_ = json.Unmarshal([]byte(config.NatsStreamConfig), &defaultStreamConfig)
+		for _, streamWiseConfig := range NatsStreamWiseConfigMapping {
+			assert.Equal(t, defaultStreamConfig, streamWiseConfig.StreamConfig)
+		}
+
+		var defaultConsumerConfig = NatsConsumerConfig{
+			NatsMsgBufferSize:          config.NatsMsgBufferSize,
+			NatsMsgProcessingBatchSize: config.NatsMsgProcessingBatchSize,
+		}
+
+		for _, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
+			assert.Equal(t, defaultConsumerConfig, consumerWiseConfig)
+		}
+	})
+
+	t.Run("StreamWiseAndConsumerWiseConfig with json configs", func(t *testing.T) {
+		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"max_age\":90000}},\"CI-RUNNER\":{\"streamConfig\":{\"max_age\":90000}},\"KUBEWATCH-1\":{\"streamConfig\":{\"max_age\":90000,\"abc\":\"123\"}}}")
+		fmt.Println(err)
+		err = os.Setenv("CONSUMER_CONFIG_JSON", "{\"ARGO_PIPELINE_STATUS_UPDATE_DURABLE-1\":{\"natsMsgProcessingBatchSize\":3,\"natsMsgBufferSize\":64},\"CI-SCAN-DURABLE-1\":{\"natsMsgProcessingBatchSize\":4,\"natsMsgBufferSize\":64}}")
+		fmt.Println(err)
+
+		ParseAndFillStreamWiseAndConsumerWiseConfigMaps()
+		config := NatsClientConfig{}
+		err = env.Parse(&config)
+		if err != nil {
+			log.Fatal("error occurred while parsing nats client config", "err", err)
+		}
+		var defaultStreamConfig = StreamConfig{}
+		_ = json.Unmarshal([]byte(config.NatsStreamConfig), &defaultStreamConfig)
+		for streamName, streamWiseConfig := range NatsStreamWiseConfigMapping {
+			if streamName == GIT_SENSOR_STREAM || streamName == IMAGE_SCANNER_STREAM {
+				assert.Equal(t, defaultStreamConfig, streamWiseConfig.StreamConfig)
+			} else {
+				assert.NotEqual(t, defaultStreamConfig, streamWiseConfig.StreamConfig)
+			}
+		}
+
+		var defaultConsumerConfig = NatsConsumerConfig{
+			NatsMsgBufferSize:          config.NatsMsgBufferSize,
+			NatsMsgProcessingBatchSize: config.NatsMsgProcessingBatchSize,
+		}
+
+		for consumerName, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
+			if consumerName == ARGO_PIPELINE_STATUS_UPDATE_DURABLE || consumerName == TOPIC_CI_SCAN_DURABLE {
+				assert.NotEqual(t, defaultConsumerConfig, consumerWiseConfig)
+			} else {
+				assert.Equal(t, defaultConsumerConfig, consumerWiseConfig)
+			}
+		}
 	})
 }
 
