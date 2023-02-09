@@ -126,7 +126,7 @@ var NatsStreamWiseConfigMapping = map[string]NatsStreamConfig{
 }
 
 var NatsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
-	AUTO_CD_TRIGGER_TOPIC_DURABLE:       {AckWaitInSecs: 3600, MaxAckPending: 1},
+	AUTO_CD_TRIGGER_TOPIC_DURABLE:       {},
 	ARGO_PIPELINE_STATUS_UPDATE_DURABLE: {},
 	TOPIC_CI_SCAN_DURABLE:               {},
 	NEW_CI_MATERIAL_TOPIC_DURABLE:       {},
@@ -200,15 +200,24 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
 		NatsMsgBufferSize:          defaultConfig.NatsMsgBufferSize,
 		NatsMsgProcessingBatchSize: defaultConfig.NatsMsgProcessingBatchSize,
 	}
-
+	defaultConsumerValuesForAutoCdTriggerTopic := NatsConsumerConfig{}
+	err = json.Unmarshal([]byte(defaultConfig.NatsConsumerConfig), &defaultConsumerValuesForAutoCdTriggerTopic)
+	if err != nil {
+		log.Print("error in unmarshalling nats consumer config", "consumer-config", defaultConfig.NatsConsumerConfig, "err", err)
+	}
 	for key, _ := range NatsConsumerWiseConfigMapping {
 		defaultValue := defaultConsumerConfigVal
-		if _, ok := consumerConfigMap[key]; ok {
+		if key == AUTO_CD_TRIGGER_TOPIC_DURABLE {
+			defaultValue.MaxAckPending = defaultConsumerValuesForAutoCdTriggerTopic.MaxAckPending
+			defaultValue.AckWaitInSecs = defaultConsumerValuesForAutoCdTriggerTopic.AckWaitInSecs
+		}
+		if _, ok := consumerConfigMap[key]; ok && (key != AUTO_CD_TRIGGER_TOPIC_DURABLE) {
 			defaultValue = consumerConfigMap[key]
 		}
 		NatsConsumerWiseConfigMapping[key] = defaultValue
 	}
-
+	ncc := NatsConsumerWiseConfigMapping
+	log.Print(ncc)
 	for key, _ := range NatsStreamWiseConfigMapping {
 		defaultValue := defaultStreamConfigVal
 		if _, ok := streamConfigMap[key]; ok {
