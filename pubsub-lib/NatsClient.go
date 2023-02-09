@@ -54,6 +54,8 @@ type NatsStreamConfig struct {
 type NatsConsumerConfig struct {
 	NatsMsgProcessingBatchSize int `json:"natsMsgProcessingBatchSize"`
 	NatsMsgBufferSize          int `json:"natsMsgBufferSize"`
+	AckWaitInSecs              int `json:"ackWaitInSecs"`
+	MaxAckPending              int `json:"maxAckPending"`
 }
 
 /* #nosec */
