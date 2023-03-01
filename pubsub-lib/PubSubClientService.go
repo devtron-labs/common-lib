@@ -88,15 +88,45 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *P
 	maxAckPending := NatsConsumerWiseConfigMapping[consumerName].MaxAckPending
 	//processingBatchSize := natsClient.NatsMsgProcessingBatchSize
 	//msgBufferSize := natsClient.NatsMsgBufferSize
+
+	ackWaitDuration := time.Duration(ackWaitInSecs) * time.Second
+
+	info, err := natsClient.JetStrCtxt.ConsumerInfo(streamName, consumerName)
+	if err != nil {
+		impl.Logger.Errorw("unable to retrieve consumer info from NATS-server",
+			"stream", streamName,
+			"consumer", consumerName,
+			"err", err)
+
+	} else {
+		// Update NATS Consumer config if new changes detected
+		// Currently only checking for AckWait, but can be done for other editable properties as well
+
+		if ackWaitInSecs > 0 && info.Config.AckWait != ackWaitDuration {
+
+			updatedConfig := info.Config
+			updatedConfig.AckWait = ackWaitDuration
+
+			_, err = natsClient.JetStrCtxt.UpdateConsumer(streamName, &updatedConfig)
+
+			if err != nil {
+				impl.Logger.Errorw("failed to update Consumer config",
+					"received consumer config", info.Config,
+					"err", err)
+			}
+		}
+	}
+
 	channel := make(chan *nats.Msg, msgBufferSize)
-	var err error
+	//var err error
 	natsOpts := []nats.SubOpt{nats.Durable(consumerName), deliveryOption, nats.ManualAck(), nats.BindStream(streamName)}
 	if maxAckPending > 0 {
 		natsOpts = append(natsOpts, nats.MaxAckPending(maxAckPending))
 	}
 	if ackWaitInSecs > 0 {
-		natsOpts = append(natsOpts, nats.AckWait(time.Duration(ackWaitInSecs)*time.Second))
+		natsOpts = append(natsOpts, nats.AckWait(ackWaitDuration))
 	}
+
 	_, err = natsClient.JetStrCtxt.ChanQueueSubscribe(topic, queueName, channel, natsOpts...)
 	if err != nil {
 		impl.Logger.Fatalw("error while subscribing to nats ", "stream", streamName, "topic", topic, "error", err)
