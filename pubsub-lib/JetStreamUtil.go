@@ -49,6 +49,9 @@ const (
 	APPLICATION_STATUS_UPDATE_TOPIC     string = "APPLICATION_STATUS_UPDATE"
 	APPLICATION_STATUS_UPDATE_GROUP     string = "APPLICATION_STATUS_UPDATE_GROUP-1"
 	APPLICATION_STATUS_UPDATE_DURABLE   string = "APPLICATION_STATUS_UPDATE_DURABLE-1"
+	APPLICATION_STATUS_DELETE_TOPIC     string = "APPLICATION_STATUS_DELETE"
+	APPLICATION_STATUS_DELETE_GROUP     string = "APPLICATION_STATUS_DELETE_GROUP-1"
+	APPLICATION_STATUS_DELETE_DURABLE   string = "APPLICATION_STATUS_DELETE_DURABLE-1"
 	CRON_EVENTS                         string = "CRON_EVENTS"
 	CRON_EVENTS_GROUP                   string = "CRON_EVENTS_GROUP-2"
 	CRON_EVENTS_DURABLE                 string = "CRON_EVENTS_DURABLE-2"
@@ -106,6 +109,7 @@ var natsTopicMapping = map[string]NatsTopic{
 	CD_STAGE_COMPLETE_TOPIC: {topicName: CD_STAGE_COMPLETE_TOPIC, streamName: CI_RUNNER_STREAM, queueName: CD_COMPLETE_GROUP, consumerName: CD_COMPLETE_DURABLE},
 
 	APPLICATION_STATUS_UPDATE_TOPIC: {topicName: APPLICATION_STATUS_UPDATE_TOPIC, streamName: KUBEWATCH_STREAM, queueName: APPLICATION_STATUS_UPDATE_GROUP, consumerName: APPLICATION_STATUS_UPDATE_DURABLE},
+	APPLICATION_STATUS_DELETE_TOPIC: {topicName: APPLICATION_STATUS_DELETE_TOPIC, streamName: KUBEWATCH_STREAM, queueName: APPLICATION_STATUS_DELETE_GROUP, consumerName: APPLICATION_STATUS_DELETE_DURABLE},
 	CRON_EVENTS:                     {topicName: CRON_EVENTS, streamName: KUBEWATCH_STREAM, queueName: CRON_EVENTS_GROUP, consumerName: CRON_EVENTS_DURABLE},
 	WORKFLOW_STATUS_UPDATE_TOPIC:    {topicName: WORKFLOW_STATUS_UPDATE_TOPIC, streamName: KUBEWATCH_STREAM, queueName: WORKFLOW_STATUS_UPDATE_GROUP, consumerName: WORKFLOW_STATUS_UPDATE_DURABLE},
 	CD_WORKFLOW_STATUS_UPDATE:       {topicName: CD_WORKFLOW_STATUS_UPDATE, streamName: KUBEWATCH_STREAM, queueName: CD_WORKFLOW_STATUS_UPDATE_GROUP, consumerName: CD_WORKFLOW_STATUS_UPDATE_DURABLE},
@@ -134,6 +138,7 @@ var NatsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
 	WORKFLOW_STATUS_UPDATE_DURABLE:      {},
 	CRON_EVENTS_DURABLE:                 {},
 	APPLICATION_STATUS_UPDATE_DURABLE:   {},
+	APPLICATION_STATUS_DELETE_DURABLE:   {},
 	CD_COMPLETE_DURABLE:                 {},
 	CI_COMPLETE_DURABLE:                 {},
 	WEBHOOK_EVENT_DURABLE:               {},
@@ -200,20 +205,27 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
 		NatsMsgBufferSize:          defaultConfig.NatsMsgBufferSize,
 		NatsMsgProcessingBatchSize: defaultConfig.NatsMsgProcessingBatchSize,
 	}
-	defaultConsumerValuesForAutoCdTriggerTopic := NatsConsumerConfig{}
-	err = json.Unmarshal([]byte(defaultConfig.NatsConsumerConfig), &defaultConsumerValuesForAutoCdTriggerTopic)
+	//default consumer values for AUTO_CD_TRIGGER and BULK_CD_TRIGGER topics
+	defaultConsumerValuesForSelectedTopic := NatsConsumerConfig{}
+	err = json.Unmarshal([]byte(defaultConfig.NatsConsumerConfig), &defaultConsumerValuesForSelectedTopic)
 	if err != nil {
 		log.Print("error in unmarshalling nats consumer config", "consumer-config", defaultConfig.NatsConsumerConfig, "err", err)
 	}
 	for key, _ := range NatsConsumerWiseConfigMapping {
 		defaultValue := defaultConsumerConfigVal
-		if key == AUTO_CD_TRIGGER_TOPIC_DURABLE {
-			defaultValue.MaxAckPending = defaultConsumerValuesForAutoCdTriggerTopic.MaxAckPending
-			defaultValue.AckWaitInSecs = defaultConsumerValuesForAutoCdTriggerTopic.AckWaitInSecs
+		if (key == AUTO_CD_TRIGGER_TOPIC_DURABLE) || (key == BULK_DEPLOY_DURABLE) {
+			defaultValue.AckWaitInSecs = defaultConsumerValuesForSelectedTopic.AckWaitInSecs
+			//setting MaxAckPending for auto_cd_trigger only
+			if key == AUTO_CD_TRIGGER_TOPIC_DURABLE {
+				defaultValue.MaxAckPending = defaultConsumerValuesForSelectedTopic.MaxAckPending
+			}
 		}
-		if _, ok := consumerConfigMap[key]; ok && (key != AUTO_CD_TRIGGER_TOPIC_DURABLE) {
+
+		//if not the selected topics get the consumer values from consumerConfigMap
+		if _, ok := consumerConfigMap[key]; ok && (key != AUTO_CD_TRIGGER_TOPIC_DURABLE && key != BULK_DEPLOY_DURABLE) {
 			defaultValue = consumerConfigMap[key]
 		}
+
 		NatsConsumerWiseConfigMapping[key] = defaultValue
 	}
 	ncc := NatsConsumerWiseConfigMapping
