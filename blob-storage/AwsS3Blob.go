@@ -27,6 +27,10 @@ func (impl *AwsS3Blob) UploadBlob(request *BlobStorageRequest, err error) error 
 	if s3BaseConfig.Region != "" {
 		cmdArgs = append(cmdArgs, "--region", s3BaseConfig.Region)
 	}
+	if s3BaseConfig.AccessKey != "" && s3BaseConfig.Passkey != "" {
+		cmdArgs = append(cmdArgs, "--aws_access_key_id", s3BaseConfig.AccessKey)
+		cmdArgs = append(cmdArgs, "--aws_secret_access_key", s3BaseConfig.Passkey)
+	}
 	command := exec.Command("aws", cmdArgs...)
 	err = utils.RunCommand(command)
 	return err
