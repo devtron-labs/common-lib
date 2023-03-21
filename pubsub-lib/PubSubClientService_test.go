@@ -139,13 +139,27 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 			NatsMsgProcessingBatchSize: config.NatsMsgProcessingBatchSize,
 		}
 
-		for _, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
+		defaultConsumerConfigForBulkCdTrigger := defaultConsumerConfig
+		err = json.Unmarshal([]byte(config.NatsConsumerConfig), &defaultConsumerConfigForBulkCdTrigger)
+
+		if err != nil {
+			log.Print("error in unmarshalling nats consumer config",
+				"consumer-config", config.NatsConsumerConfig,
+				"err", err)
+		}
+
+		for key, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
+
+			if key == BULK_DEPLOY_DURABLE {
+				assert.Equal(t, defaultConsumerConfigForBulkCdTrigger, consumerWiseConfig)
+				continue
+			}
 			assert.Equal(t, defaultConsumerConfig, consumerWiseConfig)
 		}
 	})
 
 	t.Run("StreamWiseAndConsumerWiseConfig with json configs", func(t *testing.T) {
-		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"max_age\":90000}},\"CI-RUNNER\":{\"streamConfig\":{\"max_age\":90000}},\"KUBEWATCH-1\":{\"streamConfig\":{\"max_age\":90000,\"abc\":\"123\"}}}")
+		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"max_age\":90000}},\"CI-RUNNER\":{\"streamConfig\":{\"max_age\":90000}},\"KUBEWATCH\":{\"streamConfig\":{\"max_age\":90000,\"abc\":\"123\"}}}")
 		fmt.Println(err)
 		err = os.Setenv("CONSUMER_CONFIG_JSON", "{\"ARGO_PIPELINE_STATUS_UPDATE_DURABLE-1\":{\"natsMsgProcessingBatchSize\":3,\"natsMsgBufferSize\":64},\"CI-SCAN-DURABLE-1\":{\"natsMsgProcessingBatchSize\":4,\"natsMsgBufferSize\":64}}")
 		fmt.Println(err)
@@ -171,10 +185,24 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 			NatsMsgProcessingBatchSize: config.NatsMsgProcessingBatchSize,
 		}
 
+		defaultConsumerConfigForBulkCdTrigger := defaultConsumerConfig
+		err = json.Unmarshal([]byte(config.NatsConsumerConfig), &defaultConsumerConfigForBulkCdTrigger)
+
+		if err != nil {
+			log.Print("error in unmarshalling nats consumer config",
+				"consumer-config", config.NatsConsumerConfig,
+				"err", err)
+		}
+
 		for consumerName, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
 			if consumerName == ARGO_PIPELINE_STATUS_UPDATE_DURABLE || consumerName == TOPIC_CI_SCAN_DURABLE {
 				assert.NotEqual(t, defaultConsumerConfig, consumerWiseConfig)
 			} else {
+
+				if consumerName == BULK_DEPLOY_DURABLE {
+					assert.Equal(t, defaultConsumerConfigForBulkCdTrigger, consumerWiseConfig)
+					continue
+				}
 				assert.Equal(t, defaultConsumerConfig, consumerWiseConfig)
 			}
 		}
