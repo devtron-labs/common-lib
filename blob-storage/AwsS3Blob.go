@@ -51,7 +51,7 @@ func (impl *AwsS3Blob) DownloadBlob(request *BlobStorageRequest, downloadSuccess
 	return downloadSuccess, numBytes, err
 }
 
-//TODO KB need to verify for versioning not enabled
+// TODO KB need to verify for versioning not enabled
 func downLoadFromS3(file *os.File, request *BlobStorageRequest, sess *session.Session) (success bool, bytesSize int64, err error) {
 	svc := s3.New(sess)
 	s3BaseConfig := request.AwsS3BaseConfig
@@ -106,4 +106,20 @@ func downLoadFromS3(file *os.File, request *BlobStorageRequest, sess *session.Se
 	}
 
 	return true, numBytes, nil
+}
+
+func (impl *AwsS3Blob) DeleteObjectFromBlob(request *BlobStorageRequest) error {
+	s3BaseConfig := request.AwsS3BaseConfig
+	var cmdArgs []string
+	destinationFileString := fmt.Sprintf("s3://%s/%s", s3BaseConfig.BucketName, request.DestinationKey)
+	cmdArgs = append(cmdArgs, "s3", "rm", destinationFileString)
+	if s3BaseConfig.EndpointUrl != "" {
+		cmdArgs = append(cmdArgs, "--endpoint-url", s3BaseConfig.EndpointUrl)
+	}
+	if s3BaseConfig.Region != "" {
+		cmdArgs = append(cmdArgs, "--region", s3BaseConfig.Region)
+	}
+	command := exec.Command("aws", cmdArgs...)
+	err := utils.RunCommand(command)
+	return err
 }
