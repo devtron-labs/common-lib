@@ -142,7 +142,7 @@ func (impl *AwsS3Blob) UploadWithSession(request *BlobStorageRequest) (*s3manage
 	}
 	content, err := os.ReadFile(request.SourceKey)
 	if err != nil {
-		log.Println("error in reading source file", "sourceFile", request.SourceKey)
+		log.Println("error in reading source file", "sourceFile", request.SourceKey, "destinationKey", request.DestinationKey)
 		return nil, err
 	}
 	s3Session := session.New(awsCfg)
@@ -154,7 +154,7 @@ func (impl *AwsS3Blob) UploadWithSession(request *BlobStorageRequest) (*s3manage
 	}
 	output, err := uploader.UploadWithContext(context.Background(), input)
 	if err != nil {
-		log.Println("error in uploading file to S3", "err", err, "destinationKey", request.DestinationKey)
+		log.Println("error in uploading file to S3", "err", err, "sourceKey", request.SourceKey, "destinationKey", request.DestinationKey)
 		return nil, err
 	}
 	return output, err

@@ -84,7 +84,7 @@ func (impl *BlobStorageServiceImpl) DeleteObjectForS3(request *BlobStorageReques
 		awsS3Blob := AwsS3Blob{}
 		err := awsS3Blob.DeleteObjectFromBlob(request)
 		if err != nil {
-			impl.logger.Errorw("error in deleting object from S3", "err", err)
+			impl.logger.Errorw("error in deleting object from S3", "err", err, "DestinationKey", request.DestinationKey, "StorageType", request.StorageType)
 			return err
 		}
 	}
