@@ -1,6 +1,8 @@
 package blob_storage
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -122,4 +124,40 @@ func (impl *AwsS3Blob) DeleteObjectFromBlob(request *BlobStorageRequest) error {
 	command := exec.Command("aws", cmdArgs...)
 	err := utils.RunCommand(command)
 	return err
+}
+func (impl *AwsS3Blob) UploadWithSession(request *BlobStorageRequest) (*s3manager.UploadOutput, error) {
+
+	s3BaseConfig := request.AwsS3BaseConfig
+	awsCfg := &aws.Config{
+		Region: aws.String(s3BaseConfig.Region),
+	}
+	if s3BaseConfig.AccessKey != "" {
+		awsCfg.Credentials = credentials.NewStaticCredentials(s3BaseConfig.AccessKey, s3BaseConfig.Passkey, "")
+	}
+
+	if s3BaseConfig.EndpointUrl != "" { // to handle s3 compatible storage
+		awsCfg.Endpoint = aws.String(s3BaseConfig.EndpointUrl)
+		awsCfg.DisableSSL = aws.Bool(s3BaseConfig.IsInSecure)
+		awsCfg.S3ForcePathStyle = aws.Bool(true)
+	}
+	content, err := os.ReadFile(request.SourceKey)
+	if err != nil {
+		log.Println("error in reading source file")
+		return nil, err
+	}
+	s3Session := session.New(awsCfg)
+	uploader := s3manager.NewUploader(s3Session)
+	input := &s3manager.UploadInput{
+		Bucket:      aws.String(s3BaseConfig.BucketName), // bucket's name
+		Key:         aws.String(request.DestinationKey),  // files destination location
+		Body:        bytes.NewReader(content),            // content of the file
+		ContentType: aws.String("text/plain"),            // content type
+	}
+	output, err := uploader.UploadWithContext(context.Background(), input)
+	if err != nil {
+		log.Println("error in uploading file to S3")
+		return nil, err
+	}
+	return output, err
+
 }
