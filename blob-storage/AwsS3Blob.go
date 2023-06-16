@@ -148,10 +148,9 @@ func (impl *AwsS3Blob) UploadWithSession(request *BlobStorageRequest) (*s3manage
 	s3Session := session.New(awsCfg)
 	uploader := s3manager.NewUploader(s3Session)
 	input := &s3manager.UploadInput{
-		Bucket:      aws.String(s3BaseConfig.BucketName), // bucket's name
-		Key:         aws.String(request.DestinationKey),  // files destination location
-		Body:        bytes.NewReader(content),            // content of the file
-		ContentType: aws.String("text/plain"),            // content type
+		Bucket: aws.String(s3BaseConfig.BucketName), // bucket's name
+		Key:    aws.String(request.DestinationKey),  // files destination location
+		Body:   bytes.NewReader(content),            // content of the file
 	}
 	output, err := uploader.UploadWithContext(context.Background(), input)
 	if err != nil {
