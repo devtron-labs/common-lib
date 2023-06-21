@@ -80,4 +80,23 @@ func TestBlobStorageService(t *testing.T) {
 		fmt.Println(success, totalBytes, err)
 	})
 
+	t.Run("S3 Upload with session", func(t *testing.T) {
+		awsS3BaseConfig := &AwsS3BaseConfig{
+			AccessKey:   "",
+			Passkey:     "",
+			EndpointUrl: "",
+			BucketName:  "deepak-bucket1234",
+			Region:      "ap-south-1",
+		}
+		blobStorageServiceImpl := NewBlobStorageServiceImpl(nil)
+		request := &BlobStorageRequest{
+			StorageType:     BLOB_STORAGE_S3,
+			SourceKey:       "/shivamnagar409/latest.txt",
+			DestinationKey:  "/latest.txt",
+			AwsS3BaseConfig: awsS3BaseConfig,
+		}
+		err := blobStorageServiceImpl.UploadToBlobWithSession(request)
+		fmt.Println(err)
+	})
+
 }
