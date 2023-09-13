@@ -32,6 +32,32 @@ const (
 	Nodes                        = "nodes"
 )
 
+const (
+	Group   = "group"
+	Version = "version"
+	Kind    = "kind"
+)
+
+type HookType string
+
+const (
+	HookTypePreSync  HookType = "PreSync"
+	HookTypeSync     HookType = "Sync"
+	HookTypePostSync HookType = "PostSync"
+	HookTypeSkip     HookType = "Skip"
+	HookTypeSyncFail HookType = "SyncFail"
+)
+
+type OperationPhase string
+
+const (
+	OperationRunning     OperationPhase = "Running"
+	OperationTerminating OperationPhase = "Terminating"
+	OperationFailed      OperationPhase = "Failed"
+	OperationError       OperationPhase = "Error"
+	OperationSucceeded   OperationPhase = "Succeeded"
+)
+
 type ClusterResourceListMap struct {
 	Headers       []string                 `json:"headers"`
 	Data          []map[string]interface{} `json:"data"`
