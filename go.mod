@@ -14,7 +14,7 @@ require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/devtron-labs/authenticator v0.4.31
 	github.com/stretchr/testify v1.8.4
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.44.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.37.0
 	google.golang.org/api v0.114.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.24.2
@@ -70,9 +70,9 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/otel v1.18.0 // indirect
-	go.opentelemetry.io/otel/metric v1.18.0 // indirect
-	go.opentelemetry.io/otel/trace v1.18.0 // indirect
+	go.opentelemetry.io/otel v1.11.2 // indirect
+	go.opentelemetry.io/otel/metric v0.34.0 // indirect
+	go.opentelemetry.io/otel/trace v1.11.2 // indirect
 	golang.org/x/net v0.13.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect

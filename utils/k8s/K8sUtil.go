@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"github.com/devtron-labs/common-lib/utils"
 	http2 "github.com/devtron-labs/common-lib/utils/http"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"io"
 	v13 "k8s.io/api/policy/v1"
 	v1beta12 "k8s.io/api/policy/v1beta1"
@@ -43,7 +44,6 @@ import (
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/version"
