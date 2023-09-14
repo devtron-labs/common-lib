@@ -835,6 +835,11 @@ k8s.io/klog/v2/internal/clock
 k8s.io/klog/v2/internal/dbg
 k8s.io/klog/v2/internal/serialize
 k8s.io/klog/v2/internal/severity
+# k8s.io/kube-aggregator v0.0.0 => k8s.io/kube-aggregator v0.24.2
+## explicit; go 1.16
+k8s.io/kube-aggregator/pkg/apis/apiregistration
+k8s.io/kube-aggregator/pkg/apis/apiregistration/v1
+k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1
 # k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8
 ## explicit; go 1.18
 k8s.io/kube-openapi/pkg/builder3/util
@@ -847,6 +852,9 @@ k8s.io/kube-openapi/pkg/schemamutation
 k8s.io/kube-openapi/pkg/spec3
 k8s.io/kube-openapi/pkg/util/proto
 k8s.io/kube-openapi/pkg/validation/spec
+# k8s.io/kubectl v0.0.0 => k8s.io/kubectl v0.24.2
+## explicit; go 1.16
+k8s.io/kubectl/pkg/util/podutils
 # k8s.io/kubernetes v1.24.2
 ## explicit; go 1.16
 k8s.io/kubernetes/pkg/api/legacyscheme

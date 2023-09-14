@@ -1259,6 +1259,7 @@ k8s.io/klog/v2 v2.4.0/go.mod h1:Od+F08eJP+W3HUb4pSrPpgp9DGU4GzlpG/TmITuYh/Y=
 k8s.io/klog/v2 v2.60.1/go.mod h1:y1WjHnz7Dj687irZUWR/WLkLc5N1YHtjLdmgWjndZn0=
 k8s.io/klog/v2 v2.100.1 h1:7WCHKK6K8fNhTqfBhISHQ97KrnJNFZMcQvKp7gP/tmg=
 k8s.io/klog/v2 v2.100.1/go.mod h1:y1WjHnz7Dj687irZUWR/WLkLc5N1YHtjLdmgWjndZn0=
+k8s.io/kube-aggregator v0.24.2 h1:vaKw45vFA5fIT0wdSehPIL7idjVxgLqz6iedOHedLG4=
 k8s.io/kube-aggregator v0.24.2/go.mod h1:Ju2jNDixn+vqeeKEBfjfpc204bO1pbdXX0N9knCxeMQ=
 k8s.io/kube-controller-manager v0.24.2/go.mod h1:KDE0yqiEvxYiO0WRpPA4rVx8AcK1vsWydUF37AJ9lTI=
 k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e/go.mod h1:vHXdDvt9+2spS2Rx9ql3I8tycm3H9FDfdUoIuKCefvw=
@@ -1267,6 +1268,7 @@ k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8 h1:yEQKdMCjzAOvGeiTwG4hO/
 k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8/go.mod h1:mbJ+NSUoAhuR14N0S63bPkh8MGVSo3VYSGZtH/mfMe0=
 k8s.io/kube-proxy v0.24.2/go.mod h1:bozS2ufl/Ns6s40Ue34eV7rqyLVygi5usSmCgW7rFU8=
 k8s.io/kube-scheduler v0.24.2/go.mod h1:DRa+aeXKSYUUOHHIc/9EcaO9+FW5FydaOfPSvaSW5Ko=
+k8s.io/kubectl v0.24.2 h1:+RfQVhth8akUmIc2Ge8krMl/pt66V7210ka3RE/p0J4=
 k8s.io/kubectl v0.24.2/go.mod h1:+HIFJc0bA6Tzu5O/YcuUt45APAxnNL8LeMuXwoiGsPg=
 k8s.io/kubelet v0.24.2/go.mod h1:Xm9DkWQjwOs+uGOUIIGIPMvvmenvj0lDVOErvIKOOt0=
 k8s.io/kubernetes v1.24.2 h1:AyjtHzSysliKR04Km91njmk2yaKmOa3ZISQZCIGUnVI=
