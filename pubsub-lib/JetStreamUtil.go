@@ -91,6 +91,8 @@ const (
 	DEVTRON_CHART_INSTALL_STATUS_DURABLE string = "DEVTRON-CHART-INSTALL-STATUS-DURABLE"
 )
 
+const DefaultBatchSizeForDevtronApp int = 5
+
 type NatsTopic struct {
 	topicName    string
 	streamName   string
@@ -138,24 +140,26 @@ var NatsStreamWiseConfigMapping = map[string]NatsStreamConfig{
 }
 
 var NatsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
-	ARGO_PIPELINE_STATUS_UPDATE_DURABLE:  {},
-	TOPIC_CI_SCAN_DURABLE:                {},
-	NEW_CI_MATERIAL_TOPIC_DURABLE:        {},
-	CD_WORKFLOW_STATUS_UPDATE_DURABLE:    {},
-	WORKFLOW_STATUS_UPDATE_DURABLE:       {},
-	CRON_EVENTS_DURABLE:                  {},
-	APPLICATION_STATUS_UPDATE_DURABLE:    {},
-	APPLICATION_STATUS_DELETE_DURABLE:    {},
-	CD_COMPLETE_DURABLE:                  {},
-	CI_COMPLETE_DURABLE:                  {},
-	WEBHOOK_EVENT_DURABLE:                {},
-	CD_TRIGGER_DURABLE:                   {},
-	BULK_HIBERNATE_DURABLE:               {},
-	BULK_DEPLOY_DURABLE:                  {},
-	BULK_APPSTORE_DEPLOY_DURABLE:         {},
-	CD_BULK_DEPLOY_TRIGGER_DURABLE:       {},
-	HELM_CHART_INSTALL_STATUS_DURABLE:    {},
-	DEVTRON_CHART_INSTALL_STATUS_DURABLE: {},
+	ARGO_PIPELINE_STATUS_UPDATE_DURABLE: {},
+	TOPIC_CI_SCAN_DURABLE:               {},
+	NEW_CI_MATERIAL_TOPIC_DURABLE:       {},
+	CD_WORKFLOW_STATUS_UPDATE_DURABLE:   {},
+	WORKFLOW_STATUS_UPDATE_DURABLE:      {},
+	CRON_EVENTS_DURABLE:                 {},
+	APPLICATION_STATUS_UPDATE_DURABLE:   {},
+	APPLICATION_STATUS_DELETE_DURABLE:   {},
+	CD_COMPLETE_DURABLE:                 {},
+	CI_COMPLETE_DURABLE:                 {},
+	WEBHOOK_EVENT_DURABLE:               {},
+	CD_TRIGGER_DURABLE:                  {},
+	BULK_HIBERNATE_DURABLE:              {},
+	BULK_DEPLOY_DURABLE:                 {},
+	BULK_APPSTORE_DEPLOY_DURABLE:        {},
+	CD_BULK_DEPLOY_TRIGGER_DURABLE:      {},
+	HELM_CHART_INSTALL_STATUS_DURABLE:   {},
+	DEVTRON_CHART_INSTALL_STATUS_DURABLE: {
+		NatsMsgProcessingBatchSize: DefaultBatchSizeForDevtronApp,
+	},
 }
 
 func getConsumerConfigMap(jsonString string) map[string]NatsConsumerConfig {
