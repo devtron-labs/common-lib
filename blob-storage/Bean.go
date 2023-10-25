@@ -26,37 +26,28 @@ type BlobStorageS3Config struct {
 }
 
 func (b *BlobStorageS3Config) GetBlobStorageBaseS3Config(blobStorageObjectType string) *AwsS3BaseConfig {
+	awsS3BaseConfig := &AwsS3BaseConfig{
+		AccessKey:         b.AccessKey,
+		Passkey:           b.Passkey,
+		EndpointUrl:       b.EndpointUrl,
+		IsInSecure:        b.IsInSecure,
+	}
 	switch blobStorageObjectType {
 	case BlobStorageObjectTypeCache:
-		return &AwsS3BaseConfig{
-			AccessKey:         b.AccessKey,
-			Passkey:           b.Passkey,
-			EndpointUrl:       b.EndpointUrl,
-			IsInSecure:        b.IsInSecure,
-			BucketName:        b.CiCacheBucketName,
-			Region:            b.CiCacheRegion,
-			VersioningEnabled: b.CiCacheBucketVersioning,
-		}
+		awsS3BaseConfig.BucketName = b.CiCacheBucketName
+		awsS3BaseConfig.Region = b.CiCacheRegion
+		awsS3BaseConfig.VersioningEnabled = b.CiCacheBucketVersioning
+		return awsS3BaseConfig
 	case BlobStorageObjectTypeLog:
-		return &AwsS3BaseConfig{
-			AccessKey:         b.AccessKey,
-			Passkey:           b.Passkey,
-			EndpointUrl:       b.EndpointUrl,
-			IsInSecure:        b.IsInSecure,
-			BucketName:        b.CiLogBucketName,
-			Region:            b.CiLogRegion,
-			VersioningEnabled: b.CiLogBucketVersioning,
-		}
+		awsS3BaseConfig.BucketName = b.CiLogBucketName
+		awsS3BaseConfig.Region = b.CiLogRegion
+		awsS3BaseConfig.VersioningEnabled = b.CiLogBucketVersioning
+		return awsS3BaseConfig
 	case BlobStorageObjectTypeArtifact:
-		return &AwsS3BaseConfig{
-			AccessKey:         b.AccessKey,
-			Passkey:           b.Passkey,
-			EndpointUrl:       b.EndpointUrl,
-			IsInSecure:        b.IsInSecure,
-			BucketName:        b.CiArtifactBucketName,
-			Region:            b.CiArtifactRegion,
-			VersioningEnabled: b.CiArtifactBucketVersioning,
-		}
+		awsS3BaseConfig.BucketName = b.CiArtifactBucketName
+		awsS3BaseConfig.Region = b.CiArtifactRegion
+		awsS3BaseConfig.VersioningEnabled = b.CiArtifactBucketVersioning
+		return awsS3BaseConfig
 	default:
 		return nil
 	}
@@ -82,28 +73,21 @@ type AzureBlobConfig struct {
 }
 
 func (b *AzureBlobConfig) GetBlobStorageBaseAzureConfig(blobStorageObjectType string) *AzureBlobBaseConfig {
+	azureBlobBaseConfig := &AzureBlobBaseConfig{
+		Enabled:     b.Enabled,
+		AccountName: b.AccountName,
+		AccountKey:  b.AccountKey,
+	}
 	switch blobStorageObjectType {
 	case BlobStorageObjectTypeCache:
-		return &AzureBlobBaseConfig{
-			Enabled:           b.Enabled,
-			AccountName:       b.AccountName,
-			AccountKey:        b.AccountKey,
-			BlobContainerName: b.BlobContainerCiCache,
-		}
+		azureBlobBaseConfig.BlobContainerName = b.BlobContainerCiCache
+		return azureBlobBaseConfig
 	case BlobStorageObjectTypeLog:
-		return &AzureBlobBaseConfig{
-			Enabled:           b.Enabled,
-			AccountName:       b.AccountName,
-			AccountKey:        b.AccountKey,
-			BlobContainerName: b.BlobContainerCiLog,
-		}
+		azureBlobBaseConfig.BlobContainerName = b.BlobContainerCiLog
+		return azureBlobBaseConfig
 	case BlobStorageObjectTypeArtifact:
-		return &AzureBlobBaseConfig{
-			Enabled:           b.Enabled,
-			AccountName:       b.AccountName,
-			AccountKey:        b.AccountKey,
-			BlobContainerName: b.BlobContainerArtifact,
-		}
+		azureBlobBaseConfig.BlobContainerName = b.BlobContainerArtifact
+		return azureBlobBaseConfig
 	default:
 		return nil
 	}
@@ -124,22 +108,19 @@ type GcpBlobConfig struct {
 }
 
 func (b *GcpBlobConfig) GetBlobStorageBaseGcpConfig(blobStorageObjectType string) *GcpBlobBaseConfig {
+	gcpBlobBaseConfig := &GcpBlobBaseConfig{
+		CredentialFileJsonData: b.CredentialFileJsonData
+	}
 	switch blobStorageObjectType {
 	case BlobStorageObjectTypeCache:
-		return &GcpBlobBaseConfig{
-			BucketName:             b.CacheBucketName,
-			CredentialFileJsonData: b.CredentialFileJsonData,
-		}
+		gcpBlobBaseConfig.BucketName = b.CacheBucketName
+		return gcpBlobBaseConfig
 	case BlobStorageObjectTypeLog:
-		return &GcpBlobBaseConfig{
-			BucketName:             b.LogBucketName,
-			CredentialFileJsonData: b.CredentialFileJsonData,
-		}
+		gcpBlobBaseConfig.BucketName = b.LogBucketName
+		return gcpBlobBaseConfig
 	case BlobStorageObjectTypeArtifact:
-		return &GcpBlobBaseConfig{
-			BucketName:             b.ArtifactBucketName,
-			CredentialFileJsonData: b.CredentialFileJsonData,
-		}
+		gcpBlobBaseConfig.BucketName = b.ArtifactBucketName
+		return gcpBlobBaseConfig
 	default:
 		return nil
 	}
