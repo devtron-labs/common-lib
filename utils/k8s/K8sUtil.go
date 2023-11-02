@@ -73,13 +73,21 @@ type K8sUtil struct {
 }
 
 type ClusterConfig struct {
-	ClusterName           string
-	Host                  string
-	BearerToken           string
-	InsecureSkipTLSVerify bool
-	KeyData               string
-	CertData              string
-	CAData                string
+	ClusterName                     string
+	Host                            string
+	BearerToken                     string
+	InsecureSkipTLSVerify           bool
+	KeyData                         string
+	CertData                        string
+	CAData                          string
+	ClusterId                       int
+	ProxyUrl                        string
+	ToConnectForClusterVerification bool
+	ToConnectWithSSHTunnel          bool
+	SSHTunnelUser                   string
+	SSHTunnelPassword               string
+	SSHTunnelAuthKey                string
+	SSHTunnelServerAddress          string
 }
 
 func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) *K8sUtil {
