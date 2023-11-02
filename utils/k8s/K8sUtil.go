@@ -72,6 +72,9 @@ type K8sUtil struct {
 	kubeconfig    *string
 }
 
+type K8sUtilIf interface {
+}
+
 type ClusterConfig struct {
 	ClusterName                     string
 	Host                            string
