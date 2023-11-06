@@ -499,7 +499,7 @@ func (impl K8sUtil) GetK8sInClusterConfigAndDynamicClients() (*rest.Config, *htt
 func (impl K8sUtil) GetK8sDynamicClient(restConfig *rest.Config, k8sHttpClient *http.Client) (dynamic.Interface, error) {
 	dynamicClientSet, err := dynamic.NewForConfigAndClient(restConfig, k8sHttpClient)
 	if err != nil {
-		impl.logger.Errorw("error in getting client set by rest config for in cluster", "err", err)
+		impl.Logger.Errorw("error in getting client set by rest config for in cluster", "err", err)
 		return nil, err
 	}
 	return dynamicClientSet, nil
