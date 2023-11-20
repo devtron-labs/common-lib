@@ -11,7 +11,7 @@ import (
 )
 
 type PubSubClientService interface {
-	Publish(topic string, msg string) error
+	Publish(topic string, msg string, handlePublishMetrics func()) error
 	Subscribe(topic string, callback func(msg *PubSubMsg)) error
 }
 
@@ -48,7 +48,7 @@ func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) *PubSubClientServiceI
 	return pubSubClient
 }
 
-func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
+func (impl PubSubClientServiceImpl) Publish(topic string, msg string, handlePublishMetrics func()) error {
 	impl.Logger.Debugw("Published message on pubsub client", "topic", topic, "msg", msg)
 	natsClient := impl.NatsClient
 	jetStrCtxt := natsClient.JetStrCtxt
@@ -65,6 +65,7 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 		impl.Logger.Errorw("error while publishing message", "stream", streamName, "topic", topic, "error", err)
 		return err
 	}
+	handlePublishMetrics()
 	return nil
 }
 
