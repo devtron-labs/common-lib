@@ -4,7 +4,7 @@ go 1.20
 
 require github.com/nats-io/nats.go v1.19.0
 
-require go.uber.org/zap v1.21.0
+require go.uber.org/zap v1.19.0
 
 require (
 	cloud.google.com/go/storage v1.28.1
@@ -21,9 +21,9 @@ require (
 	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
-	k8s.io/kube-aggregator v0.0.0
-	k8s.io/kubectl v0.0.0
-	k8s.io/kubernetes v1.24.2
+	k8s.io/kube-aggregator v0.0.0-00010101000000-000000000000
+	k8s.io/kubectl v0.0.0-00010101000000-000000000000
+	k8s.io/kubernetes v1.15.0-alpha.0
 	k8s.io/metrics v0.24.2
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 	sigs.k8s.io/yaml v1.3.0
@@ -109,7 +109,7 @@ require (
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
