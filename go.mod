@@ -21,7 +21,7 @@ require (
 	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
-	k8s.io/kube-aggregator v0.0.0-00010101000000-000000000000
+	k8s.io/kube-aggregator v0.24.2
 	k8s.io/kubectl v0.0.0-00010101000000-000000000000
 	k8s.io/kubernetes v1.15.0-alpha.0
 	k8s.io/metrics v0.24.2
