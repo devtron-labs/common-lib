@@ -110,7 +110,7 @@ func GetResourceKey(obj *unstructured.Unstructured) ResourceKey {
 	return NewResourceKey(gvk.Group, gvk.Kind, obj.GetNamespace(), obj.GetName())
 }
 
-type DeletionPropagationOptions = string
+type DeletionPropagationOptions string
 
 const (
 	DeletePropagationOrphan     DeletionPropagationOptions = "Orphan"
