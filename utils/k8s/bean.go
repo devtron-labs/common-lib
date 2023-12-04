@@ -93,7 +93,7 @@ type ManifestResponse struct {
 }
 
 // SetRunningEphemeralContainers will extract out all the running ephemeral containers of the given pod manifest and sets in manifestResponse.EphemeralContainers
-// if given manifest is not of pod kind
+// if given manifest is pod kind
 func (manifestResponse *ManifestResponse) SetRunningEphemeralContainers() error {
 	if manifestResponse != nil {
 		if podManifest := manifestResponse.Manifest; k8sObjectsUtil.IsPod(podManifest.GetKind(), podManifest.GroupVersionKind().Group) {
