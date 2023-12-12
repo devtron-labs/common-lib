@@ -147,11 +147,7 @@ func (impl PubSubClientServiceImpl) processMsg(msg *nats.Msg, callback func(msg 
 	t1 := time.Now()
 	defer impl.printTimeDiff(t1, msg, timeLimitInMillSecs)
 	defer msg.Ack()
-	subMsg := &model.PubSubMsg{Data: string(msg.Data)}
-	panicErr := impl.TryCatchCallBack(subMsg, callback)
-	if panicErr != nil {
-		impl.publishPanicError(msg, panicErr)
-	}
+	impl.TryCatchCallBack(msg, callback)
 }
 
 func (impl PubSubClientServiceImpl) publishPanicError(msg *nats.Msg, panicErr error) (err error) {
@@ -177,15 +173,17 @@ func (impl PubSubClientServiceImpl) publishPanicError(msg *nats.Msg, panicErr er
 	return nil
 }
 
-func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *model.PubSubMsg, callback func(msg *model.PubSubMsg)) (err error) {
-	defer func() {
+func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback func(msg *model.PubSubMsg)) {
+	defer func(msg *nats.Msg) {
 		if panicInfo := recover(); panicInfo != nil {
-			err = fmt.Errorf("%v: \n%s", panicInfo, string(debug.Stack()))
+			defer msg.Ack()
+			err := fmt.Errorf("%v \n%s", panicInfo, string(debug.Stack()))
+			impl.publishPanicError(msg, err)
 			return
 		}
-	}()
-	callback(msg)
-	return err
+	}(msg)
+	subMsg := &model.PubSubMsg{Data: string(msg.Data)}
+	callback(subMsg)
 }
 
 func (impl PubSubClientServiceImpl) printTimeDiff(t0 time.Time, msg *nats.Msg, timeLimitInMillSecs int64) {

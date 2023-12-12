@@ -279,23 +279,23 @@ func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, stream
 	for _, streamName := range streamNames {
 		streamInfo, err := js.StreamInfo(streamName)
 		if err == nats.ErrStreamNotFound || streamInfo == nil {
-			log.Print("No stream was created already. Need to create one.", "Stream name", streamName)
+			log.Print("No stream was created already. Need to create one. ", "Stream name: ", streamName)
 			//Stream doesn't already exist. Create a new stream from jetStreamContext
 			cfgToSet := getNewConfig(streamName, streamConfig)
 			_, err = js.AddStream(cfgToSet)
 			if err != nil {
-				log.Fatal("Error while creating stream", "stream name", streamName, "error", err)
+				log.Fatal("Error while creating stream. ", "stream name: ", streamName, "error: ", err)
 				return err
 			}
 		} else if err != nil {
-			log.Fatal("Error while getting stream info", "stream name", streamName, "error", err)
+			log.Fatal("Error while getting stream info. ", "stream name: ", streamName, "error: ", err)
 		} else {
 			config := streamInfo.Config
 			streamConfig.Name = streamName
 			if checkConfigChangeReqd(&config, streamConfig) {
 				_, err1 := js.UpdateStream(&config)
 				if err1 != nil {
-					log.Println("error occurred while updating stream config", "streamName", streamName, "streamConfig", config, "error", err1)
+					log.Println("error occurred while updating stream config. ", "streamName: ", streamName, "streamConfig: ", config, "error: ", err1)
 				}
 			}
 		}
