@@ -157,7 +157,7 @@ func (impl PubSubClientServiceImpl) publishPanicError(msg *nats.Msg, panicErr er
 		Payload: model.PanicEventIdentifier{
 			Topic:     msg.Subject,
 			Data:      msg.Data,
-			PanicInfo: panicErr,
+			PanicInfo: panicErr.Error(),
 		},
 	}
 	data, err := json.Marshal(publishPanicEvent.Payload)
