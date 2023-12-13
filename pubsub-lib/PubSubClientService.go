@@ -176,8 +176,7 @@ func (impl PubSubClientServiceImpl) publishPanicError(msg *nats.Msg, panicErr er
 func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback func(msg *model.PubSubMsg)) {
 	defer func(msg *nats.Msg) {
 		if panicInfo := recover(); panicInfo != nil {
-			defer msg.Ack()
-			err := fmt.Errorf("%v \n%s", panicInfo, string(debug.Stack()))
+			err := fmt.Errorf("%v\nPanic Logs:\n%s", panicInfo, string(debug.Stack()))
 			impl.publishPanicError(msg, err)
 			return
 		}
