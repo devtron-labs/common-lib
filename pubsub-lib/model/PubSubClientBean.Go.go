@@ -12,8 +12,9 @@ type PublishPanicEvent struct {
 	Topic   string               `json:"topic"`
 	Payload PanicEventIdentifier `json:"payload"`
 }
+
 type PanicEventIdentifier struct {
 	Topic     string `json:"topic"`
-	Data      []byte `json:"data"`
+	Data      string `json:"data"`
 	PanicInfo string `json:"panicInfo"`
 }
