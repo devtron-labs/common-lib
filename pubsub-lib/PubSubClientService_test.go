@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/caarlos0/env"
+	"github.com/devtron-labs/common-lib/pubsub-lib/model"
 	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +26,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 	t.Run("PubAndSub", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
-		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *PubSubMsg) {
+		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
 			fmt.Println("Data received:", msg.Data)
 		})
 		if err != nil {
@@ -41,7 +42,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 	t.Run("SubOnly", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
-		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *PubSubMsg) {
+		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
 			fmt.Println("Data received:", msg.Data)
 		})
 		if err != nil {
@@ -55,7 +56,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
 		Consumed_Counter := 0
 		lock := &sync.Mutex{}
-		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *PubSubMsg) {
+		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
 			lock.Lock()
 			Consumed_Counter++
 			lock.Unlock()
