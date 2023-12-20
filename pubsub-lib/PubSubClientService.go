@@ -52,9 +52,9 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	natsTopic := GetNatsTopic(topic)
 	streamName := natsTopic.streamName
 	streamConfig := impl.getStreamConfig(streamName)
-	//streamConfig := natsClient.streamConfig
+	// streamConfig := natsClient.streamConfig
 	_ = AddStream(jetStrCtxt, streamConfig, streamName)
-	//Generate random string for passing as Header Id in message
+	// Generate random string for passing as Header Id in message
 	randString := "MsgHeaderId-" + utils.Generate(10)
 
 	// track time taken to publish msg to nats server
@@ -63,7 +63,8 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 
 	_, err := jetStrCtxt.Publish(topic, []byte(msg), nats.MsgId(randString))
 	if err != nil {
-		//TODO need to handle retry specially for timeout cases
+		natsMetrics.IncPublishErrorCount(topic)
+		// TODO need to handle retry specially for timeout cases
 		impl.Logger.Errorw("error while publishing message", "stream", streamName, "topic", topic, "error", err)
 		return err
 	}
@@ -78,7 +79,7 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *m
 	consumerName := natsTopic.consumerName
 	natsClient := impl.NatsClient
 	streamConfig := impl.getStreamConfig(streamName)
-	//streamConfig := natsClient.streamConfig
+	// streamConfig := natsClient.streamConfig
 	_ = AddStream(natsClient.JetStrCtxt, streamConfig, streamName)
 	deliveryOption := nats.DeliverLast()
 	if streamConfig.Retention == nats.WorkQueuePolicy {
@@ -151,6 +152,7 @@ func (impl PubSubClientServiceImpl) processMessages(wg *sync.WaitGroup, channel 
 // TODO need to extend msg ack depending upon response from callback like error scenario
 func (impl PubSubClientServiceImpl) processMsg(msg *nats.Msg, callback func(msg *model.PubSubMsg), topic string) {
 	t1 := time.Now()
+	natsMetrics.IncConsumingCount(topic)
 	defer natsMetrics.IncConsumptionCount(topic)
 	defer natsMetrics.NatsEventConsumptionTime.WithLabelValues(topic).Observe(float64(time.Since(t1).Milliseconds()))
 	impl.TryCatchCallBack(msg, callback)
