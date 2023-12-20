@@ -59,7 +59,10 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 
 	// track time taken to publish msg to nats server
 	t1 := time.Now()
-	defer metrics.NatsEventPublishTime.WithLabelValues(topic).Observe(float64(time.Since(t1).Milliseconds()))
+	defer func() {
+		// wrapping this function in defer as directly calling Observe() will run immediately
+		metrics.NatsEventPublishTime.WithLabelValues(topic).Observe(float64(time.Since(t1).Milliseconds()))
+	}()
 
 	_, err := jetStrCtxt.Publish(topic, []byte(msg), nats.MsgId(randString))
 	if err != nil {
@@ -154,7 +157,10 @@ func (impl PubSubClientServiceImpl) processMsg(msg *nats.Msg, callback func(msg 
 	t1 := time.Now()
 	metrics.IncConsumingCount(topic)
 	defer metrics.IncConsumptionCount(topic)
-	defer metrics.NatsEventConsumptionTime.WithLabelValues(topic).Observe(float64(time.Since(t1).Milliseconds()))
+	defer func() {
+		// wrapping this function in defer as directly calling Observe() will run immediately
+		metrics.NatsEventConsumptionTime.WithLabelValues(topic).Observe(float64(time.Since(t1).Milliseconds()))
+	}()
 	impl.TryCatchCallBack(msg, callback)
 }
 
