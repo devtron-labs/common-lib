@@ -29,7 +29,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nats-io/nats.go/internal/parser"
 	"github.com/nats-io/nuid"
 )
 
@@ -369,21 +368,12 @@ func (obs *obs) Put(meta *ObjectMeta, r io.Reader, opts ...ObjectOpt) (*ObjectIn
 		return perr
 	}
 
+	purgePartial := func() { obs.js.purgeStream(obs.stream, &StreamPurgeRequest{Subject: chunkSubj}) }
+
 	// Create our own JS context to handle errors etc.
-	jetStream, err := obs.js.nc.JetStream(PublishAsyncErrHandler(func(js JetStream, _ *Msg, err error) { setErr(err) }))
+	js, err := obs.js.nc.JetStream(PublishAsyncErrHandler(func(js JetStream, _ *Msg, err error) { setErr(err) }))
 	if err != nil {
 		return nil, err
-	}
-
-	defer jetStream.(*js).cleanupReplySub()
-
-	purgePartial := func() {
-		// wait until all pubs are complete or up to default timeout before attempting purge
-		select {
-		case <-jetStream.PublishAsyncComplete():
-		case <-time.After(obs.js.opts.wait):
-		}
-		obs.js.purgeStream(obs.stream, &StreamPurgeRequest{Subject: chunkSubj})
 	}
 
 	m, h := NewMsg(chunkSubj), sha256.New()
@@ -426,7 +416,7 @@ func (obs *obs) Put(meta *ObjectMeta, r io.Reader, opts ...ObjectOpt) (*ObjectIn
 			h.Write(m.Data)
 
 			// Send msg itself.
-			if _, err := jetStream.PublishMsgAsync(m); err != nil {
+			if _, err := js.PublishMsgAsync(m); err != nil {
 				purgePartial()
 				return nil, err
 			}
@@ -461,7 +451,7 @@ func (obs *obs) Put(meta *ObjectMeta, r io.Reader, opts ...ObjectOpt) (*ObjectIn
 	}
 
 	// Publish the meta message.
-	_, err = jetStream.PublishMsgAsync(mm)
+	_, err = js.PublishMsgAsync(mm)
 	if err != nil {
 		if r != nil {
 			purgePartial()
@@ -471,7 +461,7 @@ func (obs *obs) Put(meta *ObjectMeta, r io.Reader, opts ...ObjectOpt) (*ObjectIn
 
 	// Wait for all to be processed.
 	select {
-	case <-jetStream.PublishAsyncComplete():
+	case <-js.PublishAsyncComplete():
 		if err := getErr(); err != nil {
 			if r != nil {
 				purgePartial()
@@ -622,7 +612,6 @@ func (obs *obs) Get(name string, opts ...GetObjectOpt) (ObjectResult, error) {
 	result.digest = sha256.New()
 
 	processChunk := func(m *Msg) {
-		var err error
 		if ctx != nil {
 			select {
 			case <-ctx.Done():
@@ -639,7 +628,7 @@ func (obs *obs) Get(name string, opts ...GetObjectOpt) (ObjectResult, error) {
 			}
 		}
 
-		tokens, err := parser.GetMetadataFields(m.Reply)
+		tokens, err := getMetadataFields(m.Reply)
 		if err != nil {
 			gotErr(m, err)
 			return
@@ -1218,7 +1207,7 @@ func (o *objResult) Read(p []byte) (n int, err error) {
 		}
 	}
 	if o.err != nil {
-		return 0, o.err
+		return 0, err
 	}
 	if o.r == nil {
 		return 0, io.EOF
