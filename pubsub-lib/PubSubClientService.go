@@ -91,52 +91,23 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *m
 	if streamConfig.Retention == nats.WorkQueuePolicy {
 		deliveryOption = nats.DeliverAll()
 	}
-	processingBatchSize := NatsConsumerWiseConfigMapping[consumerName].NatsMsgProcessingBatchSize
-	msgBufferSize := NatsConsumerWiseConfigMapping[consumerName].GetNatsMsgBufferSize()
+
+	consumerConfig := NatsConsumerWiseConfigMapping[consumerName]
+	processingBatchSize := consumerConfig.NatsMsgProcessingBatchSize
+	msgBufferSize := consumerConfig.GetNatsMsgBufferSize()
 
 	// Converting provided ack wait (int) into duration for comparing with nats-server config
-	ackWait := time.Duration(NatsConsumerWiseConfigMapping[consumerName].AckWaitInSecs) * time.Second
+	ackWait := time.Duration(consumerConfig.AckWaitInSecs) * time.Second
 
-	// Get the current Consumer config from NATS-server
-	info, err := natsClient.JetStrCtxt.ConsumerInfo(streamName, consumerName)
-
-	if err != nil {
-		impl.Logger.Errorw("unable to retrieve consumer info from NATS-server",
-			"stream", streamName,
-			"consumer", consumerName,
-			"err", err)
-
-	} else {
-		// Update NATS Consumer config if new changes detected
-		// Currently only checking for AckWait, but can be done for other editable properties as well
-
-		updatesDetected := false
-
-		updatedConfig := info.Config
-		if ackWait > 0 && info.Config.AckWait != ackWait {
-			updatedConfig.AckWait = ackWait
-			updatesDetected = true
-		}
-
-		if msgBufferSize > 0 && updatedConfig.MaxAckPending != msgBufferSize {
-			updatedConfig.MaxAckPending = msgBufferSize
-			updatesDetected = true
-		}
-
-		if updatesDetected {
-			_, err = natsClient.JetStrCtxt.UpdateConsumer(streamName, &updatedConfig)
-			if err != nil {
-				impl.Logger.Errorw("failed to update Consumer config", "received consumer config", info.Config, "err", err)
-			}
-		}
-	}
+	// Update consumer config if new changes detected
+	impl.updateConsumer(natsClient, streamName, consumerName, &consumerConfig)
 
 	channel := make(chan *nats.Msg, msgBufferSize)
-	_, err = natsClient.JetStrCtxt.ChanQueueSubscribe(topic, queueName, channel,
+	_, err := natsClient.JetStrCtxt.ChanQueueSubscribe(topic, queueName, channel,
 		nats.Durable(consumerName),
 		deliveryOption,
 		nats.ManualAck(),
-		nats.AckWait(ackWait),
+		nats.AckWait(ackWait), // if ackWait is 0 , nats sets this option to 30secs by default
 		nats.BindStream(streamName))
 	if err != nil {
 		impl.Logger.Fatalw("error while subscribing to nats ", "stream", streamName, "topic", topic, "error", err)
@@ -244,4 +215,38 @@ func (impl PubSubClientServiceImpl) getStreamConfig(streamName string) *nats.Str
 	}
 
 	return streamCfg
+}
+
+// Updates NATS Consumer config if new changes detected
+// if consumer didn't exist, this will just return
+func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, streamName string, consumerName string, overrideConfig *NatsConsumerConfig) {
+
+	// Get the current Consumer config from NATS-server
+	info, err := natsClient.JetStrCtxt.ConsumerInfo(streamName, consumerName)
+	if err != nil {
+		impl.Logger.Errorw("unable to retrieve consumer info from NATS-server", "stream", streamName, "consumer", consumerName, "err", err)
+		return
+	}
+
+	existingConfig := info.Config
+	updatesDetected := false
+
+	// Currently only checking for AckWait,MaxAckPending but can be done for other editable properties as well
+	if overrideConfig.AckWaitInSecs > 0 && existingConfig.AckWait != time.Duration(overrideConfig.AckWaitInSecs)*time.Second {
+		existingConfig.AckWait = time.Duration(overrideConfig.AckWaitInSecs) * time.Second
+		updatesDetected = true
+	}
+
+	if messageBufferSize := overrideConfig.GetNatsMsgBufferSize(); messageBufferSize > 0 && existingConfig.MaxAckPending != messageBufferSize {
+		existingConfig.MaxAckPending = messageBufferSize
+		updatesDetected = true
+	}
+
+	if updatesDetected {
+		_, err = natsClient.JetStrCtxt.UpdateConsumer(streamName, &existingConfig)
+		if err != nil {
+			impl.Logger.Errorw("failed to update Consumer config", "received consumer config", info.Config, "err", err)
+		}
+	}
+	return
 }
