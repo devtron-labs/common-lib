@@ -4,7 +4,8 @@ const PUBLISH_SUCCESS = "SUCCESS"
 const PUBLISH_FAILURE = "FAILURE"
 
 type PubSubMsg struct {
-	Data string
+	Data            string
+	MsgDeliverCount uint64
 }
 
 type LogsConfig struct {

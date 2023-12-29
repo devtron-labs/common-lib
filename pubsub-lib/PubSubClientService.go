@@ -172,7 +172,11 @@ func (impl PubSubClientServiceImpl) publishPanicError(msg *nats.Msg, panicErr er
 
 // TryCatchCallBack is a fail-safe method to use callback function
 func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback func(msg *model.PubSubMsg)) {
-	subMsg := &model.PubSubMsg{Data: string(msg.Data)}
+	var msgDeliveryCount uint64 = 0
+	if metadata, err := msg.Metadata(); err == nil {
+		msgDeliveryCount = metadata.NumDelivered
+	}
+	subMsg := &model.PubSubMsg{Data: string(msg.Data), MsgDeliverCount: msgDeliveryCount}
 	defer func() {
 		// Acknowledge the message delivery
 		err := msg.Ack()
