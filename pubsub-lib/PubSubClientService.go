@@ -9,6 +9,7 @@ import (
 	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
+	"k8s.io/utils/pointer"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -176,7 +177,9 @@ func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback fun
 	if metadata, err := msg.Metadata(); err == nil {
 		msgDeliveryCount = metadata.NumDelivered
 	}
-	subMsg := &model.PubSubMsg{Data: string(msg.Data), MsgDeliverCount: msgDeliveryCount}
+	var natsMsgId *string
+	natsMsgId = pointer.String(msg.Header.Get(model.NatsMsgId))
+	subMsg := &model.PubSubMsg{Data: string(msg.Data), MsgDeliverCount: msgDeliveryCount, MsgId: natsMsgId}
 	defer func() {
 		// Acknowledge the message delivery
 		err := msg.Ack()
