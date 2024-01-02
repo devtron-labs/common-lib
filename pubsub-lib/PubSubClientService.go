@@ -177,8 +177,7 @@ func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback fun
 	if metadata, err := msg.Metadata(); err == nil {
 		msgDeliveryCount = metadata.NumDelivered
 	}
-	var natsMsgId *string
-	natsMsgId = pointer.String(msg.Header.Get(model.NatsMsgId))
+	natsMsgId := pointer.String(msg.Header.Get(model.NatsMsgId))
 	subMsg := &model.PubSubMsg{Data: string(msg.Data), MsgDeliverCount: msgDeliveryCount, MsgId: natsMsgId}
 	defer func() {
 		// Acknowledge the message delivery
@@ -186,6 +185,7 @@ func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback fun
 		if err != nil {
 			impl.Logger.Errorw("nats: unable to acknowledge the message", "subject", msg.Subject, "msg", string(msg.Data))
 		}
+		metrics.NatsEventDeliveryCount.WithLabelValues(msg.Subject, *natsMsgId).Observe(float64(msgDeliveryCount))
 		// Panic recovery handling
 		if panicInfo := recover(); panicInfo != nil {
 			impl.Logger.Warnw("nats: found panic error", "subject", msg.Subject, "payload", string(msg.Data), "logs", string(debug.Stack()))
