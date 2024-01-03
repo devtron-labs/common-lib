@@ -15,9 +15,11 @@ import (
 )
 
 type ValidateMsg func(msg model.PubSubMsg) bool
+type LoggerFunc func(msg model.PubSubMsg) bool
+
 type PubSubClientService interface {
 	Publish(topic string, msg string) error
-	Subscribe(topic string, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg) bool, validations ...ValidateMsg) error
+	Subscribe(topic string, callback func(msg *model.PubSubMsg), loggerFunc LoggerFunc, validations ...ValidateMsg) error
 }
 
 type PubSubClientServiceImpl struct {
@@ -83,7 +85,7 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 // invokes callback(+required) func for each message received.
 // loggerFunc(+optional) is invoked before passing the message to the callback function.
 // validations(+optional) methods were called before passing the message to the callback func.
-func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg) bool, validations ...ValidateMsg) error {
+func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *model.PubSubMsg), loggerFunc LoggerFunc, validations ...ValidateMsg) error {
 	impl.Logger.Infow("Subscribed to pubsub client", "topic", topic)
 	natsTopic := GetNatsTopic(topic)
 	streamName := natsTopic.streamName
@@ -124,7 +126,7 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *m
 	return nil
 }
 
-func (impl PubSubClientServiceImpl) startListeningForEvents(processingBatchSize int, channel chan *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg) bool, validations ...ValidateMsg) {
+func (impl PubSubClientServiceImpl) startListeningForEvents(processingBatchSize int, channel chan *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc LoggerFunc, validations ...ValidateMsg) {
 	wg := new(sync.WaitGroup)
 
 	for index := 0; index < processingBatchSize; index++ {
@@ -135,7 +137,7 @@ func (impl PubSubClientServiceImpl) startListeningForEvents(processingBatchSize 
 	impl.Logger.Warn("msgs received Done from Nats side, going to end listening!!")
 }
 
-func (impl PubSubClientServiceImpl) processMessages(wg *sync.WaitGroup, channel chan *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg) bool, validations ...ValidateMsg) {
+func (impl PubSubClientServiceImpl) processMessages(wg *sync.WaitGroup, channel chan *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc LoggerFunc, validations ...ValidateMsg) {
 	defer wg.Done()
 	for msg := range channel {
 		impl.processMsg(msg, callback, loggerFunc, validations...)
@@ -143,7 +145,7 @@ func (impl PubSubClientServiceImpl) processMessages(wg *sync.WaitGroup, channel 
 }
 
 // TODO need to extend msg ack depending upon response from callback like error scenario
-func (impl PubSubClientServiceImpl) processMsg(msg *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg) bool, validations ...ValidateMsg) {
+func (impl PubSubClientServiceImpl) processMsg(msg *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc LoggerFunc, validations ...ValidateMsg) {
 	t1 := time.Now()
 	metrics.IncConsumingCount(msg.Subject)
 	defer metrics.IncConsumptionCount(msg.Subject)
@@ -177,7 +179,7 @@ func (impl PubSubClientServiceImpl) publishPanicError(msg *nats.Msg, panicErr er
 }
 
 // TryCatchCallBack is a fail-safe method to use callback function
-func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg) bool, validations ...ValidateMsg) {
+func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback func(msg *model.PubSubMsg), loggerFunc LoggerFunc, validations ...ValidateMsg) {
 	var msgDeliveryCount uint64 = 0
 	if metadata, err := msg.Metadata(); err == nil {
 		msgDeliveryCount = metadata.NumDelivered
@@ -186,7 +188,7 @@ func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback fun
 	subMsg := &model.PubSubMsg{Data: string(msg.Data), MsgDeliverCount: msgDeliveryCount, MsgId: natsMsgId}
 
 	// call loggersFunc
-	if logged := loggerFunc(subMsg); !logged {
+	if logged := loggerFunc(*subMsg); !logged {
 		impl.Logger.Debugw("processing nats message", "topic", msg.Subject, "msg", string(msg.Data))
 		return
 	}
