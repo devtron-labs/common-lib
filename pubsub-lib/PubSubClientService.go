@@ -9,13 +9,12 @@ import (
 	"github.com/devtron-labs/common-lib/utils"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
-	"k8s.io/utils/pointer"
 	"runtime/debug"
 	"sync"
 	"time"
 )
 
-type ValidateMsg func(msgId *string) bool
+type ValidateMsg func(msg model.PubSubMsg) bool
 type PubSubClientService interface {
 	Publish(topic string, msg string) error
 	Subscribe(topic string, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg), validations ...ValidateMsg) error
@@ -82,6 +81,7 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 // Subscribe method is used to subscribe to the given topic(+required),
 // this creates blocking process to continuously fetch messages from nats server published on this topic.
 // invokes callback(+required) func for each message received.
+// loggerFunc(+optional) is invoked before passing the message to the callback function.
 // validations(+optional) methods were called before passing the message to the callback func.
 func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *model.PubSubMsg), loggerFunc func(msg *model.PubSubMsg), validations ...ValidateMsg) error {
 	impl.Logger.Infow("Subscribed to pubsub client", "topic", topic)
@@ -183,18 +183,14 @@ func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback fun
 		msgDeliveryCount = metadata.NumDelivered
 	}
 	natsMsgId := msg.Header.Get(model.NatsMsgId)
-	var natsMsgIdPtr *string = nil
-	if natsMsgId != "" {
-		natsMsgIdPtr = pointer.String(natsMsgId)
-	}
-	subMsg := &model.PubSubMsg{Data: string(msg.Data), MsgDeliverCount: msgDeliveryCount, MsgId: natsMsgIdPtr}
+	subMsg := &model.PubSubMsg{Data: string(msg.Data), MsgDeliverCount: msgDeliveryCount, MsgId: natsMsgId}
 
 	// call loggersFunc
 	loggerFunc(subMsg)
 
 	// run validations
 	for _, validation := range validations {
-		if !validation(natsMsgIdPtr) {
+		if !validation(*subMsg) {
 			impl.Logger.Warnw("nats: message validation failed, not processing the message...", "subject", msg.Subject, "msg", string(msg.Data))
 			return
 		}
@@ -205,7 +201,12 @@ func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback fun
 		if err != nil {
 			impl.Logger.Errorw("nats: unable to acknowledge the message", "subject", msg.Subject, "msg", string(msg.Data))
 		}
-		metrics.NatsEventDeliveryCount.WithLabelValues(msg.Subject, natsMsgId).Observe(float64(msgDeliveryCount))
+
+		// publish metrics for msg delivery count if msgDeliveryCount > 1
+		if msgDeliveryCount > 1 {
+			metrics.NatsEventDeliveryCount.WithLabelValues(msg.Subject, natsMsgId).Observe(float64(msgDeliveryCount))
+		}
+
 		// Panic recovery handling
 		if panicInfo := recover(); panicInfo != nil {
 			impl.Logger.Warnw("nats: found panic error", "subject", msg.Subject, "payload", string(msg.Data), "logs", string(debug.Stack()))
@@ -259,8 +260,8 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 	updatesDetected := false
 
 	// Currently only checking for AckWait,MaxAckPending but can be done for other editable properties as well
-	if overrideConfig.AckWaitInSecs > 0 && existingConfig.AckWait != time.Duration(overrideConfig.AckWaitInSecs)*time.Second {
-		existingConfig.AckWait = time.Duration(overrideConfig.AckWaitInSecs) * time.Second
+	if ackWaitOverride := time.Duration(overrideConfig.AckWaitInSecs) * time.Second; ackWaitOverride > 0 && existingConfig.AckWait != ackWaitOverride {
+		existingConfig.AckWait = ackWaitOverride
 		updatesDetected = true
 	}
 
