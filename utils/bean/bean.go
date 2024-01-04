@@ -5,5 +5,5 @@ const (
 )
 
 const (
-	ErrNoCommitFound = "No commit found"
+	ErrNoCommitFound = "no commit found"
 )
