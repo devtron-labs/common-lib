@@ -285,7 +285,8 @@ func (impl PubSubClientServiceImpl) Log(loggerFunc LoggerFunc, topic string, sub
 	logMsg, metaSlice := loggerFunc(subMsg)
 	logMsg = fmt.Sprintf("%s:%s", NATS_MSG_LOG_PREFIX, logMsg)
 	if len(metaSlice) == 0 {
-		metaSlice = []interface{}{"topic", topic, "msgId", subMsg.MsgId, "msg", subMsg.Data}
+		metaSlice = []interface{}{"msgId", subMsg.MsgId, "msg", subMsg.Data}
 	}
+	metaSlice = append(metaSlice, "topic", topic)
 	impl.Logger.Infow(logMsg, metaSlice...)
 }
