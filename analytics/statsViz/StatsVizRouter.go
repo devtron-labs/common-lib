@@ -26,10 +26,11 @@ type StatsVizRouterImpl struct {
 	config *StatVizConfig
 }
 
-func NewStatsVizRouter(logger *zap.SugaredLogger, config *StatVizConfig) *StatsVizRouterImpl {
+func NewStatsVizRouter(logger *zap.SugaredLogger) *StatsVizRouterImpl {
+	cfg, _ := GetStatsVizConfig()
 	return &StatsVizRouterImpl{
 		logger: logger,
-		config: config,
+		config: cfg,
 	}
 }
 
