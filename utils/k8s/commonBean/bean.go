@@ -116,10 +116,6 @@ const (
 	EvictionSubresource = "pods/eviction"
 )
 
-const (
-	ErrNoCommitFound = "No commit found"
-)
-
 // constants starts
 var podsGvrAndScope = GvrAndScope{Gvr: schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}, Scope: meta.RESTScopeNameNamespace}
 var replicaSetGvrAndScope = GvrAndScope{Gvr: schema.GroupVersionResource{Group: "apps", Version: "v1", Resource: "replicasets"}, Scope: meta.RESTScopeNameNamespace}
