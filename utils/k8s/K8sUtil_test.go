@@ -23,7 +23,7 @@ import (
 	"testing"
 )
 
-var k8sUtilClient *K8sUtil
+var k8sUtilClient *K8sServiceImpl
 var clusterConfig *ClusterConfig
 
 func init() {
@@ -62,11 +62,11 @@ func TestK8sUtil_checkIfNsExists(t *testing.T) {
 			k8s, _ := impl.GetCoreV1Client(clusterConfig)
 			gotExists, err := impl.CheckIfNsExists(tt.namespace, k8s)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("K8sUtil.checkIfNsExists() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("K8sServiceImpl.checkIfNsExists() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if gotExists != tt.wantExists {
-				t.Errorf("K8sUtil.checkIfNsExists() = %v, want %v", gotExists, tt.wantExists)
+				t.Errorf("K8sServiceImpl.checkIfNsExists() = %v, want %v", gotExists, tt.wantExists)
 			}
 		})
 	}
@@ -89,11 +89,11 @@ func TestK8sUtil_CreateNsIfNotExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			impl := k8sUtilClient
 			if err := impl.CreateNsIfNotExists(tt.namespace, clusterConfig); (err != nil) != tt.wantErr {
-				t.Errorf("K8sUtil.CreateNsIfNotExists() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("K8sServiceImpl.CreateNsIfNotExists() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			k8s, _ := impl.GetCoreV1Client(clusterConfig)
 			if err := impl.deleteNs(tt.namespace, k8s); (err != nil) != tt.wantErr {
-				t.Errorf("K8sUtil.deleteNs() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("K8sServiceImpl.deleteNs() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
