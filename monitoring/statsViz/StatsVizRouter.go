@@ -38,7 +38,8 @@ func (r *StatsVizRouterImpl) InitStatsVizRouter(router *mux.Router) {
 	if !r.config.EnableStatsviz {
 		return
 	}
-	stvServer, _ := statsviz.NewServer()
-	router.Path("/{service}/debug/statsviz/ws").Name("GET /debug/statsviz/ws").Handler(stvServer.Ws())
-	router.Path("/{service}/debug/statsviz/").Name("GET /debug/statsviz/").Handler(stvServer.Index())
+	stvServer, _ := statsviz.NewServer(statsviz.Root("/kubewatch/debug/statsviz"))
+
+	router.Path("/debug/statsviz/ws").Name("GET /debug/statsviz/ws").Handler(stvServer.Ws())
+	router.Path("/debug/statsviz/").Name("GET /debug/statsviz/").Handler(stvServer.Index())
 }
