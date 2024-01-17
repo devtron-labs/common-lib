@@ -39,6 +39,6 @@ func (r *StatsVizRouterImpl) InitStatsVizRouter(router *mux.Router) {
 		return
 	}
 	stvServer, _ := statsviz.NewServer()
-	router.Path("/debug/statsviz/ws").Name("GET /debug/statsviz/ws").HandlerFunc(stvServer.Ws())
+	router.Path("/debug/statsviz/ws").Name("GET /debug/statsviz/ws").Handler(stvServer.Ws())
 	router.Path("/debug/statsviz/").Name("GET /debug/statsviz/").Handler(stvServer.Index())
 }
