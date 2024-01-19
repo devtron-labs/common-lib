@@ -135,7 +135,6 @@ type K8sService interface {
 	GetResourceIf(restConfig *rest.Config, groupVersionKind schema.GroupVersionKind) (resourceIf dynamic.NamespaceableResourceInterface, namespaced bool, err error)
 	FetchConnectionStatusForCluster(k8sClientSet *kubernetes.Clientset) error
 	CreateK8sClientSet(restConfig *rest.Config) (*kubernetes.Clientset, error)
-	ResolveResourceReferences(un *unstructured.Unstructured) ([]metav1.OwnerReference, func(ResourceKey) bool)
 }
 
 func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) *K8sServiceImpl {
@@ -1593,7 +1592,7 @@ func isServiceAccountTokenSecret(un *unstructured.Unstructured) (bool, metav1.Ow
 	return ref.Name != "" && ref.UID != "", ref
 }
 
-func (impl K8sServiceImpl) ResolveResourceReferences(un *unstructured.Unstructured) ([]metav1.OwnerReference, func(ResourceKey) bool) {
+func ResolveResourceReferences(un *unstructured.Unstructured) ([]metav1.OwnerReference, func(ResourceKey) bool) {
 	var isInferredParentOf func(_ ResourceKey) bool
 	ownerRefs := un.GetOwnerReferences()
 	gvk := un.GroupVersionKind()
