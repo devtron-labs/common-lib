@@ -28,6 +28,7 @@ const (
 	Port                         = "port"
 	Subsets                      = "subsets"
 	Nodes                        = "nodes"
+	Template                     = "template"
 )
 
 const (
