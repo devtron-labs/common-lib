@@ -38,7 +38,10 @@ func (r *StatsVizRouterImpl) InitStatsVizRouter(router *mux.Router, servicePrefi
 	if !r.config.EnableStatsviz {
 		return
 	}
-	stvServer, _ := statsviz.NewServer(statsviz.Root(servicePrefix + "/debug/statsviz"))
+	stvServer, err := statsviz.NewServer(statsviz.Root(servicePrefix + "/debug/statsviz"))
+	if err != nil {
+		r.logger.Errorw("statsviz error", "err", err)
+	}
 
 	router.Path("/debug/statsviz/ws").Name("GET /debug/statsviz/ws").HandlerFunc(stvServer.Ws())
 	router.PathPrefix("/debug/statsviz/").Name("GET /debug/statsviz/").Handler(stvServer.Index())
