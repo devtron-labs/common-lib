@@ -1,7 +1,6 @@
 package pubsub_lib
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/devtron-labs/common-lib/pubsub-lib/model"
@@ -22,13 +21,16 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 
 	const payload = "stop-msg"
 
-	//t.SkipNow()
+	// t.SkipNow()
 	t.Run("PubAndSub", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
 		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
 			fmt.Println("Data received:", msg.Data)
-		})
+		},
+			func(msg *model.PubSubMsg) {
+
+			})
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
@@ -44,7 +46,10 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
 		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
 			fmt.Println("Data received:", msg.Data)
-		})
+		},
+			func(msg *model.PubSubMsg) {
+
+			})
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
@@ -62,7 +67,10 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 			lock.Unlock()
 			fmt.Println(time.Now(), "Data received:", msg.Data, " count", Consumed_Counter)
 			time.Sleep(1 * time.Second)
-		})
+		},
+			func(msg *model.PubSubMsg) {
+
+			})
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
@@ -117,7 +125,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 			atomic.AddUint64(&msgId, 1)
 			msg := "published Msg " + strconv.FormatUint(msgId, 10)
 			channel <- msg
-			//time.Sleep(1 * time.Second)
+			// time.Sleep(1 * time.Second)
 		}
 		wg.Wait()
 	})
@@ -129,38 +137,20 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		if err != nil {
 			log.Fatal("error occurred while parsing nats client config", "err", err)
 		}
-		var defaultStreamConfig = StreamConfig{}
-		_ = json.Unmarshal([]byte(config.NatsStreamConfig), &defaultStreamConfig)
+		var defaultStreamConfig = config.GetDefaultNatsStreamConfig()
 		for _, streamWiseConfig := range NatsStreamWiseConfigMapping {
-			assert.Equal(t, defaultStreamConfig, streamWiseConfig.StreamConfig)
+			assert.Equal(t, defaultStreamConfig.StreamConfig, streamWiseConfig.StreamConfig)
 		}
 
-		var defaultConsumerConfig = NatsConsumerConfig{
-			NatsMsgBufferSize:          config.NatsMsgBufferSize,
-			NatsMsgProcessingBatchSize: config.NatsMsgProcessingBatchSize,
-		}
+		var defaultConsumerConfig = config.GetDefaultNatsConsumerConfig()
 
-		defaultConsumerConfigForBulkCdTrigger := defaultConsumerConfig
-		err = json.Unmarshal([]byte(config.NatsConsumerConfig), &defaultConsumerConfigForBulkCdTrigger)
-
-		if err != nil {
-			log.Print("error in unmarshalling nats consumer config",
-				"consumer-config", config.NatsConsumerConfig,
-				"err", err)
-		}
-
-		for key, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
-
-			if key == BULK_DEPLOY_DURABLE {
-				assert.Equal(t, defaultConsumerConfigForBulkCdTrigger, consumerWiseConfig)
-				continue
-			}
+		for _, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
 			assert.Equal(t, defaultConsumerConfig, consumerWiseConfig)
 		}
 	})
 
 	t.Run("StreamWiseAndConsumerWiseConfig with json configs", func(t *testing.T) {
-		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"max_age\":90000}},\"CI-RUNNER\":{\"streamConfig\":{\"max_age\":90000}},\"KUBEWATCH\":{\"streamConfig\":{\"max_age\":90000,\"abc\":\"123\"}}}")
+		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"max_age\":900000000000}},\"CI-RUNNER\":{\"streamConfig\":{\"max_age\":90000000000}},\"KUBEWATCH\":{\"streamConfig\":{\"max_age\":90000000000,\"abc\":\"123\"}}}")
 		fmt.Println(err)
 		err = os.Setenv("CONSUMER_CONFIG_JSON", "{\"ARGO_PIPELINE_STATUS_UPDATE_DURABLE-1\":{\"natsMsgProcessingBatchSize\":3,\"natsMsgBufferSize\":64},\"CI-SCAN-DURABLE-1\":{\"natsMsgProcessingBatchSize\":4,\"natsMsgBufferSize\":64}}")
 		fmt.Println(err)
@@ -171,29 +161,18 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		if err != nil {
 			log.Fatal("error occurred while parsing nats client config", "err", err)
 		}
-		var defaultStreamConfig = StreamConfig{}
-		_ = json.Unmarshal([]byte(config.NatsStreamConfig), &defaultStreamConfig)
+		var defaultStreamConfig = config.GetDefaultNatsStreamConfig()
 		for streamName, streamWiseConfig := range NatsStreamWiseConfigMapping {
-			if streamName == GIT_SENSOR_STREAM || streamName == IMAGE_SCANNER_STREAM {
-				assert.Equal(t, defaultStreamConfig, streamWiseConfig.StreamConfig)
+			if streamName == ORCHESTRATOR_STREAM || streamName == KUBEWATCH_STREAM || streamName == CI_RUNNER_STREAM {
+				assert.NotEqual(t, defaultStreamConfig.StreamConfig, streamWiseConfig.StreamConfig)
 			} else {
-				assert.NotEqual(t, defaultStreamConfig, streamWiseConfig.StreamConfig)
+				assert.Equal(t, defaultStreamConfig.StreamConfig, streamWiseConfig.StreamConfig)
 			}
 		}
 
-		var defaultConsumerConfig = NatsConsumerConfig{
-			NatsMsgBufferSize:          config.NatsMsgBufferSize,
-			NatsMsgProcessingBatchSize: config.NatsMsgProcessingBatchSize,
-		}
+		var defaultConsumerConfig = config.GetDefaultNatsConsumerConfig()
 
 		defaultConsumerConfigForBulkCdTrigger := defaultConsumerConfig
-		err = json.Unmarshal([]byte(config.NatsConsumerConfig), &defaultConsumerConfigForBulkCdTrigger)
-
-		if err != nil {
-			log.Print("error in unmarshalling nats consumer config",
-				"consumer-config", config.NatsConsumerConfig,
-				"err", err)
-		}
 
 		for consumerName, consumerWiseConfig := range NatsConsumerWiseConfigMapping {
 			if consumerName == ARGO_PIPELINE_STATUS_UPDATE_DURABLE || consumerName == TOPIC_CI_SCAN_DURABLE {
