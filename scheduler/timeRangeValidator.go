@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (tr TimeRange) validate() error {
+func (tr TimeRange) validateTimeRange() error {
 	colonCount := strings.Count(tr.HourMinuteFrom, ":")
 	if colonCount != 1 {
 		return errors.New("invalid format: must contain exactly one colon")
