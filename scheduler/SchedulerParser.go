@@ -21,52 +21,48 @@ func NewScheduleParser(logger *zap.SugaredLogger) *ScheduleParserImpl {
 
 //todo have to add start and end time
 
-func (impl *ScheduleParserImpl) GetScheduleSpec(targetTime time.Time, timeRange TimeRange) (time.Time, time.Time, bool) {
-	var windowStart, windowEnd time.Time
-	var isTimeBetween bool
+func (impl *ScheduleParserImpl) GetScheduleSpec(targetTime time.Time, timeRange TimeRange) (nextWindowEdge time.Time, isTimeBetween bool) {
+	var windowEnd time.Time
 	err := timeRange.validateTimeRange()
 	if err != nil {
 		impl.logger.Errorw("error in validating timeRange fields", "err", err)
-		return windowStart, windowEnd, false
+		return nextWindowEdge, false
 	}
 	if timeRange.Frequency == FIXED {
-		windowStart, windowEnd, isTimeBetween = getScheduleForFixedTime(targetTime, timeRange)
-		return windowStart, windowEnd, isTimeBetween
+		nextWindowEdge, isTimeBetween = getScheduleForFixedTime(targetTime, timeRange)
+		return nextWindowEdge, isTimeBetween
 	}
 	parser := cron.NewParser(CRON)
 	schedule, err := parser.Parse(timeRange.getCron())
 	if err != nil {
 		impl.logger.Errorw("error in getting schedule", "err", err)
-		return windowStart, windowEnd, false
+		return nextWindowEdge, false
 	}
 	duration, err := timeRange.getDuration(targetTime.Month(), targetTime.Year())
 	if err != nil {
 		impl.logger.Errorw("error in getting duration", "err", err)
-		return windowStart, windowEnd, false
+		return nextWindowEdge, false
 	}
 	timeMinusDuration := targetTime.Add(-1 * duration)
-	windowStart = schedule.Next(timeMinusDuration)
+	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
-	return windowStart, windowEnd, isTimeInBetween(targetTime, windowStart, windowEnd)
+	if isTimeInBetween(targetTime, windowStart, windowEnd) {
+		return windowEnd, true
+	}
+	return windowStart, false
 }
 
-func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, time.Time, bool) {
-	var windowStart, windowEnd time.Time
+func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, bool) {
+	var windowStartOrEnd time.Time
 
 	if targetTime.After(timeRange.TimeTo) {
-		return windowStart, windowEnd, false
+		return windowStartOrEnd, false
+	} else if targetTime.Before(timeRange.TimeFrom) {
+		return timeRange.TimeFrom, false
+	} else if targetTime.Before(timeRange.TimeTo) && targetTime.After(timeRange.TimeFrom) {
+		return timeRange.TimeTo, true
 	}
-	if targetTime.Before(timeRange.TimeFrom) {
-		return timeRange.TimeFrom, windowEnd, false
-	}
-	if targetTime.Before(timeRange.TimeTo) && targetTime.After(timeRange.TimeFrom) {
-		return windowStart, windowEnd, true
-	}
-	if targetTime.Before(timeRange.TimeTo) {
-		return windowStart, timeRange.TimeTo, false
-	}
-
-	return windowStart, windowEnd, false
+	return windowStartOrEnd, false
 }
 
 func isTimeInBetween(timeCurrent, periodStart, periodEnd time.Time) bool {
