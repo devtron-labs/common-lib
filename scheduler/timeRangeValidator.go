@@ -7,9 +7,11 @@ import (
 )
 
 func (tr TimeRange) validateTimeRange() error {
-	colonCount := strings.Count(tr.HourMinuteFrom, ":")
-	if colonCount != 1 {
-		return errors.New("invalid format: must contain exactly one colon")
+	if tr.Frequency != FIXED {
+		colonCount := strings.Count(tr.HourMinuteFrom, ":")
+		if colonCount != 1 {
+			return errors.New("invalid format: must contain exactly one colon")
+		}
 	}
 	switch tr.Frequency {
 	case FIXED:

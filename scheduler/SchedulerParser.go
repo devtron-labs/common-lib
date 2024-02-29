@@ -3,44 +3,32 @@ package scheduler
 import (
 	"fmt"
 	"github.com/robfig/cron/v3"
-	"go.uber.org/zap"
 	"strconv"
 	"time"
 )
 
-type ScheduleParserImpl struct {
-	logger *zap.SugaredLogger
-}
-type ScheduleParser interface {
-	GetScheduleSpec(targetTime time.Time, timeRange TimeRange) (time.Time, time.Time, bool)
-}
-
-func NewScheduleParser(logger *zap.SugaredLogger) *ScheduleParserImpl {
-	return &ScheduleParserImpl{logger: logger}
-}
-
 //todo have to add start and end time
 
-func (impl *ScheduleParserImpl) GetScheduleSpec(targetTime time.Time, timeRange TimeRange) (nextWindowEdge time.Time, isTimeBetween bool) {
+func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.Time, isTimeBetween bool) {
 	var windowEnd time.Time
-	err := timeRange.validateTimeRange()
+	err := tr.validateTimeRange()
 	if err != nil {
-		impl.logger.Errorw("error in validating timeRange fields", "err", err)
+		//impl.logger.Errorw("error in validating timeRange fields", "err", err)
 		return nextWindowEdge, false
 	}
-	if timeRange.Frequency == FIXED {
-		nextWindowEdge, isTimeBetween = getScheduleForFixedTime(targetTime, timeRange)
+	if tr.Frequency == FIXED {
+		nextWindowEdge, isTimeBetween = getScheduleForFixedTime(targetTime, tr)
 		return nextWindowEdge, isTimeBetween
 	}
 	parser := cron.NewParser(CRON)
-	schedule, err := parser.Parse(timeRange.getCron())
+	schedule, err := parser.Parse(tr.getCron())
 	if err != nil {
-		impl.logger.Errorw("error in getting schedule", "err", err)
+		//impl.logger.Errorw("error in getting schedule", "err", err)
 		return nextWindowEdge, false
 	}
-	duration, err := timeRange.getDuration(targetTime.Month(), targetTime.Year())
+	duration, err := tr.getDuration(targetTime.Month(), targetTime.Year())
 	if err != nil {
-		impl.logger.Errorw("error in getting duration", "err", err)
+		//impl.logger.Errorw("error in getting duration", "err", err)
 		return nextWindowEdge, false
 	}
 	timeMinusDuration := targetTime.Add(-1 * duration)
