@@ -36,13 +36,7 @@ type ClusterConfig struct {
 	CertData                        string
 	CAData                          string
 	ClusterId                       int
-	ProxyUrl                        string
 	ToConnectForClusterVerification bool
-	ToConnectWithSSHTunnel          bool
-	SSHTunnelUser                   string
-	SSHTunnelPassword               string
-	SSHTunnelAuthKey                string
-	SSHTunnelServerAddress          string
 	ServerConnectionConfig          *bean.ServerConnectionConfigBean
 }
 
