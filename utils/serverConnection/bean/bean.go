@@ -38,6 +38,6 @@ type RegistryConfig struct {
 	RegistryUsername string
 	RegistryPassword string
 	ConnectionMethod ConnectionMethod
-	ProxyConfig      ProxyConfig
-	SSHConfig        SSHTunnelConfig
+	ProxyConfig      *ProxyConfig
+	SSHConfig        *SSHTunnelConfig
 }
