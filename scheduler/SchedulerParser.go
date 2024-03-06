@@ -4,45 +4,80 @@ import (
 	"fmt"
 	"github.com/robfig/cron/v3"
 	"strconv"
+	"strings"
 	"time"
 )
 
-//todo have to add start and end time
+func (tr TimeRange) isCyclic() bool {
+	dayFrom := tr.DayFrom
+	dayTo := tr.DayTo
+	if dayFrom > 0 && dayTo > 0 && dayTo < dayFrom {
+		return true
+	} else if dayFrom < 0 && dayTo > 0 {
+		return true
+	}
+	return false
+}
 
-func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.Time, isTimeBetween bool) {
+func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.Time, isTimeBetween bool, err error) {
 	var windowEnd time.Time
-	err := tr.validateTimeRange()
+	err = tr.ValidateTimeRange()
 	if err != nil {
-		//impl.logger.Errorw("error in validating timeRange fields", "err", err)
-		return nextWindowEdge, false
+		return nextWindowEdge, false, err
 	}
 	if tr.Frequency == FIXED {
 		nextWindowEdge, isTimeBetween = getScheduleForFixedTime(targetTime, tr)
-		return nextWindowEdge, isTimeBetween
+		return nextWindowEdge, isTimeBetween, err
+	}
+	month := targetTime.Month()
+	year := targetTime.Year()
+	day := targetTime.Day()
+	cronExp := tr.getCron()
+	if day >= 1 && day < tr.DayTo && tr.isCyclic() {
+		if month == 1 {
+			month = 12
+			year = year - 1
+		} else {
+			month = month - 1
+		}
+	}
+	lastDayOfMonth := getLastDayOfMonth(year, month, time.Now().Local())
+	if strings.Contains(cronExp, "L-2") {
+		lastDayOfMonth = lastDayOfMonth - 2
+		cronExp = strings.Replace(cronExp, "L-2", intToString(lastDayOfMonth), -1)
+	} else if strings.Contains(cronExp, "L-1") {
+		lastDayOfMonth = lastDayOfMonth - 1
+		cronExp = strings.Replace(cronExp, "L-1", intToString(lastDayOfMonth), -1)
+	} else {
+		cronExp = strings.Replace(cronExp, "L", intToString(lastDayOfMonth), -1)
 	}
 	parser := cron.NewParser(CRON)
-	schedule, err := parser.Parse(tr.getCron())
+	schedule, err := parser.Parse(cronExp)
 	if err != nil {
-		//impl.logger.Errorw("error in getting schedule", "err", err)
-		return nextWindowEdge, false
+		return nextWindowEdge, false, err
 	}
-	duration, err := tr.getDuration(targetTime.Month(), targetTime.Year())
+
+	duration, err := tr.getDuration(month, year)
 	if err != nil {
-		//impl.logger.Errorw("error in getting duration", "err", err)
-		return nextWindowEdge, false
+		return nextWindowEdge, false, err
 	}
 	timeMinusDuration := targetTime.Add(-1 * duration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
-	if isTimeInBetween(targetTime, windowStart, windowEnd) {
-		return windowEnd, true
+	if !tr.TimeFrom.IsZero() && windowStart.Before(tr.TimeFrom) {
+		windowStart = tr.TimeFrom
 	}
-	return windowStart, false
+	if !tr.TimeTo.IsZero() && windowEnd.After(tr.TimeTo) {
+		windowEnd = tr.TimeTo
+	}
+	if isTimeInBetween(targetTime, windowStart, windowEnd) {
+		return windowEnd, true, err
+	}
+	return windowStart, false, err
 }
 
 func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, bool) {
 	var windowStartOrEnd time.Time
-
 	if targetTime.After(timeRange.TimeTo) {
 		return windowStartOrEnd, false
 	} else if targetTime.Before(timeRange.TimeFrom) {
@@ -73,27 +108,26 @@ func getDurationForHourMinute(timeRange TimeRange) (time.Duration, error) {
 	return parsedHourTo.Sub(parsedHourFrom), nil
 }
 
-// todo check for range of  week days
 func getDurationBetweenWeekdays(timeRange TimeRange) (time.Duration, error) {
-	now := time.Now()
 	weekdayFrom := timeRange.WeekdayFrom
 	weekdayTo := timeRange.WeekdayTo
 	if (weekdayFrom < 0 || weekdayFrom > 6) || (weekdayTo < 0 || weekdayTo > 6) {
 		return 0, fmt.Errorf("one or both of the values are outside the range of 0 to 6")
 	}
 	days := calculateDaysBetweenWeekdays(int(timeRange.WeekdayFrom), int(timeRange.WeekdayTo))
-	fromDateTime, err := constructDateTime(timeRange.HourMinuteFrom, now, 0)
+	fromDateTime, err := constructDateTime(timeRange.HourMinuteFrom, 0)
 	if err != nil {
 		return 0, fmt.Errorf("error in constructing fromDateTime: %s", err)
 	}
-	toDateTime, err := constructDateTime(timeRange.HourMinuteTo, now, days)
+	toDateTime, err := constructDateTime(timeRange.HourMinuteTo, days)
 	if err != nil {
 		return 0, fmt.Errorf("error in constructing toDateTime: %s", err)
 	}
 	return toDateTime.Sub(fromDateTime), nil
 }
 
-func constructDateTime(hourMinute string, now time.Time, days int) (time.Time, error) {
+func constructDateTime(hourMinute string, days int) (time.Time, error) {
+	now := time.Now()
 	dateTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	fromHour, err := strconv.Atoi(getHour(hourMinute))
 	if err != nil {
@@ -107,20 +141,19 @@ func constructDateTime(hourMinute string, now time.Time, days int) (time.Time, e
 	return dateTime, nil
 }
 func getDurationBetweenWeekDates(timeRange TimeRange, targetMonth time.Month, targetYear int) (time.Duration, error) {
-	now := time.Now()
-	days := getDaysCountForNegativeDays(timeRange, targetMonth, targetYear, now)
+
+	days := getDaysCountForNegativeDays(timeRange, targetMonth, targetYear)
 	if timeRange.DayFrom > 0 && timeRange.DayTo > 0 && timeRange.DayFrom < timeRange.DayTo {
 		days = (timeRange.DayTo) - (timeRange.DayFrom)
 	}
-	fromDateTime, err := constructDateTime(timeRange.HourMinuteFrom, now, 0)
+	fromDateTime, err := constructDateTime(timeRange.HourMinuteFrom, 0)
 	if err != nil {
 		return 0, fmt.Errorf("error in constructing fromDateTime: %s", err)
 	}
-	toDateTime, err := constructDateTime(timeRange.HourMinuteTo, now, days)
+	toDateTime, err := constructDateTime(timeRange.HourMinuteTo, days)
 	if err != nil {
 		return 0, fmt.Errorf("error in constructing toDateTime: %s", err)
 	}
-	//todo have to check here if we got negative duration we have to return error
 	duration := toDateTime.Sub(fromDateTime)
 	if duration < 0 {
 		return 0, fmt.Errorf("hourMinuteFrom: %s or hourMinuteTo: %s is not valid", timeRange.HourMinuteFrom, timeRange.HourMinuteTo)
@@ -128,10 +161,10 @@ func getDurationBetweenWeekDates(timeRange TimeRange, targetMonth time.Month, ta
 	return duration, nil
 }
 
-// todo not handled for december case
-func getDaysCountForNegativeDays(timeRange TimeRange, targetMonth time.Month, targetYear int, now time.Time) int {
+func getDaysCountForNegativeDays(timeRange TimeRange, targetMonth time.Month, targetYear int) int {
 	var days int
 	var start, end time.Time
+	now := time.Now()
 	if timeRange.DayTo < timeRange.DayFrom {
 		if timeRange.DayFrom > 0 {
 			//27 , -2 april , 27, 28, 29
@@ -141,7 +174,7 @@ func getDaysCountForNegativeDays(timeRange TimeRange, targetMonth time.Month, ta
 		} else {
 			//-2 ,-4 april 29,30,1,.....28 may
 			timeRange.DayFrom, _ = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear, now)
-			timeRange.DayTo, _ = adjustDaysForMonth(timeRange.DayTo, targetMonth+2, targetYear, now)
+			timeRange.DayTo, _ = adjustDaysForMonth(timeRange.DayTo, targetMonth+1, targetYear, now)
 			start, end = getStartAndEndTime(timeRange, targetMonth, now)
 		}
 	} else if timeRange.DayTo > timeRange.DayFrom {
@@ -149,7 +182,7 @@ func getDaysCountForNegativeDays(timeRange TimeRange, targetMonth time.Month, ta
 		if timeRange.DayTo < 0 {
 			var lastDayOfMonth int
 			timeRange.DayFrom, lastDayOfMonth = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear, now)
-			timeRange.DayFrom = lastDayOfMonth + timeRange.DayFrom + 1
+			timeRange.DayTo = lastDayOfMonth + timeRange.DayTo + 1
 			start, end = getStartAndEndTime(timeRange, targetMonth, now)
 		} else {
 			//-2 , 4  april 29 , 30 , 1, 2,3,4 output 5
@@ -161,11 +194,10 @@ func getDaysCountForNegativeDays(timeRange TimeRange, targetMonth time.Month, ta
 	return days
 }
 
-// todo have to handle for december case
 func getStartAndEndTime(timeRange TimeRange, targetMonth time.Month, now time.Time) (time.Time, time.Time) {
 	start := getStartDate(timeRange, targetMonth, now)
 	end := getEndDate(timeRange, targetMonth, now)
-	if end.Day() < start.Day() && end.Month() < start.Month() {
+	if end.Day() < start.Day() && end.Month() == start.Month() && end.Year() == start.Year() {
 		end = getEndDate(timeRange, targetMonth+1, now)
 	}
 	return start, end
@@ -179,7 +211,15 @@ func getStartDate(timeRange TimeRange, targetMonth time.Month, now time.Time) ti
 	return time.Date(now.Year(), targetMonth, timeRange.DayFrom, 0, 0, 0, 0, now.Location())
 }
 func adjustDaysForMonth(day int, targetMonth time.Month, targetYear int, now time.Time) (int, int) {
+	lastDayOfMonth := getLastDayOfMonth(targetYear, targetMonth, now)
+	if day > 0 {
+		return lastDayOfMonth + day, lastDayOfMonth
+	}
+	return lastDayOfMonth + day + 1, lastDayOfMonth
+}
+
+func getLastDayOfMonth(targetYear int, targetMonth time.Month, now time.Time) int {
 	firstDayOfNextMonth := time.Date(targetYear, targetMonth+1, 1, 0, 0, 0, 0, now.Location())
 	lastDayOfMonth := firstDayOfNextMonth.Add(-time.Hour * 24).Day()
-	return lastDayOfMonth + day + 1, lastDayOfMonth
+	return lastDayOfMonth
 }

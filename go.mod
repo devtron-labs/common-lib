@@ -19,6 +19,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.44.0
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
 	google.golang.org/api v0.114.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.24.2

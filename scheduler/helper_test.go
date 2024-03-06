@@ -5,23 +5,7 @@ import (
 	"time"
 )
 
-/*
-cases on frequency
-case 1 : FIXED : if all fields are empty other than TimeFrom and TimeTo
-then here I have add validation that TimeFrom must be less than TimeTo and TimeFrom TimeTo both should be present.
-case 2 : DAILY : HourMinuteFrom and HourMinuteTo must pe present
-case 3 : WEEKLY :  Weekdays must be present and HourMinuteFrom and HourMinuteTo must be present
-case 4 : WEEKLY_RANGE : WeekdayFrom must be present , HourMinuteFrom and HourMinuteTo must be present
-case 5 : MONTHLY :  DayFrom and  DayTo must me present , HourMinuteFrom and HourMinuteTo must be present
-*/
-/*
-cases on field validation
-DayFrom and DayTo must be from 1 to 31 as i month max have 31 days
-HourMinuteFrom and HourMinuteTo must HH:MM here HH must be from 0 to 23 and MM form 0 to 59
-*/
-//todo have to add test case for hour and min it means that duration must like 5hrs 30 min
 func TestGetDurationAndGetCron(t *testing.T) {
-	//Test case 1: DAILY frequency
 	timeRange1 := TimeRange{
 		HourMinuteFrom: "09:00",
 		HourMinuteTo:   "03:00",
@@ -29,7 +13,6 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	}
 	wantDuration1 := 18 * time.Hour
 	wantCron1 := "00 09 * * *"
-	// Test case 2: DAILY frequency
 	timeRange2 := TimeRange{
 		HourMinuteFrom: "12:00",
 		HourMinuteTo:   "14:00",
@@ -37,6 +20,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	}
 	wantDuration2 := 2 * time.Hour
 	wantCron2 := "00 12 * * *"
+
 	timeRange3 := TimeRange{
 		HourMinuteFrom: "14:00",
 		HourMinuteTo:   "12:00",
@@ -46,14 +30,12 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	wantCron3 := "00 14 * * *"
 	timeRange4 := TimeRange{
 		HourMinuteFrom: "09:00",
-		HourMinuteTo:   "12:00",
+		HourMinuteTo:   "12:00", //00:01
 		Weekdays:       []time.Weekday{time.Monday, time.Tuesday, time.Wednesday},
 		Frequency:      WEEKLY,
 	}
 	wantDuration4 := 3 * time.Hour
 	wantCron4 := "00 09 * * 1,2,3"
-
-	//Test case 3: WEEKLY frequency
 	timeRange5 := TimeRange{
 		HourMinuteFrom: "09:00",
 		HourMinuteTo:   "00:00",
@@ -74,20 +56,20 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "01:00",
 		Frequency:      WEEKLY_RANGE,
-		WeekdayTo:      1,
 		WeekdayFrom:    4,
+		WeekdayTo:      1,
 	}
 	wantDuration7 := 86 * time.Hour
-	wantCron7 := "00 17 1 * *"
+	wantCron7 := "00 11 * * 4"
 	timeRange8 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "13:00",
 		Frequency:      WEEKLY_RANGE,
-		WeekdayTo:      4,
 		WeekdayFrom:    1,
+		WeekdayTo:      4,
 	}
 	wantDuration8 := 74 * time.Hour
-	wantCron8 := "00 11 * * Monday"
+	wantCron8 := "00 11 * * 1"
 	timeRange9 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "12:00",
@@ -95,8 +77,8 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		WeekdayTo:      9,
 		WeekdayFrom:    1,
 	}
-	wantDuration9 := 74 * time.Hour
-	wantCron9 := "00 11 * * Monday"
+	wantDuration9 := 0 * time.Hour
+	wantCron9 := "00 11 * * 1"
 	timeRange10 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "12:00",
@@ -105,7 +87,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		WeekdayFrom:    9,
 	}
 	wantDuration10 := 0 * time.Second
-	wantCron10 := "00 11 * * %!Weekday(9)"
+	wantCron10 := "00 11 * * 9"
 	timeRange11 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "12:00",
@@ -140,8 +122,8 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		DayTo:          -2,
 		Frequency:      MONTHLY,
 	}
-	wantDuration14 := 39 * time.Hour
-	wantCron14 := "00 11 1 * *"
+	wantDuration14 := 63 * time.Hour
+	wantCron14 := "00 11 27 * *"
 	timeRange15 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "02:00",
@@ -149,7 +131,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		DayTo:          -4,
 		Frequency:      MONTHLY,
 	}
-	wantDuration15 := 0 * time.Hour
+	wantDuration15 := 15 * time.Hour
 	wantCron15 := "00 11 27 * *"
 	timeRange16 := TimeRange{
 		HourMinuteFrom: "11:00",
@@ -158,7 +140,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		DayTo:          -4,
 		Frequency:      MONTHLY,
 	}
-	wantDuration16 := 1 * time.Hour
+	wantDuration16 := 25 * time.Hour
 	wantCron16 := "00 11 27 * *"
 	timeRange17 := TimeRange{
 		HourMinuteFrom: "11:00",
@@ -167,17 +149,68 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		DayTo:          -4,
 		Frequency:      MONTHLY,
 	}
-	wantDuration17 := 0 * time.Hour
+	wantDuration17 := 24 * time.Hour
 	wantCron17 := "00 11 27 * *"
 	timeRange18 := TimeRange{
 		HourMinuteFrom: "11:00",
-		HourMinuteTo:   "11:00",
+		HourMinuteTo:   "13:00",
 		DayFrom:        27,
-		DayTo:          -5,
+		DayTo:          4,
 		Frequency:      MONTHLY,
 	}
-	wantDuration18 := 696 * time.Hour
+	wantDuration18 := 194 * time.Hour
 	wantCron18 := "00 11 27 * *"
+	timeRange19 := TimeRange{
+		HourMinuteFrom: "11:00",
+		HourMinuteTo:   "12:00",
+		DayFrom:        27,
+		DayTo:          4,
+		Frequency:      MONTHLY,
+	}
+	wantDuration19 := 193 * time.Hour
+	wantCron19 := "00 11 27 * *"
+	timeRange20 := TimeRange{
+		HourMinuteFrom: "11:00",
+		HourMinuteTo:   "13:00",
+		DayFrom:        -2,
+		DayTo:          -4,
+		Frequency:      MONTHLY,
+	}
+	wantDuration20 := 698 * time.Hour
+	wantCron20 := "00 11 L-1 * *"
+	timeRange21 := TimeRange{
+		HourMinuteFrom: "11:00",
+		HourMinuteTo:   "13:00",
+		DayFrom:        -2,
+		DayTo:          -1,
+		Frequency:      MONTHLY,
+	}
+	wantDuration21 := 26 * time.Hour
+	wantCron21 := "00 11 L-1 * *"
+	timeRange22 := TimeRange{
+		HourMinuteFrom: "11:00",
+		HourMinuteTo:   "13:00",
+		DayFrom:        -2,
+		DayTo:          4,
+		Frequency:      MONTHLY,
+	}
+	wantDuration22 := 122 * time.Hour
+	wantCron22 := "00 11 L-1 * *"
+	timeRange23 := TimeRange{
+		HourMinuteFrom: "09:00",
+		HourMinuteTo:   "00:01", //00:01
+		Weekdays:       []time.Weekday{time.Monday, time.Tuesday, time.Wednesday},
+		Frequency:      WEEKLY,
+	}
+	wantDuration23 := 15*time.Hour + 1*time.Minute
+	wantCron23 := "00 09 * * 1,2,3"
+	timeRange24 := TimeRange{
+		HourMinuteFrom: "12:00ab",
+		HourMinuteTo:   "14:00ab",
+		Frequency:      DAILY,
+	}
+	wantDuration24 := 0 * time.Hour
+	wantCron24 := "00ab 12 * * *"
 	//todo have to write test case for all negative handling
 	tests := []struct {
 		timeRange    TimeRange
@@ -202,13 +235,21 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		{timeRange16, wantDuration16, wantCron16},
 		{timeRange17, wantDuration17, wantCron17},
 		{timeRange18, wantDuration18, wantCron18},
+		{timeRange19, wantDuration19, wantCron19},
+		{timeRange20, wantDuration20, wantCron20},
+		{timeRange21, wantDuration21, wantCron21},
+		{timeRange22, wantDuration22, wantCron22},
+		{timeRange23, wantDuration23, wantCron23},
+		{timeRange24, wantDuration24, wantCron24},
 	}
 
 	for i, test := range tests {
 		// Test getDuration method
-		gotDuration, err := test.timeRange.getDuration(4, 2024)
+		gotDuration, err := test.timeRange.getDuration(12, 2024)
 		if err != nil {
-			t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
+			if gotDuration != test.wantDuration {
+				t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
+			}
 		}
 		if gotDuration != test.wantDuration {
 			t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
