@@ -66,7 +66,7 @@ func (tr TimeRange) ValidateTimeRange() error {
 		if tr.DayFrom < 0 && tr.DayTo < 0 && tr.DayFrom > tr.DayTo {
 			return errors.New("invalid value of DayFrom or DayTo,DayFrom and DayTo is less than zero and  DayFrom > DayTo")
 		}
-		if tr.DayTo < 0 && tr.DayFrom > 0 && tr.DayFrom > 29+tr.DayTo && tr.DayTo < -3 {
+		if (tr.DayTo < 0 && tr.DayFrom > 0 && tr.DayFrom > 29+tr.DayTo) || tr.DayTo < -3 {
 			return errors.New("invalid value of DayFrom or DayTo")
 		}
 		if tr.DayFrom == tr.DayTo {
@@ -79,7 +79,7 @@ func (tr TimeRange) ValidateTimeRange() error {
 func validateHourMinute(HourMinute string) error {
 	for _, char := range HourMinute {
 		if !unicode.IsDigit(char) && char != ':' {
-			return errors.New("HourMinute is not valid")
+			return errors.New("HourMinute is not valid,must not contain character other than integer and colon(:)")
 		}
 	}
 	return nil
