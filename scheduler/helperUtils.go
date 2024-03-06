@@ -87,69 +87,68 @@ func getDurationBetweenWeekDates(timeRange TimeRange, targetMonth time.Month, ta
 func getDaysCountForNegativeDays(timeRange TimeRange, targetMonth time.Month, targetYear int) int {
 	var days int
 	var start, end time.Time
-	now := time.Now()
 	if timeRange.DayTo < timeRange.DayFrom {
 		if timeRange.DayFrom > 0 {
 			//27 , -2 april , 27, 28, 29
 			//27 , -5 april , 27, 28, 29 .......next month
-			timeRange.DayTo, _ = adjustDaysForMonth(timeRange.DayTo, targetMonth, targetYear, now)
-			start, end = getStartAndEndTime(timeRange, targetMonth, now)
+			timeRange.DayTo, _ = adjustDaysForMonth(timeRange.DayTo, targetMonth, targetYear)
+			start, end = getStartAndEndTime(timeRange, targetMonth)
 		} else {
 			//-2 ,-4 april 29,30,1,.....28 may
-			timeRange.DayFrom, _ = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear, now)
-			timeRange.DayTo, _ = adjustDaysForMonth(timeRange.DayTo, targetMonth+1, targetYear, now)
-			start, end = getStartAndEndTime(timeRange, targetMonth, now)
+			timeRange.DayFrom, _ = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear)
+			timeRange.DayTo, _ = adjustDaysForMonth(timeRange.DayTo, targetMonth+1, targetYear)
+			start, end = getStartAndEndTime(timeRange, targetMonth)
 		}
 	} else if timeRange.DayTo > timeRange.DayFrom {
 		//-2 , -1 april 29 ,30
 		if timeRange.DayTo < 0 {
 			var lastDayOfMonth int
-			timeRange.DayFrom, lastDayOfMonth = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear, now)
+			timeRange.DayFrom, lastDayOfMonth = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear)
 			timeRange.DayTo = lastDayOfMonth + timeRange.DayTo + 1
-			start, end = getStartAndEndTime(timeRange, targetMonth, now)
+			start, end = getStartAndEndTime(timeRange, targetMonth)
 		} else {
 			//-2 , 4  april 29 , 30 , 1, 2,3,4 output 5
-			timeRange.DayFrom, _ = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear, now)
-			start, end = getStartAndEndTime(timeRange, targetMonth, now)
+			timeRange.DayFrom, _ = adjustDaysForMonth(timeRange.DayFrom, targetMonth, targetYear)
+			start, end = getStartAndEndTime(timeRange, targetMonth)
 		}
 	}
 	days = int(end.Sub(start).Hours() / 24)
 	return days
 }
 
-func getStartAndEndTime(timeRange TimeRange, targetMonth time.Month, now time.Time) (time.Time, time.Time) {
-	start := getStartDate(timeRange, targetMonth, now)
-	end := getEndDate(timeRange, targetMonth, now)
+func getStartAndEndTime(timeRange TimeRange, targetMonth time.Month) (time.Time, time.Time) {
+	start := getStartDate(timeRange, targetMonth)
+	end := getEndDate(timeRange, targetMonth)
 	if end.Day() < start.Day() && end.Month() == start.Month() && end.Year() == start.Year() {
-		end = getEndDate(timeRange, targetMonth+1, now)
+		end = getEndDate(timeRange, targetMonth+1)
 	}
 	return start, end
 }
 
-func getEndDate(timeRange TimeRange, targetMonth time.Month, now time.Time) time.Time {
-	return time.Date(now.Year(), targetMonth, timeRange.DayTo, 0, 0, 0, 0, now.Location())
+func getEndDate(timeRange TimeRange, targetMonth time.Month) time.Time {
+	return time.Date(time.Now().Year(), targetMonth, timeRange.DayTo, 0, 0, 0, 0, time.UTC)
 }
 
-func getStartDate(timeRange TimeRange, targetMonth time.Month, now time.Time) time.Time {
-	return time.Date(now.Year(), targetMonth, timeRange.DayFrom, 0, 0, 0, 0, now.Location())
+func getStartDate(timeRange TimeRange, targetMonth time.Month) time.Time {
+	return time.Date(time.Now().Year(), targetMonth, timeRange.DayFrom, 0, 0, 0, 0, time.UTC)
 }
-func adjustDaysForMonth(day int, targetMonth time.Month, targetYear int, now time.Time) (int, int) {
-	lastDayOfMonth := getLastDayOfMonth(targetYear, targetMonth, now)
+func adjustDaysForMonth(day int, targetMonth time.Month, targetYear int) (int, int) {
+	lastDayOfMonth := getLastDayOfMonth(targetYear, targetMonth)
 	if day > 0 {
 		return lastDayOfMonth + day, lastDayOfMonth
 	}
 	return lastDayOfMonth + day + 1, lastDayOfMonth
 }
 
-func getLastDayOfMonth(targetYear int, targetMonth time.Month, now time.Time) int {
-	firstDayOfNextMonth := time.Date(targetYear, targetMonth+1, 1, 0, 0, 0, 0, now.Location())
+func getLastDayOfMonth(targetYear int, targetMonth time.Month) int {
+	firstDayOfNextMonth := time.Date(targetYear, targetMonth+1, 1, 0, 0, 0, 0, time.UTC)
 	lastDayOfMonth := firstDayOfNextMonth.Add(-time.Hour * 24).Day()
 	return lastDayOfMonth
 }
 
 func constructDateTime(hourMinute string, days int) (time.Time, error) {
 	now := time.Now()
-	dateTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	dateTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	fromHour, err := strconv.Atoi(getHour(hourMinute))
 	if err != nil {
 		return dateTime, err

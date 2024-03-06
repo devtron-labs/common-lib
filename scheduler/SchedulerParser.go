@@ -26,6 +26,7 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 	if err != nil {
 		return nextWindowEdge, false, err
 	}
+
 	windowStart, windowEnd := tr.getWindowStartAndEndTime(targetTime, duration, schedule)
 	if isTimeInBetween(targetTime, windowStart, windowEnd) {
 		return windowEnd, true, err
@@ -35,7 +36,14 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time.Duration, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
-	timeMinusDuration := targetTime.Add(-1 * duration)
+
+	prevDuration := duration
+	if tr.isCyclic() {
+		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
+		prevDuration = duration - time.Duration(diff)*time.Hour*24
+	}
+
+	timeMinusDuration := targetTime.Add(-1 * prevDuration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
 	if !tr.TimeFrom.IsZero() && windowStart.Before(tr.TimeFrom) {
@@ -49,7 +57,7 @@ func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time
 
 func (tr TimeRange) getCronExp(year int, month time.Month) string {
 	cronExp := tr.getCron()
-	lastDayOfMonth := getLastDayOfMonth(year, month, time.Now().Local())
+	lastDayOfMonth := getLastDayOfMonth(year, month)
 	if strings.Contains(cronExp, "L-2") {
 		lastDayOfMonth = lastDayOfMonth - 2
 		cronExp = strings.Replace(cronExp, "L-2", intToString(lastDayOfMonth), -1)
