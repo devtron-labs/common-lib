@@ -4,6 +4,7 @@ import (
 	"errors"
 	"golang.org/x/exp/slices"
 	"strings"
+	"unicode"
 )
 
 func (tr TimeRange) ValidateTimeRange() error {
@@ -22,6 +23,15 @@ func (tr TimeRange) ValidateTimeRange() error {
 		if tr.HourMinuteFrom == tr.HourMinuteTo {
 			return errors.New("invalid value ,HourMinuteFrom must not be equal to HourMinuteTo")
 		}
+		err := validateHourMinute(tr.HourMinuteFrom)
+		if err != nil {
+			return err
+		}
+		err = validateHourMinute(tr.HourMinuteTo)
+		if err != nil {
+			return err
+		}
+
 	}
 	switch tr.Frequency {
 	case DAILY:
@@ -46,6 +56,9 @@ func (tr TimeRange) ValidateTimeRange() error {
 		if tr.WeekdayFrom == 0 || tr.WeekdayTo == 0 {
 			return errors.New("WeekdayFrom, must be present for WEEKLY_RANGE frequency")
 		}
+		if (tr.WeekdayFrom < 0 || tr.WeekdayFrom > 6) || (tr.WeekdayTo < 0 || tr.WeekdayTo > 6) {
+			return errors.New("one or both of the values are outside the range of 0 to 6")
+		}
 	case MONTHLY:
 		if tr.DayFrom == 0 || tr.DayTo == 0 {
 			return errors.New("DayFrom, DayTo, must be present for MONTHLY frequency")
@@ -58,6 +71,15 @@ func (tr TimeRange) ValidateTimeRange() error {
 		}
 		if tr.DayFrom == tr.DayTo {
 			return errors.New("invalid value , DayFrom must not be equal to DayTo")
+		}
+	}
+	return nil
+}
+
+func validateHourMinute(HourMinute string) error {
+	for _, char := range HourMinute {
+		if !unicode.IsDigit(char) && char != ':' {
+			return errors.New("HourMinute is not valid")
 		}
 	}
 	return nil

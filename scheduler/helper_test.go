@@ -211,7 +211,6 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	}
 	wantDuration24 := 0 * time.Hour
 	wantCron24 := "00ab 12 * * *"
-	//todo have to write test case for all negative handling
 	tests := []struct {
 		timeRange    TimeRange
 		wantDuration time.Duration
