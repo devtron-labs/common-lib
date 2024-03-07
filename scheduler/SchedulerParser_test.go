@@ -393,7 +393,7 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 			//29,30,31,1,2,3,4
 			targetTime:         time.Date(2024, time.Month(2), 4, 9, 59, 0, 0, time.Local),
 			expectedWindowEdge: time.Date(2024, time.Month(2), 27, 10, 0, 0, 0, time.Local),
-			expectedIsBetween:  false,
+			expectedIsBetween:  true,
 		},
 
 		{
@@ -405,9 +405,9 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 				DayTo:          -3,
 				Frequency:      MONTHLY,
 			},
-			targetTime:         time.Date(2024, time.Month(5), 26, 10, 0, 0, 0, time.Local),
-			expectedWindowEdge: time.Date(2024, time.Month(5), 29, 8, 0, 0, 0, time.Local),
-			expectedIsBetween:  true,
+			targetTime:         time.Date(2024, time.Month(2), 26, 8, 59, 0, 0, time.Local),
+			expectedWindowEdge: time.Date(2024, time.Month(2), 26, 9, 0, 0, 0, time.Local),
+			expectedIsBetween:  false,
 		},
 		{
 			description: "Target time between  the time range  and HourMinuteFrom>HourMinuteTo and DayFrom >DayTo and dayTo< -4",

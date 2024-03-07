@@ -66,9 +66,6 @@ func (tr TimeRange) ValidateTimeRange() error {
 		if (tr.DayTo < 0 && tr.DayFrom > 0 && tr.DayFrom > 29+tr.DayTo) || tr.DayTo < -3 || tr.DayFrom < -3 {
 			return errors.New("invalid value of DayFrom or DayTo")
 		}
-		if tr.DayFrom == tr.DayTo {
-			return errors.New("invalid value , DayFrom must not be equal to DayTo")
-		}
 	}
 	return nil
 }
