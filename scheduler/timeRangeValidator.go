@@ -20,9 +20,6 @@ func (tr TimeRange) ValidateTimeRange() error {
 		if colonCountTo != 1 {
 			return errors.New("invalid format: must contain exactly one colon")
 		}
-		if tr.HourMinuteFrom == tr.HourMinuteTo {
-			return errors.New("invalid value ,HourMinuteFrom must not be equal to HourMinuteTo")
-		}
 		err := validateHourMinute(tr.HourMinuteFrom)
 		if err != nil {
 			return err
