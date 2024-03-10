@@ -82,15 +82,15 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 			expectedIsBetween:  true,
 		},
 		{
-			description: "Target time outside the time range",
+			description: "Target time inside the time range for same start and end",
 			timeRange: TimeRange{
 				HourMinuteFrom: "08:00",
 				HourMinuteTo:   "08:00",
 				Frequency:      DAILY,
 			},
 			targetTime:         time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local),
-			expectedWindowEdge: time.Time{},
-			expectedIsBetween:  false,
+			expectedWindowEdge: time.Date(2024, time.Month(2), 27, 8, 0, 0, 0, time.Local),
+			expectedIsBetween:  true,
 		},
 		{
 			description: "Target time outside the time range",
@@ -196,8 +196,8 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 				Frequency:      WEEKLY,
 			},
 			targetTime:         time.Date(2024, time.Month(2), 26, 8, 30, 0, 0, time.Local),
-			expectedWindowEdge: time.Time{},
-			expectedIsBetween:  false,
+			expectedWindowEdge: time.Date(2024, time.Month(2), 27, 8, 00, 0, 0, time.Local),
+			expectedIsBetween:  true,
 		},
 		{
 			description: "Target time inside  the time range HourMinuteFrom<HourMinuteTo",
@@ -780,7 +780,7 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 			expectedIsBetween:  false,
 		},
 		{
-			description: "Target time within the time range",
+			description: "Target time before the time range for edge case february goes to next month",
 			timeRange: TimeRange{
 				HourMinuteFrom: "12:00",
 				HourMinuteTo:   "17:00",
@@ -789,7 +789,7 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 				DayTo:          1,
 			},
 			targetTime:         time.Date(2024, time.Month(2), 26, 10, 0, 0, 0, time.Local),
-			expectedWindowEdge: time.Time{},
+			expectedWindowEdge: time.Date(2024, time.Month(3), 1, 12, 0, 0, 0, time.Local),
 			expectedIsBetween:  false,
 		},
 		{

@@ -75,7 +75,11 @@ func (tr TimeRange) getMonthAndYear(targetTime time.Time) (time.Month, int) {
 	year := targetTime.Year()
 	day := targetTime.Day()
 
-	if day >= 1 && day < tr.DayTo && tr.isCyclic() {
+	isBeforeEndTime, err := isToHourMinuteBefore(tr, targetTime)
+	if err != nil {
+		return 0, 0
+	}
+	if day >= 1 && (day < tr.DayTo || (day == tr.DayTo && isBeforeEndTime)) && tr.isCyclic() {
 		if month == 1 {
 			month = 12
 			year = year - 1

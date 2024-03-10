@@ -29,6 +29,20 @@ func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Ti
 	return windowStartOrEnd, false
 }
 
+func isToHourMinuteBefore(timeRange TimeRange, targetTime time.Time) (bool, error) {
+
+	currentHourMinute, err := time.Parse(parseFormat, targetTime.Format(parseFormat))
+	if err != nil {
+		return false, fmt.Errorf("invalid format for HourMinuteFrom: : %s", err)
+	}
+
+	parsedHourTo, err := time.Parse(parseFormat, timeRange.HourMinuteTo)
+	if err != nil {
+		return false, fmt.Errorf("invalid format for HourMinuteTo: %s", err)
+	}
+	return currentHourMinute.Before(parsedHourTo), nil
+}
+
 func getDurationForHourMinute(timeRange TimeRange) (time.Duration, error) {
 
 	parsedHourFrom, err := time.Parse(parseFormat, timeRange.HourMinuteFrom)
@@ -39,7 +53,7 @@ func getDurationForHourMinute(timeRange TimeRange) (time.Duration, error) {
 	if err != nil {
 		return 0, fmt.Errorf("invalid format for HourMinuteTo: %s", err)
 	}
-	if parsedHourTo.Before(parsedHourFrom) {
+	if parsedHourTo.Before(parsedHourFrom) || parsedHourTo.Equal(parsedHourFrom) {
 		parsedHourTo = parsedHourTo.AddDate(0, 0, 1)
 	}
 	return parsedHourTo.Sub(parsedHourFrom), nil
