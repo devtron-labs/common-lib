@@ -37,3 +37,13 @@ func calculateDaysBetweenWeekdays(from, to int) int {
 	}
 	return days
 }
+
+func getPreviousMonthAndYear(currentMonth time.Month, currentYear int) (time.Month, int) {
+	previousMonth := currentMonth - 1
+	previousYear := currentYear
+	if previousMonth == 0 {
+		previousMonth = 12
+		previousYear = currentYear - 1
+	}
+	return previousMonth, previousYear
+}

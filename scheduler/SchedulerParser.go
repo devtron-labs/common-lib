@@ -56,8 +56,12 @@ func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time
 
 	prevDuration := duration
 	if tr.isMonthOverlapping() && !tr.isInsideOverLap(targetTime) {
+		currentMonth := targetTime.Month()
+		currentYear := targetTime.Year()
+
 		//adjusting duration when duration for consecutive windows is different
-		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
+		previousMonth, previousYear := getPreviousMonthAndYear(currentMonth, currentYear)
+		diff := getLastDayOfMonth(currentYear, currentMonth) - getLastDayOfMonth(previousYear, previousMonth)
 		prevDuration = duration - time.Duration(diff)*time.Hour*24
 	}
 
@@ -92,12 +96,7 @@ func (tr TimeRange) getMonthAndYearForPreviousWindow(targetTime time.Time) (time
 	year := targetTime.Year()
 
 	if tr.isMonthOverlapping() && tr.isInsideOverLap(targetTime) {
-		if month == 1 {
-			month = 12
-			year = year - 1
-		} else {
-			month = month - 1
-		}
+		month, year = getPreviousMonthAndYear(month, year)
 	}
 	return month, year
 }
