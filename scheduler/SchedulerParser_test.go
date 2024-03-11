@@ -106,6 +106,17 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 		{
 			description: "Target time inside the time range for same start and end",
 			timeRange: TimeRange{
+				HourMinuteFrom: "12:00ab",
+				HourMinuteTo:   "14:00ab",
+				Frequency:      Daily,
+			},
+			targetTime:         time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local),
+			expectedWindowEdge: time.Time{},
+			expectedIsBetween:  false,
+		},
+		{
+			description: "Target time inside the time range for same start and end",
+			timeRange: TimeRange{
 				HourMinuteFrom: "08:59",
 				HourMinuteTo:   "24:00",
 				Frequency:      Daily,

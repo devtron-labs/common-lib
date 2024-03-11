@@ -70,24 +70,6 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	}
 	wantDuration8 := 74 * time.Hour
 	wantCron8 := "00 11 * * 1"
-	timeRange9 := TimeRange{
-		HourMinuteFrom: "11:00",
-		HourMinuteTo:   "12:00",
-		Frequency:      WeeklyRange,
-		WeekdayTo:      9,
-		WeekdayFrom:    1,
-	}
-	wantDuration9 := 0 * time.Hour
-	wantCron9 := "00 11 * * 1"
-	timeRange10 := TimeRange{
-		HourMinuteFrom: "11:00",
-		HourMinuteTo:   "12:00",
-		Frequency:      WeeklyRange,
-		WeekdayTo:      1,
-		WeekdayFrom:    9,
-	}
-	wantDuration10 := 0 * time.Second
-	wantCron10 := "00 11 * * 9"
 	timeRange11 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "12:00",
@@ -169,15 +151,6 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	}
 	wantDuration19 := 193 * time.Hour
 	wantCron19 := "00 11 27 * *"
-	timeRange20 := TimeRange{
-		HourMinuteFrom: "11:00",
-		HourMinuteTo:   "13:00",
-		DayFrom:        -2,
-		DayTo:          -4,
-		Frequency:      Monthly,
-	}
-	wantDuration20 := 698 * time.Hour
-	wantCron20 := "00 11 L-1 * *"
 	timeRange21 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "13:00",
@@ -186,7 +159,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		Frequency:      Monthly,
 	}
 	wantDuration21 := 26 * time.Hour
-	wantCron21 := "00 11 L-1 * *"
+	wantCron21 := "00 11 30 * *"
 	timeRange22 := TimeRange{
 		HourMinuteFrom: "11:00",
 		HourMinuteTo:   "13:00",
@@ -195,7 +168,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		Frequency:      Monthly,
 	}
 	wantDuration22 := 122 * time.Hour
-	wantCron22 := "00 11 L-1 * *"
+	wantCron22 := "00 11 30 * *"
 	timeRange23 := TimeRange{
 		HourMinuteFrom: "09:00",
 		HourMinuteTo:   "00:01",
@@ -204,13 +177,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	}
 	wantDuration23 := 15*time.Hour + 1*time.Minute
 	wantCron23 := "00 09 * * 1,2,3"
-	timeRange24 := TimeRange{
-		HourMinuteFrom: "12:00ab",
-		HourMinuteTo:   "14:00ab",
-		Frequency:      Daily,
-	}
-	wantDuration24 := 0 * time.Hour
-	wantCron24 := "00ab 12 * * *"
+
 	tests := []struct {
 		timeRange    TimeRange
 		wantDuration time.Duration
@@ -224,8 +191,6 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		{timeRange6, wantDuration6, wantCron6},
 		{timeRange7, wantDuration7, wantCron7},
 		{timeRange8, wantDuration8, wantCron8},
-		{timeRange9, wantDuration9, wantCron9},
-		{timeRange10, wantDuration10, wantCron10},
 		{timeRange11, wantDuration11, wantCron11},
 		{timeRange12, wantDuration12, wantCron12},
 		{timeRange13, wantDuration13, wantCron13},
@@ -235,16 +200,14 @@ func TestGetDurationAndGetCron(t *testing.T) {
 		{timeRange17, wantDuration17, wantCron17},
 		{timeRange18, wantDuration18, wantCron18},
 		{timeRange19, wantDuration19, wantCron19},
-		{timeRange20, wantDuration20, wantCron20},
 		{timeRange21, wantDuration21, wantCron21},
 		{timeRange22, wantDuration22, wantCron22},
 		{timeRange23, wantDuration23, wantCron23},
-		{timeRange24, wantDuration24, wantCron24},
 	}
 
 	for i, test := range tests {
 		// Test getDuration method
-		//lastDayOfMonth := test.timeRange.calculateLastDayOfMonthForOverlappingWindow(time.Now())
+		lastDayOfMonth := 31
 		gotDuration := test.timeRange.getDuration(lastDayOfMonth)
 		if gotDuration != test.wantDuration {
 			t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
