@@ -27,6 +27,7 @@ func (tr TimeRange) GetTimeRangeWindow(targetTime time.Time) (nextWindowEdge tim
 	return windowStart, false, nil
 }
 
+// have one function foe both fixed and non fixed deduce from type from tr
 func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, time.Time, error) {
 	duration, cronExp := tr.getDurationAndCronExp(targetTime)
 	parser := cron.NewParser(CRON)
@@ -40,7 +41,9 @@ func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, tim
 }
 
 func (tr TimeRange) getDurationAndCronExp(targetTime time.Time) (time.Duration, string) {
+	//move inside monthly calculation
 	lastDayOfMonth := tr.calculateLastDayOfMonthForOverlappingWindow(targetTime)
+
 	duration := tr.getDuration(lastDayOfMonth)
 	cronExp := tr.getCron(lastDayOfMonth)
 	return duration, cronExp
@@ -51,6 +54,7 @@ func (tr TimeRange) calculateLastDayOfMonthForOverlappingWindow(targetTime time.
 	return getLastDayOfMonth(year, month)
 }
 
+// directrly fetch duration from function inside here
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time.Duration, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
 

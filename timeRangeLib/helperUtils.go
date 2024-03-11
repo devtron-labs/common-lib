@@ -18,16 +18,16 @@ func (tr TimeRange) isMonthOverlapping() bool {
 
 func (tr TimeRange) isToHourMinuteBeforeWindowEnd(targetTime time.Time) bool {
 
-	currentHourMinute, _ := time.Parse(parseFormat, targetTime.Format(parseFormat))
+	currentHourMinute, _ := time.Parse(hourMinuteFormat, targetTime.Format(hourMinuteFormat))
 
-	parsedHourTo, _ := time.Parse(parseFormat, tr.HourMinuteTo)
+	parsedHourTo, _ := time.Parse(hourMinuteFormat, tr.HourMinuteTo)
 
 	return currentHourMinute.Before(parsedHourTo)
 }
 
 func (tr TimeRange) compareHourMinute() bool {
-	parseHourFrom, _ := time.Parse(parseFormat, tr.HourMinuteFrom)
-	parsedHourTo, _ := time.Parse(parseFormat, tr.HourMinuteTo)
+	parseHourFrom, _ := time.Parse(hourMinuteFormat, tr.HourMinuteFrom)
+	parsedHourTo, _ := time.Parse(hourMinuteFormat, tr.HourMinuteTo)
 	return parsedHourTo.Before(parseHourFrom)
 }
 

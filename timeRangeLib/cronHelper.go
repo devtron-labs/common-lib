@@ -7,6 +7,7 @@ import (
 )
 
 func (tr TimeRange) getCron(lastDayOfMonth int) string {
+	// one function, rename to parse hour minute
 	minute := getMinute(tr.HourMinuteFrom)
 	hour := getHour(tr.HourMinuteFrom)
 
@@ -38,6 +39,7 @@ func weeklyRangeCron(minute, hour string, weekdayFrom string) string {
 
 func monthlyCron(minute, hour string, dayFrom int, lastDayOfMonth int) string {
 	if dayFrom < 0 {
+		// move to function which will tell why we add 1
 		dayFrom = lastDayOfMonth + 1 + dayFrom
 	}
 	day := strconv.Itoa(dayFrom)

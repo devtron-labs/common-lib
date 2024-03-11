@@ -18,8 +18,8 @@ func (tr TimeRange) getDuration(monthEnd int) time.Duration {
 
 func getDurationForHourMinute(timeRange TimeRange) time.Duration {
 
-	parsedHourFrom, _ := time.Parse(parseFormat, timeRange.HourMinuteFrom)
-	parsedHourTo, _ := time.Parse(parseFormat, timeRange.HourMinuteTo)
+	parsedHourFrom, _ := time.Parse(hourMinuteFormat, timeRange.HourMinuteFrom)
+	parsedHourTo, _ := time.Parse(hourMinuteFormat, timeRange.HourMinuteTo)
 	if parsedHourTo.Before(parsedHourFrom) || parsedHourTo.Equal(parsedHourFrom) {
 		parsedHourTo = parsedHourTo.AddDate(0, 0, 1)
 	}

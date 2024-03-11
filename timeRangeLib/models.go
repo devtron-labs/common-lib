@@ -19,7 +19,7 @@ type TimeRange struct {
 }
 
 // random values for  for understanding HH:MM format
-const parseFormat = "15:04"
+const hourMinuteFormat = "15:04"
 
 type Frequency string
 
