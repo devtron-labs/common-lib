@@ -22,10 +22,7 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 	if err != nil {
 		return nextWindowEdge, false, err
 	}
-	duration, err := tr.getDuration(month, year)
-	if err != nil {
-		return nextWindowEdge, false, err
-	}
+	duration := tr.getDuration(month, year)
 
 	windowStart, windowEnd := tr.getWindowStartAndEndTime(targetTime, duration, schedule)
 	if isTimeInBetween(targetTime, windowStart, windowEnd) {
@@ -100,4 +97,16 @@ func (tr TimeRange) checkForOverlappingWindow(targetTime time.Time, day int) boo
 
 func isTimeInBetween(timeCurrent, periodStart, periodEnd time.Time) bool {
 	return (timeCurrent.After(periodStart) && timeCurrent.Before(periodEnd)) || timeCurrent.Equal(periodStart)
+}
+
+func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, bool) {
+	var windowStartOrEnd time.Time
+	if targetTime.After(timeRange.TimeTo) {
+		return windowStartOrEnd, false
+	} else if targetTime.Before(timeRange.TimeFrom) {
+		return timeRange.TimeFrom, false
+	} else if targetTime.Before(timeRange.TimeTo) && targetTime.After(timeRange.TimeFrom) {
+		return timeRange.TimeTo, true
+	}
+	return windowStartOrEnd, false
 }

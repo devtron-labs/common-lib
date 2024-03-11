@@ -16,18 +16,6 @@ func (tr TimeRange) isMonthOverlapping() bool {
 	return false
 }
 
-func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, bool) {
-	var windowStartOrEnd time.Time
-	if targetTime.After(timeRange.TimeTo) {
-		return windowStartOrEnd, false
-	} else if targetTime.Before(timeRange.TimeFrom) {
-		return timeRange.TimeFrom, false
-	} else if targetTime.Before(timeRange.TimeTo) && targetTime.After(timeRange.TimeFrom) {
-		return timeRange.TimeTo, true
-	}
-	return windowStartOrEnd, false
-}
-
 func (tr TimeRange) isToHourMinuteBeforeWindowEnd(targetTime time.Time) bool {
 
 	currentHourMinute, _ := time.Parse(parseFormat, targetTime.Format(parseFormat))
@@ -85,29 +73,29 @@ func getDaysCount(timeRange TimeRange, targetMonth time.Month, targetYear int) i
 //	return days
 //}
 
-func getStartAndEndTime(timeRange TimeRange, targetMonth time.Month) (time.Time, time.Time) {
-	start := getStartDate(timeRange, targetMonth)
-	end := getEndDate(timeRange, targetMonth)
-	if end.Day() < start.Day() && end.Month() == start.Month() && end.Year() == start.Year() {
-		end = getEndDate(timeRange, targetMonth+1)
-	}
-	return start, end
-}
-
-func getEndDate(timeRange TimeRange, targetMonth time.Month) time.Time {
-	return time.Date(time.Now().Year(), targetMonth, timeRange.DayTo, 0, 0, 0, 0, time.UTC)
-}
-
-func getStartDate(timeRange TimeRange, targetMonth time.Month) time.Time {
-	return time.Date(time.Now().Year(), targetMonth, timeRange.DayFrom, 0, 0, 0, 0, time.UTC)
-}
-func adjustDaysForMonth(day int, targetMonth time.Month, targetYear int) (int, int) {
-	lastDayOfMonth := getLastDayOfMonth(targetYear, targetMonth)
-	if day > 0 {
-		return lastDayOfMonth + day, lastDayOfMonth
-	}
-	return lastDayOfMonth + day + 1, lastDayOfMonth
-}
+//func getStartAndEndTime(timeRange TimeRange, targetMonth time.Month) (time.Time, time.Time) {
+//	start := getStartDate(timeRange, targetMonth)
+//	end := getEndDate(timeRange, targetMonth)
+//	if end.Day() < start.Day() && end.Month() == start.Month() && end.Year() == start.Year() {
+//		end = getEndDate(timeRange, targetMonth+1)
+//	}
+//	return start, end
+//}
+//
+//func getEndDate(timeRange TimeRange, targetMonth time.Month) time.Time {
+//	return time.Date(time.Now().Year(), targetMonth, timeRange.DayTo, 0, 0, 0, 0, time.UTC)
+//}
+//
+//func getStartDate(timeRange TimeRange, targetMonth time.Month) time.Time {
+//	return time.Date(time.Now().Year(), targetMonth, timeRange.DayFrom, 0, 0, 0, 0, time.UTC)
+//}
+//func adjustDaysForMonth(day int, targetMonth time.Month, targetYear int) (int, int) {
+//	lastDayOfMonth := getLastDayOfMonth(targetYear, targetMonth)
+//	if day > 0 {
+//		return lastDayOfMonth + day, lastDayOfMonth
+//	}
+//	return lastDayOfMonth + day + 1, lastDayOfMonth
+//}
 
 func getLastDayOfMonth(targetYear int, targetMonth time.Month) int {
 	firstDayOfNextMonth := time.Date(targetYear, targetMonth+1, 1, 0, 0, 0, 0, time.UTC)
