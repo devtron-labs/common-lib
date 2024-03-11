@@ -24,6 +24,11 @@ func (tr TimeRange) isToHourMinuteBeforeWindowEnd(targetTime time.Time) bool {
 
 	return currentHourMinute.Before(parsedHourTo)
 }
+func (tr TimeRange) compareHourMinute() bool {
+	parseHourFrom, _ := time.Parse(parseFormat, tr.HourMinuteFrom)
+	parsedHourTo, _ := time.Parse(parseFormat, tr.HourMinuteTo)
+	return parsedHourTo.Before(parseHourFrom)
+}
 
 func getDaysCount(timeRange TimeRange, targetMonth time.Month, targetYear int) int {
 

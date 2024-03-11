@@ -93,6 +93,28 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 			expectedIsBetween:  true,
 		},
 		{
+			description: "Target time inside the time range for same start and end",
+			timeRange: TimeRange{
+				HourMinuteFrom: "08:70",
+				HourMinuteTo:   "08:00",
+				Frequency:      Daily,
+			},
+			targetTime:         time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local),
+			expectedWindowEdge: time.Time{},
+			expectedIsBetween:  false,
+		},
+		{
+			description: "Target time inside the time range for same start and end",
+			timeRange: TimeRange{
+				HourMinuteFrom: "08:59",
+				HourMinuteTo:   "24:00",
+				Frequency:      Daily,
+			},
+			targetTime:         time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local),
+			expectedWindowEdge: time.Time{},
+			expectedIsBetween:  false,
+		},
+		{
 			description: "Target time outside the time range",
 			timeRange: TimeRange{
 				HourMinuteFrom: "08:00",
@@ -338,7 +360,20 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 				DayTo:          4,
 				Frequency:      Monthly,
 			},
-			targetTime:         time.Date(2024, time.Month(3), 1, 9, 30, 0, 0, time.Local),
+			targetTime:         time.Date(2024, time.Month(3), 4, 8, 59, 0, 0, time.Local),
+			expectedWindowEdge: time.Date(2024, time.Month(3), 4, 10, 0, 0, 0, time.Local),
+			expectedIsBetween:  true,
+		},
+		{
+			description: "Target time between  the time range  and HourMinuteFrom>HourMinuteTo and DayFrom >DayTo  for dec and target time is for next month ",
+			timeRange: TimeRange{
+				HourMinuteFrom: "09:00",
+				HourMinuteTo:   "10:00",
+				DayFrom:        -3,
+				DayTo:          4,
+				Frequency:      Monthly,
+			},
+			targetTime:         time.Date(2024, time.Month(3), 4, 9, 59, 0, 0, time.Local),
 			expectedWindowEdge: time.Date(2024, time.Month(3), 4, 10, 0, 0, 0, time.Local),
 			expectedIsBetween:  true,
 		},

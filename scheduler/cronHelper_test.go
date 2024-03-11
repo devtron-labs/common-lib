@@ -244,12 +244,7 @@ func TestGetDurationAndGetCron(t *testing.T) {
 
 	for i, test := range tests {
 		// Test getDuration method
-		gotDuration, err := test.timeRange.getDuration(12, 2024)
-		if err != nil {
-			if gotDuration != test.wantDuration {
-				t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
-			}
-		}
+		gotDuration := test.timeRange.getDuration(12, 2024)
 		if gotDuration != test.wantDuration {
 			t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
 		}

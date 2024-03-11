@@ -60,6 +60,9 @@ func (tr TimeRange) ValidateTimeRange() error {
 		if tr.DayFrom == 0 || tr.DayTo == 0 {
 			return errors.New("DayFrom, DayTo, must be present for Monthly frequency")
 		}
+		if tr.DayFrom == tr.DayTo && tr.compareHourMinute() {
+			return errors.New("Invalid value of hourMinuteFrom or hourMinuteTo  for same day ,hourMinuteFrom >hourMinuteTo")
+		}
 		// this is to prevent overlapping windows crossing to next month for both negatives
 		if tr.DayFrom < 0 && tr.DayTo < 0 && tr.DayFrom > tr.DayTo {
 			return errors.New("invalid value of DayFrom or DayTo,DayFrom and DayTo is less than zero and  DayFrom > DayTo")
