@@ -4,14 +4,14 @@ import (
 	"time"
 )
 
-func (tr TimeRange) getDuration(month time.Month, year int) time.Duration {
+func (tr TimeRange) getDuration(monthEnd int) time.Duration {
 	switch tr.Frequency {
 	case Daily, Weekly:
 		return getDurationForHourMinute(tr)
 	case WeeklyRange:
 		return getDurationBetweenWeekdays(tr)
 	case Monthly:
-		return getDurationBetweenWeekDates(tr, month, year)
+		return getDurationBetweenWeekDates(tr, monthEnd)
 	}
 	return 0
 }
@@ -34,9 +34,9 @@ func getDurationBetweenWeekdays(timeRange TimeRange) time.Duration {
 	return toDateTime.Sub(fromDateTime)
 }
 
-func getDurationBetweenWeekDates(timeRange TimeRange, targetMonth time.Month, targetYear int) time.Duration {
+func getDurationBetweenWeekDates(timeRange TimeRange, monthEnd int) time.Duration {
 
-	days := getDaysCount(timeRange, targetMonth, targetYear)
+	days := getDaysCount(timeRange, monthEnd)
 	//if timeRange.DayFrom > 0 && timeRange.DayTo > 0 && timeRange.DayFrom < timeRange.DayTo {
 	//	days = (timeRange.DayTo) - (timeRange.DayFrom)
 	//}
@@ -45,4 +45,3 @@ func getDurationBetweenWeekDates(timeRange TimeRange, targetMonth time.Month, ta
 
 	return toDateTime.Sub(fromDateTime)
 }
-

@@ -30,9 +30,8 @@ func (tr TimeRange) compareHourMinute() bool {
 	return parsedHourTo.Before(parseHourFrom)
 }
 
-func getDaysCount(timeRange TimeRange, targetMonth time.Month, targetYear int) int {
+func getDaysCount(timeRange TimeRange, monthEnd int) int {
 
-	monthEnd := getLastDayOfMonth(targetYear, targetMonth)
 	windowEndDay := timeRange.DayTo
 	if windowEndDay < 0 {
 		windowEndDay = monthEnd + 1 + windowEndDay

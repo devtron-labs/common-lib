@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"github.com/robfig/cron/v3"
-	"strings"
 	"time"
 )
 
@@ -11,18 +10,20 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 	if err != nil {
 		return nextWindowEdge, false, err
 	}
+
 	if tr.Frequency == Fixed {
 		nextWindowEdge, isTimeBetween = getScheduleForFixedTime(targetTime, tr)
-		return nextWindowEdge, isTimeBetween, err
+		return nextWindowEdge, isTimeBetween, nil
 	}
-	month, year := tr.getMonthAndYearForPreviousWindow(targetTime)
-	cronExp := tr.getCronExp(year, month)
+
+	lastDayOfMonth := tr.calculateLastDayOfMonthForOverlappingWindow(targetTime)
+	duration := tr.getDuration(lastDayOfMonth)
+	cronExp := tr.getCron(lastDayOfMonth)
 	parser := cron.NewParser(CRON)
 	schedule, err := parser.Parse(cronExp)
 	if err != nil {
 		return nextWindowEdge, false, err
 	}
-	duration := tr.getDuration(month, year)
 
 	windowStart, windowEnd := tr.getWindowStartAndEndTime(targetTime, duration, schedule)
 	if isTimeInBetween(targetTime, windowStart, windowEnd) {
@@ -31,18 +32,18 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 	return windowStart, false, err
 }
 
+func (tr TimeRange) calculateLastDayOfMonthForOverlappingWindow(targetTime time.Time) int {
+	month, year := tr.getMonthAndYearForPreviousWindow(targetTime)
+	return getLastDayOfMonth(year, month)
+}
+
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time.Duration, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
 
-	prevDuration := duration
-	if tr.isMonthOverlapping() {
-		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
-		prevDuration = duration - time.Duration(diff)*time.Hour*24
-	}
-
-	timeMinusDuration := targetTime.Add(-1 * prevDuration)
+	timeMinusDuration := tr.currentTimeMinusWindowDuration(targetTime, duration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
+
 	if !tr.TimeFrom.IsZero() && windowStart.Before(tr.TimeFrom) {
 		windowStart = tr.TimeFrom
 	}
@@ -52,19 +53,15 @@ func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time
 	return windowStart, windowEnd
 }
 
-func (tr TimeRange) getCronExp(year int, month time.Month) string {
-	cronExp := tr.getCron()
-	lastDayOfMonth := getLastDayOfMonth(year, month)
-	if strings.Contains(cronExp, "L-2") {
-		lastDayOfMonth = lastDayOfMonth - 2
-		cronExp = strings.Replace(cronExp, "L-2", intToString(lastDayOfMonth), -1)
-	} else if strings.Contains(cronExp, "L-1") {
-		lastDayOfMonth = lastDayOfMonth - 1
-		cronExp = strings.Replace(cronExp, "L-1", intToString(lastDayOfMonth), -1)
-	} else {
-		cronExp = strings.Replace(cronExp, "L", intToString(lastDayOfMonth), -1)
+func (tr TimeRange) currentTimeMinusWindowDuration(targetTime time.Time, duration time.Duration) time.Time {
+	prevDuration := duration
+	if tr.isMonthOverlapping() && !tr.isInsideOverLap(targetTime) {
+		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
+		prevDuration = duration - time.Duration(diff)*time.Hour*24
 	}
-	return cronExp
+
+	timeMinusDuration := targetTime.Add(-1 * prevDuration)
+	return timeMinusDuration
 }
 
 // this will determine if the relevant year and month for the last window happens
@@ -72,9 +69,8 @@ func (tr TimeRange) getCronExp(year int, month time.Month) string {
 func (tr TimeRange) getMonthAndYearForPreviousWindow(targetTime time.Time) (time.Month, int) {
 	month := targetTime.Month()
 	year := targetTime.Year()
-	day := targetTime.Day()
 
-	if tr.isMonthOverlapping() && tr.checkForOverlappingWindow(targetTime, day) {
+	if tr.isMonthOverlapping() && tr.isInsideOverLap(targetTime) {
 		if month == 1 {
 			month = 12
 			year = year - 1
@@ -85,10 +81,10 @@ func (tr TimeRange) getMonthAndYearForPreviousWindow(targetTime time.Time) (time
 	return month, year
 }
 
-func (tr TimeRange) checkForOverlappingWindow(targetTime time.Time, day int) bool {
+func (tr TimeRange) isInsideOverLap(targetTime time.Time) bool {
 	// for an overlapping window if the current time is on the latter part of the overlap then
 	// we use the last month for calculation.
-
+	day := targetTime.Day()
 	if day < 1 {
 		return false
 	}
@@ -105,7 +101,8 @@ func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Ti
 		return windowStartOrEnd, false
 	} else if targetTime.Before(timeRange.TimeFrom) {
 		return timeRange.TimeFrom, false
-	} else if targetTime.Before(timeRange.TimeTo) && targetTime.After(timeRange.TimeFrom) {
+		//} else if targetTime.Before(timeRange.TimeTo) && targetTime.After(timeRange.TimeFrom) {
+	} else if isTimeInBetween(targetTime, timeRange.TimeFrom, timeRange.TimeTo) {
 		return timeRange.TimeTo, true
 	}
 	return windowStartOrEnd, false
