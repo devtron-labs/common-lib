@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"fmt"
 	"github.com/robfig/cron/v3"
 	"time"
 )
@@ -16,20 +17,33 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 		return nextWindowEdge, isTimeBetween, nil
 	}
 
-	lastDayOfMonth := tr.calculateLastDayOfMonthForOverlappingWindow(targetTime)
-	duration := tr.getDuration(lastDayOfMonth)
-	cronExp := tr.getCron(lastDayOfMonth)
-	parser := cron.NewParser(CRON)
-	schedule, err := parser.Parse(cronExp)
+	windowStart, windowEnd, err := tr.getWindowForTargetTime(targetTime)
 	if err != nil {
-		return nextWindowEdge, false, err
+		return nextWindowEdge, isTimeBetween, err
 	}
-
-	windowStart, windowEnd := tr.getWindowStartAndEndTime(targetTime, duration, schedule)
 	if isTimeInBetween(targetTime, windowStart, windowEnd) {
 		return windowEnd, true, err
 	}
 	return windowStart, false, err
+}
+
+func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, time.Time, error) {
+	duration, cronExp := tr.getDurationAndCronExp(targetTime)
+	parser := cron.NewParser(CRON)
+	schedule, err := parser.Parse(cronExp)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("error parsing cron expression %s %v", cronExp, err)
+	}
+
+	windowStart, windowEnd := tr.getWindowStartAndEndTime(targetTime, duration, schedule)
+	return windowStart, windowEnd, nil
+}
+
+func (tr TimeRange) getDurationAndCronExp(targetTime time.Time) (time.Duration, string) {
+	lastDayOfMonth := tr.calculateLastDayOfMonthForOverlappingWindow(targetTime)
+	duration := tr.getDuration(lastDayOfMonth)
+	cronExp := tr.getCron(lastDayOfMonth)
+	return duration, cronExp
 }
 
 func (tr TimeRange) calculateLastDayOfMonthForOverlappingWindow(targetTime time.Time) int {
@@ -42,6 +56,7 @@ func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time
 
 	prevDuration := duration
 	if tr.isMonthOverlapping() && !tr.isInsideOverLap(targetTime) {
+		//adjusting duration when duration for consecutive windows is different
 		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
 		prevDuration = duration - time.Duration(diff)*time.Hour*24
 	}

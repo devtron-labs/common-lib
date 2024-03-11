@@ -245,13 +245,13 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	for i, test := range tests {
 		// Test getDuration method
 		//lastDayOfMonth := test.timeRange.calculateLastDayOfMonthForOverlappingWindow(time.Now())
-		gotDuration := test.timeRange.getDuration(lastDayOfMonth)
+		gotDuration := test.timeRange.getDuration(1)
 		if gotDuration != test.wantDuration {
 			t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
 		}
 
 		// Test getCron method
-		gotCron := test.timeRange.getCron(lastDayOfMonth)
+		gotCron := test.timeRange.getCron(1)
 		if gotCron != test.wantCron {
 			t.Errorf("Test case %d: getCron() = %v, want %v", i+1, gotCron, test.wantCron)
 		}
