@@ -54,18 +54,7 @@ func (tr TimeRange) calculateLastDayOfMonthForOverlappingWindow(targetTime time.
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time.Duration, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
 
-	prevDuration := duration
-	if tr.isMonthOverlapping() && !tr.isInsideOverLap(targetTime) {
-		currentMonth := targetTime.Month()
-		currentYear := targetTime.Year()
-
-		//adjusting duration when duration for consecutive windows is different
-		previousMonth, previousYear := getPreviousMonthAndYear(currentMonth, currentYear)
-		diff := getLastDayOfMonth(currentYear, currentMonth) - getLastDayOfMonth(previousYear, previousMonth)
-		prevDuration = duration - time.Duration(diff)*time.Hour*24
-	}
-
-	timeMinusDuration := targetTime.Add(-1 * prevDuration)
+	timeMinusDuration := tr.currentTimeMinusWindowDuration(targetTime, duration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
 
@@ -81,12 +70,19 @@ func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time
 func (tr TimeRange) currentTimeMinusWindowDuration(targetTime time.Time, duration time.Duration) time.Time {
 	prevDuration := duration
 	if tr.isMonthOverlapping() && !tr.isInsideOverLap(targetTime) {
-		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
-		prevDuration = duration - time.Duration(diff)*time.Hour*24
+		prevDuration = tr.getAdjustedDuration(targetTime, duration, prevDuration)
 	}
+	return targetTime.Add(-1 * prevDuration)
+}
 
-	timeMinusDuration := targetTime.Add(-1 * prevDuration)
-	return timeMinusDuration
+func (tr TimeRange) getAdjustedDuration(targetTime time.Time, duration time.Duration, prevDuration time.Duration) time.Duration {
+	//adjusting duration when duration for consecutive windows is different
+	currentMonth := targetTime.Month()
+	currentYear := targetTime.Year()
+	previousMonth, previousYear := getPreviousMonthAndYear(currentMonth, currentYear)
+	diff := getLastDayOfMonth(currentYear, currentMonth) - getLastDayOfMonth(previousYear, previousMonth)
+	prevDuration = duration - time.Duration(diff)*time.Hour*24
+	return prevDuration
 }
 
 // this will determine if the relevant year and month for the last window happens
