@@ -22,9 +22,9 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 		return nextWindowEdge, isTimeBetween, err
 	}
 	if isTimeInBetween(targetTime, windowStart, windowEnd) {
-		return windowEnd, true, err
+		return windowEnd, true, nil
 	}
-	return windowStart, false, err
+	return windowStart, false, nil
 }
 
 func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, time.Time, error) {
