@@ -40,7 +40,13 @@ func (tr TimeRange) calculateLastDayOfMonthForOverlappingWindow(targetTime time.
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time.Duration, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
 
-	timeMinusDuration := tr.currentTimeMinusWindowDuration(targetTime, duration)
+	prevDuration := duration
+	if tr.isMonthOverlapping() && !tr.isInsideOverLap(targetTime) {
+		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
+		prevDuration = duration - time.Duration(diff)*time.Hour*24
+	}
+
+	timeMinusDuration := targetTime.Add(-1 * prevDuration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
 

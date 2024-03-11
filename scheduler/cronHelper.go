@@ -37,11 +37,6 @@ func weeklyRangeCron(minute, hour string, weekdayFrom string) string {
 }
 
 func monthlyCron(minute, hour string, dayFrom int, lastDayOfMonth int) string {
-	//day := strconv.Itoa(dayFrom)
-	//if dayFrom == -1 {
-	//	day = "L"
-	//} else if dayFrom <= -2 && dayFrom >= -31 {
-	//	day = fmt.Sprintf("L-%s", strconv.Itoa(-dayFrom-1))
 	if dayFrom < 0 {
 		dayFrom = lastDayOfMonth + 1 + dayFrom
 	}
@@ -49,18 +44,3 @@ func monthlyCron(minute, hour string, dayFrom int, lastDayOfMonth int) string {
 
 	return fmt.Sprintf("%s %s %s * *", minute, hour, day)
 }
-
-//func (tr TimeRange) getCronExp(lastDayOfMonth int) string {
-//	cronExp := tr.getCron(lastDayOfMonth)
-//
-//	if strings.Contains(cronExp, "L-2") {
-//		lastDayOfMonth = lastDayOfMonth - 2
-//		cronExp = strings.Replace(cronExp, "L-2", intToString(lastDayOfMonth), -1)
-//	} else if strings.Contains(cronExp, "L-1") {
-//		lastDayOfMonth = lastDayOfMonth - 1
-//		cronExp = strings.Replace(cronExp, "L-1", intToString(lastDayOfMonth), -1)
-//	} else {
-//		cronExp = strings.Replace(cronExp, "L", intToString(lastDayOfMonth), -1)
-//	}
-//	return cronExp
-//}

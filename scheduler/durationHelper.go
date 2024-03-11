@@ -35,13 +35,8 @@ func getDurationBetweenWeekdays(timeRange TimeRange) time.Duration {
 }
 
 func getDurationBetweenWeekDates(timeRange TimeRange, monthEnd int) time.Duration {
-
 	days := getDaysCount(timeRange, monthEnd)
-	//if timeRange.DayFrom > 0 && timeRange.DayTo > 0 && timeRange.DayFrom < timeRange.DayTo {
-	//	days = (timeRange.DayTo) - (timeRange.DayFrom)
-	//}
 	fromDateTime := constructDateTime(timeRange.HourMinuteFrom, 0)
 	toDateTime := constructDateTime(timeRange.HourMinuteTo, days)
-
 	return toDateTime.Sub(fromDateTime)
 }
