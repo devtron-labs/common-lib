@@ -1,4 +1,4 @@
-package scheduler
+package timeRangeLib
 
 import (
 	"fmt"
@@ -6,14 +6,14 @@ import (
 	"time"
 )
 
-func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.Time, isTimeBetween bool, err error) {
+func (tr TimeRange) GetTimeRangeWindow(targetTime time.Time) (nextWindowEdge time.Time, isTimeBetween bool, err error) {
 	err = tr.ValidateTimeRange()
 	if err != nil {
 		return nextWindowEdge, false, err
 	}
 
 	if tr.Frequency == Fixed {
-		nextWindowEdge, isTimeBetween = getScheduleForFixedTime(targetTime, tr)
+		nextWindowEdge, isTimeBetween = getWindowForFixedTime(targetTime, tr)
 		return nextWindowEdge, isTimeBetween, nil
 	}
 
@@ -111,7 +111,7 @@ func isTimeInBetween(timeCurrent, periodStart, periodEnd time.Time) bool {
 	return (timeCurrent.After(periodStart) && timeCurrent.Before(periodEnd)) || timeCurrent.Equal(periodStart)
 }
 
-func getScheduleForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, bool) {
+func getWindowForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, bool) {
 	var windowStartOrEnd time.Time
 	if targetTime.After(timeRange.TimeTo) {
 		return windowStartOrEnd, false

@@ -1,4 +1,4 @@
-package scheduler
+package timeRangeLib
 
 import (
 	"strconv"

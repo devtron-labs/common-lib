@@ -1,4 +1,4 @@
-package scheduler
+package timeRangeLib
 
 import (
 	"testing"
@@ -989,7 +989,7 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 	// Execute test cases
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			nextWindowEdge, isTimeBetween, _ := tc.timeRange.GetScheduleSpec(tc.targetTime)
+			nextWindowEdge, isTimeBetween, _ := tc.timeRange.GetTimeRangeWindow(tc.targetTime)
 			if nextWindowEdge != tc.expectedWindowEdge || isTimeBetween != tc.expectedIsBetween {
 				t.Errorf("Test case failed: %s\nExpected nextWindowEdge: %v, got: %v\nExpected isTimeBetween: %t, got: %t", tc.description, tc.expectedWindowEdge, nextWindowEdge, tc.expectedIsBetween, isTimeBetween)
 			}
