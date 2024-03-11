@@ -11,11 +11,11 @@ func (tr TimeRange) GetScheduleSpec(targetTime time.Time) (nextWindowEdge time.T
 	if err != nil {
 		return nextWindowEdge, false, err
 	}
-	if tr.Frequency == FIXED {
+	if tr.Frequency == Fixed {
 		nextWindowEdge, isTimeBetween = getScheduleForFixedTime(targetTime, tr)
 		return nextWindowEdge, isTimeBetween, err
 	}
-	month, year := tr.getMonthAndYear(targetTime)
+	month, year := tr.getMonthAndYearForPreviousWindow(targetTime)
 	cronExp := tr.getCronExp(year, month)
 	parser := cron.NewParser(CRON)
 	schedule, err := parser.Parse(cronExp)
@@ -38,7 +38,7 @@ func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time
 	var windowEnd time.Time
 
 	prevDuration := duration
-	if tr.isCyclic() {
+	if tr.isMonthOverlapping() {
 		diff := getLastDayOfMonth(targetTime.Year(), targetTime.Month()) - getLastDayOfMonth(targetTime.Year(), targetTime.Month()-1)
 		prevDuration = duration - time.Duration(diff)*time.Hour*24
 	}
@@ -70,16 +70,14 @@ func (tr TimeRange) getCronExp(year int, month time.Month) string {
 	return cronExp
 }
 
-func (tr TimeRange) getMonthAndYear(targetTime time.Time) (time.Month, int) {
+// this will determine if the relevant year and month for the last window happens
+// in the same month or previous month
+func (tr TimeRange) getMonthAndYearForPreviousWindow(targetTime time.Time) (time.Month, int) {
 	month := targetTime.Month()
 	year := targetTime.Year()
 	day := targetTime.Day()
 
-	isBeforeEndTime, err := isToHourMinuteBefore(tr, targetTime)
-	if err != nil {
-		return 0, 0
-	}
-	if day >= 1 && (day < tr.DayTo || (day == tr.DayTo && isBeforeEndTime)) && tr.isCyclic() {
+	if tr.isMonthOverlapping() && tr.checkForOverlappingWindow(targetTime, day) {
 		if month == 1 {
 			month = 12
 			year = year - 1
@@ -88,6 +86,16 @@ func (tr TimeRange) getMonthAndYear(targetTime time.Time) (time.Month, int) {
 		}
 	}
 	return month, year
+}
+
+func (tr TimeRange) checkForOverlappingWindow(targetTime time.Time, day int) bool {
+	// for an overlapping window if the current time is on the latter part of the overlap then
+	// we use the last month for calculation.
+
+	if day < 1 {
+		return false
+	}
+	return day < tr.DayTo || (day == tr.DayTo && tr.isToHourMinuteBeforeWindowEnd(targetTime))
 }
 
 func isTimeInBetween(timeCurrent, periodStart, periodEnd time.Time) bool {
