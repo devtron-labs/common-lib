@@ -23,7 +23,7 @@ func TestGetScheduleSpec_FixedFrequency(t *testing.T) {
 				Frequency: Fixed,
 			},
 			targetTime:         time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local),
-			expectedWindowEdge: time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC),
+			expectedWindowEdge: time.Time{},
 			expectedIsBetween:  false,
 		},
 		{

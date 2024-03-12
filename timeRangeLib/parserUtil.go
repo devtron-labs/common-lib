@@ -6,20 +6,12 @@ import (
 	"time"
 )
 
-func getHour(hourMin string) string {
-	return strings.Split(hourMin, ":")[0]
-}
-
-func getMinute(hourMin string) string {
-	return strings.Split(hourMin, ":")[1]
+func parseHourMinute(hourMin string) (string, string) {
+	return strings.Split(hourMin, ":")[0], strings.Split(hourMin, ":")[1]
 }
 
 func toString(weekday time.Weekday) string {
 	return strconv.Itoa(int(weekday))
-}
-
-func intToString(value int) string {
-	return strconv.Itoa(value)
 }
 
 func weekdaysToString(weekdays []time.Weekday) string {

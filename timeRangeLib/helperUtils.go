@@ -59,9 +59,9 @@ func getLastDayOfMonth(targetYear int, targetMonth time.Month) int {
 func constructDateTime(hourMinute string, days int) time.Time {
 	now := time.Now()
 	dateTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	fromHour, _ := strconv.Atoi(getHour(hourMinute))
-	fromMinute, _ := strconv.Atoi(getMinute(hourMinute))
-
+	hour, minute := parseHourMinute(hourMinute)
+	fromHour, _ := strconv.Atoi(hour)
+	fromMinute, _ := strconv.Atoi(minute)
 	dateTime = dateTime.Add(time.Duration(fromHour+24*days)*time.Hour + time.Duration(fromMinute)*time.Minute)
 	return dateTime
 }

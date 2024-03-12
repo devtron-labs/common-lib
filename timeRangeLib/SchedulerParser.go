@@ -41,20 +41,17 @@ func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, tim
 }
 
 func (tr TimeRange) getDurationAndCronExp(targetTime time.Time) (time.Duration, string) {
-	//move inside monthly calculation
-	lastDayOfMonth := tr.calculateLastDayOfMonthForOverlappingWindow(targetTime)
-
-	duration := tr.getDuration(lastDayOfMonth)
-	cronExp := tr.getCron(lastDayOfMonth)
+	timeInstant := tr.getTimeRangeInstant(targetTime)
+	cronExp := timeInstant.getCron()
+	duration := timeInstant.getDuration()
 	return duration, cronExp
 }
 
-func (tr TimeRange) calculateLastDayOfMonthForOverlappingWindow(targetTime time.Time) int {
+func (tr TimeRange) calculateLastDayOfMonth(targetTime time.Time) int {
 	month, year := tr.getMonthAndYearForPreviousWindow(targetTime)
 	return getLastDayOfMonth(year, month)
 }
 
-// directrly fetch duration from function inside here
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time.Duration, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
 

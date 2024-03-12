@@ -4,39 +4,28 @@ import (
 	"time"
 )
 
-func (tr TimeRange) getDuration(monthEnd int) time.Duration {
-	switch tr.Frequency {
-	case Daily, Weekly:
-		return getDurationForHourMinute(tr)
-	case WeeklyRange:
-		return getDurationBetweenWeekdays(tr)
-	case Monthly:
-		return getDurationBetweenWeekDates(tr, monthEnd)
-	}
-	return 0
-}
+func (tr TimeRange) getDurationForHourMinute() time.Duration {
 
-func getDurationForHourMinute(timeRange TimeRange) time.Duration {
-
-	parsedHourFrom, _ := time.Parse(hourMinuteFormat, timeRange.HourMinuteFrom)
-	parsedHourTo, _ := time.Parse(hourMinuteFormat, timeRange.HourMinuteTo)
+	parsedHourFrom, _ := time.Parse(hourMinuteFormat, tr.HourMinuteFrom)
+	parsedHourTo, _ := time.Parse(hourMinuteFormat, tr.HourMinuteTo)
 	if parsedHourTo.Before(parsedHourFrom) || parsedHourTo.Equal(parsedHourFrom) {
 		parsedHourTo = parsedHourTo.AddDate(0, 0, 1)
 	}
 	return parsedHourTo.Sub(parsedHourFrom)
 }
 
-func getDurationBetweenWeekdays(timeRange TimeRange) time.Duration {
-	days := calculateDaysBetweenWeekdays(int(timeRange.WeekdayFrom), int(timeRange.WeekdayTo))
+func (tr TimeRange) getDurationBetweenWeekdays() time.Duration {
+	days := calculateDaysBetweenWeekdays(int(tr.WeekdayFrom), int(tr.WeekdayTo))
 
-	fromDateTime := constructDateTime(timeRange.HourMinuteFrom, 0)
-	toDateTime := constructDateTime(timeRange.HourMinuteTo, days)
+	fromDateTime := constructDateTime(tr.HourMinuteFrom, 0)
+	toDateTime := constructDateTime(tr.HourMinuteTo, days)
 	return toDateTime.Sub(fromDateTime)
 }
 
-func getDurationBetweenWeekDates(timeRange TimeRange, monthEnd int) time.Duration {
-	days := getDaysCount(timeRange, monthEnd)
-	fromDateTime := constructDateTime(timeRange.HourMinuteFrom, 0)
-	toDateTime := constructDateTime(timeRange.HourMinuteTo, days)
+func (tr TimeRange) getDurationBetweenWeekDates(targetTime time.Time) time.Duration {
+	lastDayOfMonth := tr.calculateLastDayOfMonth(targetTime)
+	days := getDaysCount(tr, lastDayOfMonth)
+	fromDateTime := constructDateTime(tr.HourMinuteFrom, 0)
+	toDateTime := constructDateTime(tr.HourMinuteTo, days)
 	return toDateTime.Sub(fromDateTime)
 }
