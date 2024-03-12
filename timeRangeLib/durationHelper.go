@@ -24,7 +24,7 @@ func (tr TimeRange) getDurationBetweenWeekdays() time.Duration {
 
 func (tr TimeRange) getDurationBetweenWeekDates(targetTime time.Time) time.Duration {
 	lastDayOfMonth := tr.calculateLastDayOfMonth(targetTime)
-	days := getDaysCount(tr, lastDayOfMonth)
+	days := tr.getDaysCount(lastDayOfMonth)
 	fromDateTime := constructDateTime(tr.HourMinuteFrom, 0)
 	toDateTime := constructDateTime(tr.HourMinuteTo, days)
 	return toDateTime.Sub(fromDateTime)

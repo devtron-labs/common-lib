@@ -12,11 +12,6 @@ func (tr TimeRange) GetTimeRangeWindow(targetTime time.Time) (nextWindowEdge tim
 		return nextWindowEdge, false, err
 	}
 
-	if tr.Frequency == Fixed {
-		nextWindowEdge, isTimeBetween = getWindowForFixedTime(targetTime, tr)
-		return nextWindowEdge, isTimeBetween, nil
-	}
-
 	windowStart, windowEnd, err := tr.getWindowForTargetTime(targetTime)
 	if err != nil {
 		return nextWindowEdge, isTimeBetween, err
@@ -29,6 +24,12 @@ func (tr TimeRange) GetTimeRangeWindow(targetTime time.Time) (nextWindowEdge tim
 
 // have one function foe both fixed and non fixed deduce from type from tr
 func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, time.Time, error) {
+
+	if tr.Frequency == Fixed {
+		windowStart, windowEnd := tr.getWindowForFixedTime(targetTime)
+		return windowStart, windowEnd, nil
+	}
+
 	duration, cronExp := tr.getDurationAndCronExp(targetTime)
 	parser := cron.NewParser(CRON)
 	schedule, err := parser.Parse(cronExp)
@@ -112,15 +113,10 @@ func isTimeInBetween(timeCurrent, periodStart, periodEnd time.Time) bool {
 	return (timeCurrent.After(periodStart) && timeCurrent.Before(periodEnd)) || timeCurrent.Equal(periodStart)
 }
 
-func getWindowForFixedTime(targetTime time.Time, timeRange TimeRange) (time.Time, bool) {
+func (tr TimeRange) getWindowForFixedTime(targetTime time.Time) (time.Time, time.Time) {
 	var windowStartOrEnd time.Time
-	if targetTime.After(timeRange.TimeTo) {
-		return windowStartOrEnd, false
-	} else if targetTime.Before(timeRange.TimeFrom) {
-		return timeRange.TimeFrom, false
-		//} else if targetTime.Before(timeRange.TimeTo) && targetTime.After(timeRange.TimeFrom) {
-	} else if isTimeInBetween(targetTime, timeRange.TimeFrom, timeRange.TimeTo) {
-		return timeRange.TimeTo, true
+	if targetTime.After(tr.TimeTo) {
+		return windowStartOrEnd, windowStartOrEnd
 	}
-	return windowStartOrEnd, false
+	return tr.TimeFrom, tr.TimeTo
 }

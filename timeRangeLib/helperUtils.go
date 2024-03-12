@@ -25,20 +25,20 @@ func (tr TimeRange) isToHourMinuteBeforeWindowEnd(targetTime time.Time) bool {
 	return currentHourMinute.Before(parsedHourTo)
 }
 
-func getDaysCount(timeRange TimeRange, monthEnd int) int {
+func (tr TimeRange) getDaysCount(monthEnd int) int {
 
-	windowEndDay := timeRange.DayTo
+	windowEndDay := tr.DayTo
 	if windowEndDay < 0 {
 		windowEndDay = monthEnd + 1 + windowEndDay
 	}
 
-	windowStartDay := timeRange.DayFrom
+	windowStartDay := tr.DayFrom
 	if windowStartDay < 0 {
 		windowStartDay = monthEnd + 1 + windowStartDay
 	}
 
 	totalDays := windowEndDay - windowStartDay
-	if timeRange.isMonthOverlapping() {
+	if tr.isMonthOverlapping() {
 		totalDays = totalDays + monthEnd
 	}
 	return totalDays
