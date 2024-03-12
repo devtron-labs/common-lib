@@ -60,7 +60,7 @@ func constructDateTime(hourMinute string, days int) time.Time {
 	return dateTime
 }
 
-func isFromBeforeTo(from, to string) bool {
+func isToBeforeFrom(from, to string) bool {
 	parseHourFrom, _ := time.Parse(hourMinuteFormat, from)
 	parsedHourTo, _ := time.Parse(hourMinuteFormat, to)
 	return parsedHourTo.Before(parseHourFrom)

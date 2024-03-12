@@ -9,7 +9,7 @@ import (
 
 func (tr TimeRange) ValidateTimeRange() error {
 	if !slices.Contains(AllowedFrequencies, tr.Frequency) {
-		return errors.New("invalid Frequency type")
+		return errors.New(string(InvalidFrequencyType))
 	}
 	if tr.Frequency != Fixed {
 		err := validateHourMinute(tr.HourMinuteFrom)
@@ -25,45 +25,45 @@ func (tr TimeRange) ValidateTimeRange() error {
 	switch tr.Frequency {
 	case Daily:
 		if tr.HourMinuteFrom == "" || tr.HourMinuteTo == "" {
-			return errors.New("HourMinuteFrom and HourMinuteTo must be present for Daily frequency")
+			return errors.New(string(HourMinuteNotPresent))
 		}
 	case Fixed:
 		if tr.TimeFrom.IsZero() || tr.TimeTo.IsZero() {
-			return errors.New("TimeFrom and TimeTo must be present for Fixed frequency")
+			return errors.New(string(TimeFromOrToNotPresent))
 		}
 		if tr.TimeFrom.After(tr.TimeTo) {
-			return errors.New("TimeFrom must be less than TimeTo for Fixed frequency")
+			return errors.New(string(TimeFromLessThanTimeTo))
 		}
 		if tr.TimeFrom.Equal(tr.TimeTo) {
-			return errors.New("TimeFrom must not be equal to TimeTo for Fixed frequency")
+			return errors.New(string(TimeFromEqualToTimeTo))
 		}
 	case Weekly:
 		if len(tr.Weekdays) == 0 {
-			return errors.New("weekdays, must be present for Weekly frequency")
+			return errors.New(string(WeekDaysNotPresent))
 		}
 	case WeeklyRange:
 		if tr.WeekdayFrom == 0 || tr.WeekdayTo == 0 {
-			return errors.New("WeekdayFrom, must be present for WeeklyRange frequency")
+			return errors.New(string(WeekDayFromOrToNotPresent))
 		}
 		if (tr.WeekdayFrom < 0 || tr.WeekdayFrom > 6) || (tr.WeekdayTo < 0 || tr.WeekdayTo > 6) {
-			return errors.New("one or both of the values are outside the range of 0 to 6")
+			return errors.New(string(WeekDayOutsideRange))
 		}
 	case Monthly:
 		if tr.DayFrom == 0 || tr.DayTo == 0 {
-			return errors.New("DayFrom, DayTo, must be present for Monthly frequency")
+			return errors.New(string(DayFromOrToNotPresent))
 		}
-		if tr.DayFrom == tr.DayTo && isFromBeforeTo(tr.HourMinuteFrom, tr.HourMinuteTo) {
-			return errors.New("Invalid value of hourMinuteFrom or hourMinuteTo  for same day ,hourMinuteFrom >hourMinuteTo")
+		if tr.DayFrom == tr.DayTo && isToBeforeFrom(tr.HourMinuteFrom, tr.HourMinuteTo) {
+			return errors.New(string(ToBeforeFrom))
 		}
 		// this is to prevent overlapping windows crossing to next month for both negatives
 		if tr.DayFrom < 0 && tr.DayTo < 0 && tr.DayFrom > tr.DayTo {
-			return errors.New("invalid value of DayFrom or DayTo,DayFrom and DayTo is less than zero and  DayFrom > DayTo")
+			return errors.New(string(BothLessThanZeroAndFromGreaterThanTo))
 		}
 		// this is an edge case where with negative 'to' date results into a date before the 'from' date
 		// example: 26,-4 will pe prevented because for February it will become invalid
 		// also currently max negative supported is third last day of the month
 		if (tr.DayTo < 0 && tr.DayFrom > 0 && tr.DayFrom > 29+tr.DayTo) || tr.DayTo < -3 || tr.DayFrom < -3 {
-			return errors.New("invalid value of DayFrom or DayTo")
+			return errors.New(string(DayFromOrToNotValid))
 		}
 	}
 	return nil

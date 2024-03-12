@@ -16,7 +16,6 @@ func (tr TimeRange) getDurationForHourMinute() time.Duration {
 
 func (tr TimeRange) getDurationBetweenWeekdays() time.Duration {
 	days := calculateDaysBetweenWeekdays(int(tr.WeekdayFrom), int(tr.WeekdayTo))
-
 	fromDateTime := constructDateTime(tr.HourMinuteFrom, 0)
 	toDateTime := constructDateTime(tr.HourMinuteTo, days)
 	return toDateTime.Sub(fromDateTime)

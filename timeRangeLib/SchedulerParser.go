@@ -11,7 +11,6 @@ func (tr TimeRange) GetTimeRangeWindow(targetTime time.Time) (nextWindowEdge tim
 	if err != nil {
 		return nextWindowEdge, false, err
 	}
-
 	windowStart, windowEnd, err := tr.getWindowForTargetTime(targetTime)
 	if err != nil {
 		return nextWindowEdge, isTimeBetween, err
@@ -22,30 +21,26 @@ func (tr TimeRange) GetTimeRangeWindow(targetTime time.Time) (nextWindowEdge tim
 	return windowStart, false, nil
 }
 
-// have one function foe both fixed and non fixed deduce from type from tr
 func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, time.Time, error) {
 
 	if tr.Frequency == Fixed {
 		windowStart, windowEnd := tr.getWindowForFixedTime(targetTime)
 		return windowStart, windowEnd, nil
 	}
-
-	duration, cronExp := tr.getDurationAndCronExp(targetTime)
+	cronExp := tr.getTimeRangeInstant(targetTime).getCron()
 	parser := cron.NewParser(CRON)
 	schedule, err := parser.Parse(cronExp)
 	if err != nil {
 		return time.Time{}, time.Time{}, fmt.Errorf("error parsing cron expression %s %v", cronExp, err)
 	}
-
-	windowStart, windowEnd := tr.getWindowStartAndEndTime(targetTime, duration, schedule)
+	windowStart, windowEnd := tr.getWindowStartAndEndTime(targetTime, schedule)
 	return windowStart, windowEnd, nil
 }
 
-func (tr TimeRange) getDurationAndCronExp(targetTime time.Time) (time.Duration, string) {
-	timeInstant := tr.getTimeRangeInstant(targetTime)
-	cronExp := timeInstant.getCron()
-	duration := timeInstant.getDuration()
-	return duration, cronExp
+func (tr TimeRange) getDurationAndCronExp(targetTime time.Time) string {
+	cronExp := tr.getTimeRangeInstant(targetTime).getCron()
+
+	return cronExp
 }
 
 func (tr TimeRange) calculateLastDayOfMonth(targetTime time.Time) int {
@@ -53,9 +48,9 @@ func (tr TimeRange) calculateLastDayOfMonth(targetTime time.Time) int {
 	return getLastDayOfMonth(year, month)
 }
 
-func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, duration time.Duration, schedule cron.Schedule) (time.Time, time.Time) {
+func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
-
+	duration := tr.getTimeRangeInstant(targetTime).getDuration()
 	timeMinusDuration := tr.currentTimeMinusWindowDuration(targetTime, duration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
