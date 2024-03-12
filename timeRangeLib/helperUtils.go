@@ -25,12 +25,6 @@ func (tr TimeRange) isToHourMinuteBeforeWindowEnd(targetTime time.Time) bool {
 	return currentHourMinute.Before(parsedHourTo)
 }
 
-func (tr TimeRange) compareHourMinute() bool {
-	parseHourFrom, _ := time.Parse(hourMinuteFormat, tr.HourMinuteFrom)
-	parsedHourTo, _ := time.Parse(hourMinuteFormat, tr.HourMinuteTo)
-	return parsedHourTo.Before(parseHourFrom)
-}
-
 func getDaysCount(timeRange TimeRange, monthEnd int) int {
 
 	windowEndDay := timeRange.DayTo
@@ -64,4 +58,10 @@ func constructDateTime(hourMinute string, days int) time.Time {
 	fromMinute, _ := strconv.Atoi(minute)
 	dateTime = dateTime.Add(time.Duration(fromHour+24*days)*time.Hour + time.Duration(fromMinute)*time.Minute)
 	return dateTime
+}
+
+func isFromBeforeTo(from, to string) bool {
+	parseHourFrom, _ := time.Parse(hourMinuteFormat, from)
+	parsedHourTo, _ := time.Parse(hourMinuteFormat, to)
+	return parsedHourTo.Before(parseHourFrom)
 }
