@@ -27,6 +27,9 @@ func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, tim
 		windowStart, windowEnd := tr.getWindowForFixedTime(targetTime)
 		return windowStart, windowEnd, nil
 	}
+	// create func tr.getCronSchedule(targetTime)
+	//add comment why target time is required
+
 	cronExp := tr.getTimeRangeInstant(targetTime).getCron()
 	parser := cron.NewParser(CRON)
 	schedule, err := parser.Parse(cronExp)
@@ -48,13 +51,22 @@ func (tr TimeRange) calculateLastDayOfMonth(targetTime time.Time) int {
 	return getLastDayOfMonth(year, month)
 }
 
+//move schedule inside
+
+// start and end time of the same window
+
+// create cronSchdule from timeRange
+// closest start time using cronSchedule
+// find duration from timeRange,
+// calculate endTime using duration & startTime
+
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time, schedule cron.Schedule) (time.Time, time.Time) {
 	var windowEnd time.Time
-	duration := tr.getTimeRangeInstant(targetTime).getDuration()
+	duration := tr.getTimeWindowDuration(targetTime)
 	timeMinusDuration := tr.currentTimeMinusWindowDuration(targetTime, duration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
-
+	//get adjustunderboundary() adjustedstart
 	if !tr.TimeFrom.IsZero() && windowStart.Before(tr.TimeFrom) {
 		windowStart = tr.TimeFrom
 	}

@@ -2,6 +2,11 @@ package timeRangeLib
 
 import "time"
 
+func (tr TimeRange) getTimeWindowDuration(targetTime time.Time) time.Duration {
+	return tr.getTimeRangeInstant(targetTime).getDuration()
+}
+
+// getTimeRangeExpressionEvaluator
 func (tr TimeRange) getTimeRangeInstant(targetTime time.Time) timeRangeInstant {
 
 	common := tr.buildTimeInstantCommon(targetTime)
@@ -35,6 +40,8 @@ type timeRangeInstant interface {
 	getCron() string
 	getDuration() time.Duration
 }
+
+//change name
 
 type TimeRangeInstantCalculated struct {
 	Hour   string
