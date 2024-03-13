@@ -208,13 +208,13 @@ func TestGetDurationAndGetCron(t *testing.T) {
 	for i, test := range tests {
 		// Test getDuration method
 
-		gotDuration := test.timeRange.getTimeRangeInstant(time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local)).getDuration()
+		gotDuration := test.timeRange.getTimeRangeExpressionEvaluator(time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local)).getDuration()
 		if gotDuration != test.wantDuration {
 			t.Errorf("Test case %d: getDuration() = %v, want %v", i+1, gotDuration, test.wantDuration)
 		}
 
 		// Test getCron method
-		gotCron := test.timeRange.getTimeRangeInstant(time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local)).getCron()
+		gotCron := test.timeRange.getTimeRangeExpressionEvaluator(time.Date(2024, time.Month(2), 26, 18, 0, 0, 0, time.Local)).getCron()
 		if gotCron != test.wantCron {
 			t.Errorf("Test case %d: getCron() = %v, want %v", i+1, gotCron, test.wantCron)
 		}
