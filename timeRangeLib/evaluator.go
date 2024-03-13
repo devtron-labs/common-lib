@@ -59,7 +59,7 @@ func (evaluator BaseTimeRangeExpressionEvaluator) getMonthAndYearForPreviousWind
 	month := evaluator.TargetTime.Month()
 	year := evaluator.TargetTime.Year()
 
-	if evaluator.isMonthOverlapping() && evaluator.isInsideOverLap(evaluator.TargetTime) {
+	if evaluator.isMonthOverlapping() && evaluator.isInsideOverLap() {
 		month, year = getPreviousMonthAndYear(month, year)
 	}
 	return month, year
@@ -67,7 +67,7 @@ func (evaluator BaseTimeRangeExpressionEvaluator) getMonthAndYearForPreviousWind
 
 func (evaluator BaseTimeRangeExpressionEvaluator) getDurationOfPreviousWindow(duration time.Duration) time.Duration {
 	prevDuration := duration
-	if evaluator.isMonthOverlapping() && !evaluator.isInsideOverLap(evaluator.TargetTime) {
+	if evaluator.isMonthOverlapping() && !evaluator.isInsideOverLap() {
 		prevDuration = evaluator.getAdjustedDuration(duration, prevDuration)
 	}
 	return prevDuration
@@ -83,15 +83,15 @@ func (evaluator BaseTimeRangeExpressionEvaluator) getAdjustedDuration(duration t
 	return prevDuration
 }
 
-func (evaluator BaseTimeRangeExpressionEvaluator) isInsideOverLap(targetTime time.Time) bool {
+func (evaluator BaseTimeRangeExpressionEvaluator) isInsideOverLap() bool {
 	// for an overlapping window if the current time is on the latter part of the overlap then
 	// we use the last month for calculation.
 	tr := evaluator.TimeRange
-	day := targetTime.Day()
+	day := evaluator.TargetTime.Day()
 	if day < 1 {
 		return false
 	}
-	return day < tr.DayTo || (day == tr.DayTo && isToHourMinuteBeforeWindowEnd(tr.HourMinuteTo, targetTime))
+	return day < tr.DayTo || (day == tr.DayTo && isToHourMinuteBeforeWindowEnd(tr.HourMinuteTo, evaluator.TargetTime))
 }
 
 func (evaluator BaseTimeRangeExpressionEvaluator) isMonthOverlapping() bool {
