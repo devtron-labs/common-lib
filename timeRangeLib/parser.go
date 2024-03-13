@@ -32,27 +32,29 @@ func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, tim
 
 // here target time is required to handle exceptions in monthly
 // frequency where current time determines the cron and duration
-func (tr TimeRange) getCronScheduleAndDuration(targetTime time.Time) (cron.Schedule, time.Duration, error) {
+func (tr TimeRange) getCronScheduleAndDuration(targetTime time.Time) (cron.Schedule, time.Duration, time.Duration, error) {
 
 	evaluator := tr.getTimeRangeExpressionEvaluator(targetTime)
 	cronExp := evaluator.getCron()
 	parser := cron.NewParser(CRON)
 	schedule, err := parser.Parse(cronExp)
 	if err != nil {
-		return nil, 0, fmt.Errorf("error parsing cron expression %s %v", cronExp, err)
+		return nil, 0, 0, fmt.Errorf("error parsing cron expression %s %v", cronExp, err)
 	}
-	return schedule, evaluator.getDuration(), nil
+	duration := evaluator.getDuration()
+	prevDuration := evaluator.getDurationOfPreviousWindow(duration)
+	return schedule, duration, prevDuration, nil
 }
 
 func (tr TimeRange) getWindowStartAndEndTime(targetTime time.Time) (time.Time, time.Time, error) {
 
 	var windowEnd time.Time
-	schedule, duration, err := tr.getCronScheduleAndDuration(targetTime)
+	schedule, duration, prevDuration, err := tr.getCronScheduleAndDuration(targetTime)
 	if err != nil {
 		return windowEnd, windowEnd, err
 	}
 
-	timeMinusDuration := tr.currentTimeMinusWindowDuration(targetTime, duration)
+	timeMinusDuration := tr.currentTimeMinusWindowDuration(targetTime, prevDuration)
 	windowStart := schedule.Next(timeMinusDuration)
 	windowEnd = windowStart.Add(duration)
 
@@ -71,9 +73,7 @@ func (tr TimeRange) applyStartEndBoundary(windowStart time.Time, windowEnd time.
 }
 
 func (tr TimeRange) currentTimeMinusWindowDuration(targetTime time.Time, duration time.Duration) time.Time {
-
-	prevDuration := tr.getTimeRangeExpressionEvaluator(targetTime).getDurationOfPreviousWindow(duration)
-	return targetTime.Add(-1 * prevDuration)
+	return targetTime.Add(-1 * duration)
 }
 
 func (tr TimeRange) getWindowForFixedTime(targetTime time.Time) (time.Time, time.Time) {
