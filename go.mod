@@ -13,7 +13,7 @@ require (
 	github.com/arl/statsviz v0.6.0
 	github.com/aws/aws-sdk-go v1.44.116
 	github.com/caarlos0/env v3.5.0+incompatible
-	github.com/devtron-labs/authenticator v0.4.31
+	github.com/devtron-labs/authenticator v0.4.34-0.20240208084114-6e2552488da8
 	github.com/gorilla/mux v1.8.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/stretchr/testify v1.8.4
