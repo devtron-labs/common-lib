@@ -23,22 +23,28 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 
 	// t.SkipNow()
 	t.Run("PubAndSub", func(t *testing.T) {
+		//	err := os.Setenv("STREAM_CONFIG_JSON", "{\"Devtron_Test_Stream\":{\"streamConfig\":{\"max_age\":900000000000,\"num_replicas\":4}}}")
+		//	fmt.Println(err)
+		//err := os.Setenv("CONSUMER_CONFIG_JSON", "{\"Test_Topic_Consumer\":{\"replicas\":2}}")
+		err := os.Setenv("CONSUMER_CONFIG_JSON", "{\"Test_Topic_Consumer\":{\"natsMsgProcessingBatchSize\":3,\"natsMsgBufferSize\":64,\"replicas\":2}}")
+
+		fmt.Println(err)
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
-		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
+		err = pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
 			fmt.Println("Data received:", msg.Data)
 		},
-			func(msg *model.PubSubMsg) {
-
+			func(msg model.PubSubMsg) (string, []interface{}) {
+				return "", nil
 			})
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
-		err = pubSubClient.Publish(DEVTRON_TEST_TOPIC, "published Msg "+strconv.Itoa(time.Now().Second()))
+		err = pubSubClient.Publish(DEVTRON_TEST_TOPIC, "published Msg "+"hhhhhhi")
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while publishing to topic")
 		}
-		time.Sleep(time.Duration(5) * time.Second)
+		time.Sleep(time.Duration(10) * time.Second)
 	})
 
 	t.Run("SubOnly", func(t *testing.T) {
@@ -46,10 +52,9 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
 		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {
 			fmt.Println("Data received:", msg.Data)
-		},
-			func(msg *model.PubSubMsg) {
-
-			})
+		}, func(msg model.PubSubMsg) (string, []interface{}) {
+			return "", nil
+		})
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
@@ -67,10 +72,9 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 			lock.Unlock()
 			fmt.Println(time.Now(), "Data received:", msg.Data, " count", Consumed_Counter)
 			time.Sleep(1 * time.Second)
-		},
-			func(msg *model.PubSubMsg) {
-
-			})
+		}, func(msg model.PubSubMsg) (string, []interface{}) {
+			return "", nil
+		})
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		}
