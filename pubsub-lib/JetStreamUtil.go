@@ -95,6 +95,9 @@ const (
 	CD_STAGE_SUCCESS_EVENT_TOPIC        string = "CD-STAGE-SUCCESS-EVENT"
 	CD_STAGE_SUCCESS_EVENT_GROUP        string = "CD-STAGE-SUCCESS-EVENT-GROUP"
 	CD_STAGE_SUCCESS_EVENT_DURABLE      string = "CD-STAGE-SUCCESS-EVENT-DURABLE"
+	NOTIFICATION_EVENT_TOPIC            string = "NOTIFICATION_EVENT_TOPIC"
+	NOTIFICATION_EVENT_GROUP            string = "NOTIFICATION_EVENT_GROUP"
+	NOTIFICATION_EVENT_DURABLE          string = "NOTIFICATION_EVENT_DURABLE"
 )
 
 type NatsTopic struct {
@@ -138,6 +141,7 @@ var natsTopicMapping = map[string]NatsTopic{
 	DEVTRON_CHART_INSTALL_TOPIC:       {topicName: DEVTRON_CHART_INSTALL_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: DEVTRON_CHART_INSTALL_GROUP, consumerName: DEVTRON_CHART_INSTALL_DURABLE},
 	PANIC_ON_PROCESSING_TOPIC:         {topicName: PANIC_ON_PROCESSING_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: PANIC_ON_PROCESSING_GROUP, consumerName: PANIC_ON_PROCESSING_DURABLE},
 	CD_STAGE_SUCCESS_EVENT_TOPIC:      {topicName: CD_STAGE_SUCCESS_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: CD_STAGE_SUCCESS_EVENT_GROUP, consumerName: CD_STAGE_SUCCESS_EVENT_DURABLE},
+	NOTIFICATION_EVENT_TOPIC:          {topicName: NOTIFICATION_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: NOTIFICATION_EVENT_GROUP, consumerName: NOTIFICATION_EVENT_DURABLE},
 }
 
 var NatsStreamWiseConfigMapping = map[string]NatsStreamConfig{
@@ -170,6 +174,7 @@ var NatsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
 	DEVTRON_CHART_INSTALL_DURABLE:       {},
 	PANIC_ON_PROCESSING_DURABLE:         {},
 	DEVTRON_TEST_CONSUMER:               {},
+	NOTIFICATION_EVENT_DURABLE:          {},
 }
 
 // getConsumerConfigMap will fetch the consumer wise config from the json string
