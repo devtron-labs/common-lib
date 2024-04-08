@@ -1,6 +1,7 @@
 package pubsub_lib
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/devtron-labs/common-lib/pubsub-lib/model"
@@ -40,8 +41,21 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		//if err != nil {
 		//	sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		//}
+		type Event struct {
+			AppId   int    `json:"appId"`
+			EnvId   int    `json:"envId"`
+			TeamId  int    `json:"teamId"`
+			BaseUrl string `json:"baseUrl"`
+		}
+		event := Event{
+			AppId:   34,
+			EnvId:   44,
+			TeamId:  565,
+			BaseUrl: "www.raunit.com",
+		}
+		jsonData, err := json.Marshal(event)
 
-		err := pubSubClient.Publish(DEVTRON_TEST_TOPIC, "published Msg "+"gireesh")
+		err = pubSubClient.Publish("NOTIFICATION_EVENT_TOPIC", string(jsonData))
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while publishing to topic")
 		}
@@ -49,6 +63,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 	})
 
 	t.Run("SubOnly", func(t *testing.T) {
+		nats.NewInbox()
 		sugaredLogger, _ := utils.NewSugardLogger()
 		var pubSubClient = NewPubSubClientServiceImpl(sugaredLogger)
 		err := pubSubClient.Subscribe(DEVTRON_TEST_TOPIC, func(msg *model.PubSubMsg) {

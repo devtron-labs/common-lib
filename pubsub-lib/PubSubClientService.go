@@ -132,7 +132,6 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *m
 		impl.Logger.Fatalw("error while subscribing to nats ", "stream", streamName, "topic", topic, "error", err)
 		return err
 	}
-
 	go impl.startListeningForEvents(processingBatchSize, channel, callback, loggerFunc, validations...)
 
 	//time.Sleep(10 * time.Second)

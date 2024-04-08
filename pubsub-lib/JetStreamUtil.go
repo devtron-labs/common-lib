@@ -27,7 +27,7 @@ import (
 
 const (
 	CI_RUNNER_STREAM                    string = "CI-RUNNER"
-	ORCHESTRATOR_STREAM                 string = "ORCHESTRATOR"
+	ORCHESTRATOR_STREAM                 string = "ORCHESTRATOR_STREAM"
 	KUBEWATCH_STREAM                    string = "KUBEWATCH"
 	GIT_SENSOR_STREAM                   string = "GIT-SENSOR"
 	IMAGE_SCANNER_STREAM                string = "IMAGE-SCANNER"
@@ -109,6 +109,7 @@ type NatsTopic struct {
 	queueName    string // needed for load balancing
 	consumerName string
 }
+
 type ConfigJson struct {
 	// StreamConfigJson is a json string of map[string]NatsStreamConfig
 	StreamConfigJson string `env:"STREAM_CONFIG_JSON"`
@@ -146,7 +147,7 @@ var natsTopicMapping = map[string]NatsTopic{
 	CD_STAGE_SUCCESS_EVENT_TOPIC:      {topicName: CD_STAGE_SUCCESS_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: CD_STAGE_SUCCESS_EVENT_GROUP, consumerName: CD_STAGE_SUCCESS_EVENT_DURABLE},
 
 	CD_PIPELINE_DELETE_EVENT_TOPIC: {topicName: CD_PIPELINE_DELETE_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: CD_PIPELINE_DELETE_EVENT_GROUP, consumerName: CD_PIPELINE_DELETE_EVENT_DURABLE},
-	NOTIFICATION_EVENT_TOPIC:          {topicName: NOTIFICATION_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: NOTIFICATION_EVENT_GROUP, consumerName: NOTIFICATION_EVENT_DURABLE},
+	NOTIFICATION_EVENT_TOPIC:       {topicName: NOTIFICATION_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: NOTIFICATION_EVENT_GROUP, consumerName: NOTIFICATION_EVENT_DURABLE},
 }
 
 var NatsStreamWiseConfigMapping = map[string]NatsStreamConfig{
