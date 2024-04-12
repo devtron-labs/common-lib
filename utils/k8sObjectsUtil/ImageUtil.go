@@ -13,11 +13,7 @@ func getPath(item string, path []string) []string {
 func ExtractImages(obj unstructured.Unstructured) []string {
 	images := make([]string, 0)
 
-	kind := obj.GetKind()
-	subPath, ok := commonBean.KindToPath[kind]
-	if !ok {
-		return images
-	}
+	subPath := commonBean.GetContainerSubPathForKind(obj.GetKind())
 	allContainers := make([]interface{}, 0)
 	containers, _, _ := unstructured.NestedSlice(obj.Object, getPath(commonBean.Containers, subPath)...)
 	if len(containers) > 0 {
