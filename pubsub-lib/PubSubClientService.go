@@ -292,8 +292,9 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 			existingConfig.Replicas = replicas
 			updatesDetected = true
 		} else {
-			impl.Logger.Errorw("replicas >1 is not possible in non-clustered mode ")
-
+			if replicas > 1 {
+				impl.Logger.Errorw("replicas >1 is not possible in non-clustered mode ")
+			}
 		}
 
 	}

@@ -42,16 +42,20 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		//	sugaredLogger.Fatalw("error occurred while subscribing to topic")
 		//}
 		type Event struct {
-			AppId   int    `json:"appId"`
-			EnvId   int    `json:"envId"`
-			TeamId  int    `json:"teamId"`
-			BaseUrl string `json:"baseUrl"`
+			AppId     int    `json:"appId"`
+			EnvId     int    `json:"envId"`
+			TeamId    int    `json:"teamId"`
+			BaseUrl   string `json:"baseUrl"`
+			Payload   any    `json:"payload"`
+			EventTime string `json:"eventTime"`
 		}
 		event := Event{
-			AppId:   34,
-			EnvId:   44,
-			TeamId:  565,
-			BaseUrl: "www.raunit.com",
+			AppId:     34,
+			EnvId:     44,
+			TeamId:    565,
+			BaseUrl:   "www.kishan.com",
+			Payload:   "kishan",
+			EventTime: "123",
 		}
 		jsonData, err := json.Marshal(event)
 

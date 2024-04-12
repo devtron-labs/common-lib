@@ -27,7 +27,7 @@ import (
 
 const (
 	CI_RUNNER_STREAM                    string = "CI-RUNNER"
-	ORCHESTRATOR_STREAM                 string = "ORCHESTRATOR_STREAM"
+	ORCHESTRATOR_STREAM                 string = "ORCHESTRATOR"
 	KUBEWATCH_STREAM                    string = "KUBEWATCH"
 	GIT_SENSOR_STREAM                   string = "GIT-SENSOR"
 	IMAGE_SCANNER_STREAM                string = "IMAGE-SCANNER"
