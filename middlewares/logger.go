@@ -9,8 +9,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// interceptorLogger adapts go-kit logger to interceptor logger.
-func interceptorLogger(enableLogger bool, lg *zap.SugaredLogger) logging.Logger {
+// InterceptorLogger adapts go-kit logger to interceptor logger.
+func InterceptorLogger(enableLogger bool, lg *zap.SugaredLogger) logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
 		if !enableLogger {
 			return
@@ -36,7 +36,7 @@ func extractedFields(fields []any) []byte {
 	finalReq, _ := json.Marshal(req)
 	return finalReq
 }
-func generateLogFields(ctx context.Context, meta interceptors.CallMeta) logging.Fields {
+func GenerateLogFields(ctx context.Context, meta interceptors.CallMeta) logging.Fields {
 	fields := logging.Fields{logging.MethodFieldKey, meta.Method}
 	ctx = logging.InjectFields(ctx, fields)
 	return fields
