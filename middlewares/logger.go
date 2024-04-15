@@ -33,12 +33,13 @@ func getIndex(fields []any, fieldKey any) int {
 func extractRequestFromFields(fields []any, removeFields []string) []byte {
 	index := getIndex(fields, RequestFieldKey)
 	req := make(map[string]interface{})
-	marshal, _ := json.Marshal(fields[index+1])
-	json.Unmarshal(marshal, &req)
-	if len(removeFields) > 0 {
-		for _, field := range removeFields {
-			delete(req, field)
-		}
+	marshalReq, _ := json.Marshal(fields[index+1])
+	if len(removeFields) == 0 {
+		return marshalReq
+	}
+	json.Unmarshal(marshalReq, &req)
+	for _, field := range removeFields {
+		delete(req, field)
 	}
 	finalReq, _ := json.Marshal(req)
 	return finalReq
