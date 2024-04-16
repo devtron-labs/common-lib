@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
@@ -20,10 +21,13 @@ func InterceptorLogger(enableLogger bool, removeFields []string, lg *zap.Sugared
 		if !enableLogger {
 			return
 		}
-		req := extractFromFields(fields, RequestFieldKey)
-		finalReq := extractRequestAfterRemovingFields(req, removeFields)
-		methodName := extractFromFields(fields, MethodFieldKey)
-		message := fmt.Sprintf("AUDIT_LOG: requestMethod: %s, requestPayload: %s", methodName, finalReq)
+		var meta interceptors.CallMeta
+		fields1 := logging.Fields{meta.Method, meta.ReqOrNil}
+		fmt.Println(fields1)
+		//req := extractFromFields(fields, RequestFieldKey)
+		//finalReq := extractRequestAfterRemovingFields(req, removeFields)
+		//methodName := extractFromFields(fields, MethodFieldKey)
+		message := fmt.Sprintf("AUDIT_LOG: requestMethod: %s, requestPayload: %s", meta.Method, meta.ReqOrNil)
 		lg.Info(message)
 	})
 }
