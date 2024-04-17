@@ -36,14 +36,16 @@ func ExtractImages(obj unstructured.Unstructured) []string {
 	return images
 }
 
-func ExtractImageFromManifestYaml(manifestYaml string) ([]string, error) {
+func ExtractImageFromManifestYaml(manifestYaml string) []string {
+	var dockerImagesFinal []string
 	parsedManifests, err := yamlUtil.SplitYAMLs([]byte(manifestYaml))
 	if err != nil {
-		return nil, err
+
+		return dockerImagesFinal
 	}
-	dockerImages, err := ExtractAllDockerImages(parsedManifests)
-	if err != nil {
-		return nil, err
+	for _, manifest := range parsedManifests {
+		dockerImages := ExtractImages(manifest)
+		dockerImagesFinal = append(dockerImagesFinal, dockerImages...)
 	}
-	return dockerImages, nil
+	return dockerImagesFinal
 }
