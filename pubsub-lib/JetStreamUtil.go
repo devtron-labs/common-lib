@@ -212,11 +212,12 @@ func getStreamConfigMap(jsonString string) map[string]NatsStreamConfig {
 	return resMap
 }
 
-func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
+func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() error {
 	configJson := ConfigJson{}
 	err := env.Parse(&configJson)
 	if err != nil {
-		log.Fatal("error while parsing config from environment params", " err", err)
+		log.Println("error while parsing config from environment params", " err", err)
+		return err
 	}
 
 	// fetch the consumer configs that were given explicitly in the configJson.ConsumerConfigJson
@@ -252,7 +253,7 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
 		}
 		NatsStreamWiseConfigMapping[key] = streamConfig
 	}
-
+	return nil
 }
 
 func GetNatsTopic(topicName string) NatsTopic {
