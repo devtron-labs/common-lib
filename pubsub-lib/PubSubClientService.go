@@ -38,12 +38,12 @@ type PubSubClientServiceImpl struct {
 func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) *PubSubClientServiceImpl {
 	natsClient, err := NewNatsClient(logger)
 	if err != nil {
-		logger.Fatalw("error occurred while creating nats client stopping now!!")
+		logger.Errorw("error occurred while creating nats client stopping now!!")
 	}
 	logsConfig := &model.LogsConfig{}
 	err = env.Parse(logsConfig)
 	if err != nil {
-		logger.Fatalw("error occurred while parsing LogsConfig", "err", err)
+		logger.Errorw("error occurred while parsing LogsConfig", "err", err)
 	}
 	ParseAndFillStreamWiseAndConsumerWiseConfigMaps()
 	pubSubClient := &PubSubClientServiceImpl{
