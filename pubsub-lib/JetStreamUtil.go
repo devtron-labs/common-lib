@@ -216,7 +216,7 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() {
 	configJson := ConfigJson{}
 	err := env.Parse(&configJson)
 	if err != nil {
-		log.Fatal("error while parsing config from environment params", " err", err)
+		log.Println("error while parsing config from environment params", " err", err)
 	}
 
 	// fetch the consumer configs that were given explicitly in the configJson.ConsumerConfigJson
@@ -280,11 +280,11 @@ func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, stream
 			cfgToSet := getNewConfig(streamName, streamConfig)
 			_, err = js.AddStream(cfgToSet)
 			if err != nil {
-				log.Fatal("Error while creating stream. ", "stream name: ", streamName, "error: ", err)
+				log.Println("Error while creating stream. ", "stream name: ", streamName, "error: ", err)
 				return err
 			}
 		} else if err != nil {
-			log.Fatal("Error while getting stream info. ", "stream name: ", streamName, "error: ", err)
+			log.Println("Error while getting stream info. ", "stream name: ", streamName, "error: ", err)
 		} else {
 			config := streamInfo.Config
 			streamConfig.Name = streamName
