@@ -32,9 +32,12 @@ var NatsEventDeliveryCount = promauto.NewHistogramVec(prometheus.HistogramOpts{
 	Name: "nats_event_delivery_count",
 }, []string{"topic", "msg_id"})
 
-var PanicRecoveryCount = promauto.NewCounterVec(prometheus.CounterOpts{
-	Name: "PanicRecoveryCount",
+var HandlerPanicRecoveryCount = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "Handler_Panic_Recovery_Count",
 }, []string{"host", "method", "path", "error"})
+var CronPanicRecoveryCount = promauto.NewCounterVec(prometheus.CounterOpts{
+	Name: "Cron_Panic_Recovery_Count",
+}, []string{"error"})
 
 func IncPublishCount(topic, status string) {
 	NatsPublishingCount.WithLabelValues(topic, status).Inc()
@@ -47,6 +50,10 @@ func IncConsumptionCount(topic string) {
 func IncConsumingCount(topic string) {
 	NatsConsumingCount.WithLabelValues(topic).Inc()
 }
-func IncPanicRecoveryCount(host, method, path, error string) {
-	PanicRecoveryCount.WithLabelValues(host, method, path, error).Inc()
+func IncHandlerPanicRecoveryCount(host, method, path, error string) {
+	HandlerPanicRecoveryCount.WithLabelValues(host, method, path, error).Inc()
+}
+
+func IncCronPanicRecoveryCount(error string) {
+	HandlerPanicRecoveryCount.WithLabelValues(error).Inc()
 }
