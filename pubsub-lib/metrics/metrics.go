@@ -55,5 +55,5 @@ func IncHandlerPanicRecoveryCount(host, method, path, error string) {
 }
 
 func IncCronPanicRecoveryCount(error string) {
-	HandlerPanicRecoveryCount.WithLabelValues(error).Inc()
+	CronPanicRecoveryCount.WithLabelValues(error).Inc()
 }

@@ -16,7 +16,6 @@ func Recovery(next http.Handler) http.Handler {
 		defer func() {
 			err := recover()
 			if err != nil {
-
 				metrics.IncHandlerPanicRecoveryCount(r.Host, r.Method, r.RequestURI, fmt.Sprint(err))
 				log.Print(constants.PanicLogIdentifier, "recovered from panic", "err", err, "stack", string(debug.Stack()))
 				jsonBody, _ := json.Marshal(map[string]string{
