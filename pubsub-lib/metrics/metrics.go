@@ -48,5 +48,5 @@ func IncConsumingCount(topic string) {
 	NatsConsumingCount.WithLabelValues(topic).Inc()
 }
 func IncPanicRecoveryCount(host, method, path string) {
-	PanicRecoveryCount.WithLabelValues(host, method, path)
+	PanicRecoveryCount.WithLabelValues(host, method, path).Inc()
 }
