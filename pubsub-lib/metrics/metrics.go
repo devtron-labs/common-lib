@@ -34,7 +34,7 @@ var NatsEventDeliveryCount = promauto.NewHistogramVec(prometheus.HistogramOpts{
 
 var PanicRecoveryCount = promauto.NewCounterVec(prometheus.CounterOpts{
 	Name: "PanicRecoveryCount",
-}, []string{"host", "method", "path"})
+}, []string{"host", "method", "path", "error"})
 
 func IncPublishCount(topic, status string) {
 	NatsPublishingCount.WithLabelValues(topic, status).Inc()
