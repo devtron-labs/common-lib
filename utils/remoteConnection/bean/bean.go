@@ -37,7 +37,7 @@ type RegistryConfig struct {
 	RegistryUrl               string
 	RegistryUsername          string
 	RegistryPassword          string
-	RegistryConnectionMethod  string //secure, insecure, secure-with-cert
+	RegistryConnectionType    string //secure, insecure, secure-with-cert
 	RegistryCertificateString string
 	ConnectionMethod          ConnectionMethod //ssh, proxy
 	ProxyConfig               *ProxyConfig
