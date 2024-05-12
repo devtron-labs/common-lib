@@ -29,8 +29,10 @@ func (s *DefaultSettingsGetterImpl) GetRegistrySettings(config *Configuration) (
 	}
 
 	return &Settings{
-		RegistryClient:  registryClient,
-		RegistryHostURL: config.RegistryUrl,
+		RegistryClient:         registryClient,
+		RegistryHostURL:        config.RegistryUrl,
+		RegistryConnectionType: REGISTRY_CONNECTION_TYPE_DIRECT,
+		HttpClient:             nil,
 	}, nil
 }
 
