@@ -29,6 +29,7 @@ type Settings struct {
 	RegistryHostURL        string
 	RegistryConnectionType RegistryConnectionType
 	HttpClient             *http.Client
+	Header                 http.Header
 }
 
 const (
