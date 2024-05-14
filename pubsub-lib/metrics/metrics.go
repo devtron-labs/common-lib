@@ -1,40 +1,41 @@
 package metrics
 
 import (
+	"github.com/devtron-labs/common-lib/constants"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 var NatsPublishingCount = promauto.NewCounterVec(prometheus.CounterOpts{
-	Name: "nats_publish_count",
+	Name: constants.NATS_PUBLISH_COUNT,
 	Help: "count of successfully published events on nats",
-}, []string{"topic", "status"})
+}, []string{constants.TOPIC, constants.STATUS})
 
 var NatsConsumptionCount = promauto.NewCounterVec(prometheus.CounterOpts{
-	Name: "nats_consumption_count",
+	Name: constants.NATS_CONSUMPTION_COUNT,
 	Help: "count of consumed events on nats ",
-}, []string{"topic"})
+}, []string{constants.TOPIC})
 
 var NatsConsumingCount = promauto.NewCounterVec(prometheus.CounterOpts{
-	Name: "nats_consuming_count",
+	Name: constants.NATS_CONSUMING_COUNT,
 	Help: "count of nats events whose consumption is in progress",
-}, []string{"topic"})
+}, []string{constants.TOPIC})
 
 var NatsEventConsumptionTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
-	Name: "nats_event_consumption_time",
-}, []string{"topic"})
+	Name: constants.NATS_EVENT_CONSUMPTION_TIME,
+}, []string{constants.TOPIC})
 
 var NatsEventPublishTime = promauto.NewHistogramVec(prometheus.HistogramOpts{
-	Name: "nats_event_publish_time",
-}, []string{"topic"})
+	Name: constants.NATS_EVENT_PUBLISH_TIME,
+}, []string{constants.TOPIC})
 
 var NatsEventDeliveryCount = promauto.NewHistogramVec(prometheus.HistogramOpts{
-	Name: "nats_event_delivery_count",
-}, []string{"topic", "msg_id"})
+	Name: constants.NATS_EVENT_DELIVERY_COUNT,
+}, []string{constants.TOPIC, constants.MESSAGE_ID})
 
 var PanicRecoveryCount = promauto.NewCounterVec(prometheus.CounterOpts{
-	Name: "Panic_Recovery_Count",
-}, []string{"panicType", "host", "method", "path", "error"})
+	Name: constants.PANIC_RECOVERY_COUNT,
+}, []string{constants.PANIC_TYPE, constants.HOST, constants.METHOD, constants.PATH, constants.ERROR})
 
 func IncPublishCount(topic, status string) {
 	NatsPublishingCount.WithLabelValues(topic, status).Inc()
