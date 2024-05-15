@@ -14,6 +14,7 @@ import (
 	"helm.sh/helm/v3/pkg/registry"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -145,6 +146,24 @@ func getLoginOptions(config *Configuration) ([]registry.LoginOption, error) {
 	}
 
 	return loginOptions, nil
+}
+
+func GetHttpClient(config *Configuration) (*http.Client, error) {
+	if len(config.RegistryCAFilePath) == 0 {
+		caFilePath, err := CreateCertificateFile(config.RegistryId, config.RegistryCertificateString)
+		if err != nil {
+			return nil, err
+		}
+		config.RegistryCAFilePath = caFilePath
+	}
+	tlsConfig, err := GetTlsConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	httpClient := &http.Client{
+		Transport: &http.Transport{TLSClientConfig: tlsConfig},
+	}
+	return httpClient, nil
 }
 
 func GetTlsConfig(config *Configuration) (*tls.Config, error) {
