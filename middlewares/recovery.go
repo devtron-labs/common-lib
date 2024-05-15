@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/devtron-labs/common-lib/constants"
 	"github.com/devtron-labs/common-lib/pubsub-lib/metrics"
 	"log"
@@ -16,7 +15,7 @@ func Recovery(next http.Handler) http.Handler {
 		defer func() {
 			err := recover()
 			if err != nil {
-				metrics.IncPanicRecoveryCount("handler", r.Host, r.Method, r.RequestURI, fmt.Sprint(err))
+				metrics.IncPanicRecoveryCount("handler", r.Host, r.Method, r.RequestURI)
 				log.Print(constants.PanicLogIdentifier, "recovered from panic", "err", err, "stack", string(debug.Stack()))
 				jsonBody, _ := json.Marshal(map[string]string{
 					"error": "internal server error",

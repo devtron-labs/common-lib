@@ -3,6 +3,7 @@ package constants
 const PanicLogIdentifier = "DEVTRON_PANIC_RECOVER"
 
 // metrics name constants
+
 const (
 	NATS_PUBLISH_COUNT          = "Nats_Publish_Count"
 	NATS_CONSUMPTION_COUNT      = "Nats_Consumption_Count"
@@ -19,7 +20,6 @@ const (
 	HOST       = "host"
 	METHOD     = "method"
 	PATH       = "path"
-	ERROR      = "error"
 	TOPIC      = "topic"
 	MESSAGE_ID = "msg_id"
 	STATUS     = "status"
