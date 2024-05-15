@@ -912,8 +912,8 @@ k8s.io/kube-openapi/pkg/validation/spec
 # k8s.io/kubectl v0.0.0 => k8s.io/kubectl v0.24.2
 ## explicit; go 1.16
 k8s.io/kubectl/pkg/util/podutils
-# k8s.io/kubernetes v1.27.13
-## explicit; go 1.20
+# k8s.io/kubernetes v1.26.0-alpha.3
+## explicit; go 1.19
 k8s.io/kubernetes/pkg/api/legacyscheme
 # k8s.io/metrics v0.24.2 => k8s.io/metrics v0.24.2
 ## explicit; go 1.16
@@ -924,7 +924,7 @@ k8s.io/metrics/pkg/client/clientset/versioned
 k8s.io/metrics/pkg/client/clientset/versioned/scheme
 k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1alpha1
 k8s.io/metrics/pkg/client/clientset/versioned/typed/metrics/v1beta1
-# k8s.io/utils v0.0.0-20230209194617-a36077c30491
+# k8s.io/utils v0.0.0-20221107191617-1a15be271d1d
 ## explicit; go 1.18
 k8s.io/utils/buffer
 k8s.io/utils/clock
