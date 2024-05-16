@@ -220,7 +220,7 @@ func (impl PubSubClientServiceImpl) TryCatchCallBack(msg *nats.Msg, callback fun
 		if panicInfo := recover(); panicInfo != nil {
 			impl.Logger.Warnw(fmt.Sprintf("%s: found panic error", NATS_PANIC_MSG_LOG_PREFIX), "subject", msg.Subject, "payload", string(msg.Data), "logs", string(debug.Stack()))
 			err = fmt.Errorf("%v\nPanic Logs:\n%s", panicInfo, string(debug.Stack()))
-			metrics.IncPanicRecoveryCount("nats", fmt.Sprint(msg.Subject), "", "")
+			metrics.IncPanicRecoveryCount("nats", msg.Subject, "", "")
 			// Publish the panic info to PANIC_ON_PROCESSING_TOPIC
 			publishErr := impl.publishPanicError(msg, err)
 			if publishErr != nil {
