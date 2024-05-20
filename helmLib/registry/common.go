@@ -45,8 +45,8 @@ func OCIRegistryLogin(client *registry.Client, config *Configuration) error {
 
 func CreateCertificateFile(registryName, caString string) (certificatePath string, err error) {
 
-	registryFolderPath := fmt.Sprintf("%s/%s", REGISTRY_CREDENTIAL_BASE_PATH, registryName)
-	certificateFilePath := fmt.Sprintf("%s/%s-%v/ca.crt", REGISTRY_CREDENTIAL_BASE_PATH, registryName, rand.Int())
+	registryFolderPath := fmt.Sprintf("%s/%s-%v", REGISTRY_CREDENTIAL_BASE_PATH, registryName, rand.Int())
+	certificateFilePath := fmt.Sprintf("%s/ca.crt", registryFolderPath)
 
 	if _, err = os.Stat(certificateFilePath); os.IsExist(err) {
 		// if file exists - remove file
