@@ -30,28 +30,28 @@ func (e ApiError) ErrorfUser(format string, a ...interface{}) error {
 
 // InternalError represents an internal error with a gRPC status code.
 type InternalError struct {
-	Message string
-	Code    codes.Code
+	err  error
+	Code codes.Code
 }
 
 func (e *InternalError) Error() string {
-	return fmt.Sprintf("Internal Error: %s", e.Message)
+	return fmt.Sprintf("Internal Error: %s", e.err.Error())
 }
 
 func (e *InternalError) GRPCError() error {
-	return status.New(e.Code, e.Message).Err()
+	return status.New(e.Code, e.err.Error()).Err()
 }
 
 // HelmError represents an error from Helm with a gRPC status code.
 type HelmError struct {
-	Message string
-	Code    codes.Code
+	err  error
+	Code codes.Code
 }
 
 func (e *HelmError) Error() string {
-	return fmt.Sprintf("Helm Error: %s", e.Message)
+	return fmt.Sprintf("Helm Error: %s", e.err.Error())
 }
 
 func (e *HelmError) GRPCError() error {
-	return status.New(e.Code, e.Message).Err()
+	return status.New(e.Code, e.err.Error()).Err()
 }
