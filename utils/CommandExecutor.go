@@ -9,19 +9,9 @@ import (
 	"os/exec"
 )
 
-func RunCommand(cmd *exec.Cmd) error {
-	var stdBuffer bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
-	cmd.Stdout = mw
-	cmd.Stderr = mw
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-	//log.Println(stdBuffer.String())
-	return nil
-}
+var maskSecrets = true
 
-func RunCommandWithSecretMasking(cmd *exec.Cmd) error {
+func RunCommand(cmd *exec.Cmd) error {
 
 	var outBuf bytes.Buffer
 	cmd.Stdout = &outBuf
@@ -30,24 +20,25 @@ func RunCommandWithSecretMasking(cmd *exec.Cmd) error {
 	// Run the command
 	if err := cmd.Run(); err != nil {
 		fmt.Printf("Command execution failed: %v\n", err)
-		os.Exit(1)
 		return err
 	}
 
-	buf := new(bytes.Buffer)
-	// Call the function to mask secrets and print the masked output
-	maskedStream, err := secretScanner.MaskSecretsStream(&outBuf)
-	if err != nil {
-		fmt.Printf("Error masking secrets: %v\n", err)
-		os.Exit(1)
-		return err
+	if maskSecrets {
+		buf := new(bytes.Buffer)
+		// Call the function to mask secrets and print the masked output
+		maskedStream, err := secretScanner.MaskSecretsStream(&outBuf)
+		if err != nil {
+			fmt.Printf("Error masking secrets: %v\n", err)
+			return err
+		}
+		_, err = io.Copy(buf, maskedStream)
+		if err != nil {
+			fmt.Printf("Error reading from masked stream: %v\n", err)
+			return err
+		}
+		fmt.Println(buf.String())
+	} else {
+		fmt.Println(outBuf.String())
 	}
-	_, er := buf.ReadFrom(maskedStream)
-	if er != nil {
-		fmt.Printf("Error reading from masked stream: %v\n", er)
-		os.Exit(1)
-		return err
-	}
-	fmt.Println(buf.String())
 	return nil
 }
