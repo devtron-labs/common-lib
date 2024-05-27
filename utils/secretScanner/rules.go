@@ -154,7 +154,7 @@ var BuiltinRules = []Rule{
 		ID:       "slack-web-hook",
 		Title:    "Slack Webhook",
 		Severity: "MEDIUM",
-		Regex:    regexp.MustCompile(`https:\/\/hooks.slack.com\/services\/[A-Za-z0-9+\/]{44,48}`),
+		Regex:    regexp.MustCompile(`https:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9+\/]{44,48}`),
 		Keywords: []string{"hooks.slack.com"},
 	},
 	{
