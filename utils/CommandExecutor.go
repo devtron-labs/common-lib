@@ -1,40 +1,59 @@
 package utils
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/devtron-labs/common-lib/utils/secretScanner"
 	"io"
+	"os"
 	"os/exec"
 )
 
 var maskSecrets = true
 
 func RunCommand(cmd *exec.Cmd) error {
-	// Run the command
-	output, outputerr := cmd.CombinedOutput()
+	// Create a pipe for the command's stdout
+	stdoutPipe, err := cmd.StdoutPipe()
+	if err != nil {
+		fmt.Printf("Error creating stdout pipe: %v\n", err)
+		return err
+	}
+	cmd.Stderr = cmd.Stdout // Combine stderr and stdout
 
-	outBuf := bytes.NewBuffer(output)
+	// Start the command
+	if err := cmd.Start(); err != nil {
+		fmt.Printf("Command execution failed: %v\n", err)
+		return err
+	}
+
 	if maskSecrets {
-		buf := new(bytes.Buffer)
-		// Call the function to mask secrets and print the masked output
-		maskedStream, err := secretScanner.MaskSecretsStream(outBuf)
-		if err != nil {
-			fmt.Printf("Error masking secrets: %v\n", err)
-			fmt.Println(outBuf.String())
-		}
-		_, err = io.Copy(buf, maskedStream)
-		if err != nil {
-			fmt.Printf("Error reading from masked stream: %v\n", err)
-			fmt.Println(outBuf.String())
-		}
-		fmt.Println(buf.String())
+		// Create a goroutine to handle real-time output processing
+		go func() {
+			// Wrap the pipe reader to mask secrets
+			maskedStream, err := secretScanner.MaskSecretsStream(stdoutPipe)
+			if err != nil {
+				fmt.Printf("Error masking secrets: %v\n", err)
+				return
+			}
+
+			// Copy the masked stream to stdout
+			if _, err := io.Copy(os.Stdout, maskedStream); err != nil {
+				fmt.Printf("Error reading masked stream: %v\n", err)
+				return
+			}
+		}()
 	} else {
-		fmt.Println(outBuf.String())
+		// Copy the output directly to stdout
+		if _, err := io.Copy(os.Stdout, stdoutPipe); err != nil {
+			fmt.Printf("Error reading stream: %v\n", err)
+			return err
+		}
 	}
-	if outputerr != nil {
-		fmt.Printf("Command execution failed: %v\n", outputerr)
-		return outputerr
+
+	// Wait for the command to complete
+	if err := cmd.Wait(); err != nil {
+		fmt.Printf("Command execution failed: %v\n", err)
+		return err
 	}
+
 	return nil
 }

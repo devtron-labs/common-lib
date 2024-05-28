@@ -2,7 +2,6 @@ package secretScanner
 
 import (
 	"bufio"
-	"bytes"
 	"errors"
 	"io"
 	"log"
@@ -19,7 +18,7 @@ func MaskSecretsOnString(input string, rules []Rule) string {
 	return maskedInput
 }
 
-func MaskSecretsStream(input *bytes.Buffer) (io.Reader, error) {
+func MaskSecretsStream(input io.Reader) (io.Reader, error) {
 	pr, pw := io.Pipe()
 
 	go func() {
