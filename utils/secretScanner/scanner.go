@@ -18,7 +18,7 @@ func MaskSecretsOnString(input string, rules []Rule) string {
 	return maskedInput
 }
 
-func MaskSecretsStream(input io.Reader) (io.Reader, error) {
+func MaskSecretsOnStream(input io.Reader) (io.Reader, error) {
 	pr, pw := io.Pipe()
 
 	go func() {
