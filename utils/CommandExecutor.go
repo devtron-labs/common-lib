@@ -32,6 +32,8 @@ func RunCommand(cmd *exec.Cmd) error {
 			maskedStream, err := secretScanner.MaskSecretsStream(stdoutPipe)
 			if err != nil {
 				fmt.Printf("Error masking secrets: %v\n", err)
+				// Copy the output directly to stdout
+				io.Copy(os.Stdout, stdoutPipe)
 				return
 			}
 
