@@ -58,7 +58,11 @@ func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) (*PubSubClientService
 	}
 	return pubSubClient, nil
 }
-
+func (impl PubSubClientServiceImpl) isClustered(streamName string) bool {
+	// This is only ever set, no need for lock here.
+	streamInfo, _ := impl.NatsClient.JetStrCtxt.StreamInfo(streamName)
+	return streamInfo.Cluster != nil
+}
 func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	impl.Logger.Debugw("Published message on pubsub client", "topic", topic, "msg", msg)
 	status := model.PUBLISH_FAILURE
@@ -282,7 +286,17 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 		existingConfig.MaxAckPending = messageBufferSize
 		updatesDetected = true
 	}
+	if replicas := overrideConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
+		if replicas > 1 && impl.isClustered(streamName) {
+			existingConfig.Replicas = replicas
+			updatesDetected = true
+		} else {
+			if replicas > 1 {
+				impl.Logger.Errorw("replicas >1 is not possible in non-clustered mode ")
+			}
+		}
 
+	}
 	if updatesDetected {
 		_, err = natsClient.JetStrCtxt.UpdateConsumer(streamName, &existingConfig)
 		if err != nil {
