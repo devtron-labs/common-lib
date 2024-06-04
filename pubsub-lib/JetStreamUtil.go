@@ -104,6 +104,9 @@ const (
 	CHART_SCAN_TOPIC                    string = "CHART-SCAN-TOPIC"
 	CHART_SCAN_GROUP                    string = "CHART-SCAN-GROUP"
 	CHART_SCAN_DURABLE                  string = "CHART-SCAN-DURABLE"
+	NOTIFICATION_EVENT_TOPIC            string = "NOTIFICATION_EVENT_TOPIC"
+	NOTIFICATION_EVENT_GROUP            string = "NOTIFICATION_EVENT_GROUP"
+	NOTIFICATION_EVENT_DURABLE          string = "NOTIFICATION_EVENT_DURABLE"
 )
 
 type NatsTopic struct {
@@ -151,6 +154,7 @@ var natsTopicMapping = map[string]NatsTopic{
 
 	CD_PIPELINE_DELETE_EVENT_TOPIC: {topicName: CD_PIPELINE_DELETE_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: CD_PIPELINE_DELETE_EVENT_GROUP, consumerName: CD_PIPELINE_DELETE_EVENT_DURABLE},
 	CHART_SCAN_TOPIC:               {topicName: CHART_SCAN_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: CHART_SCAN_GROUP, consumerName: CHART_SCAN_DURABLE},
+	NOTIFICATION_EVENT_TOPIC:       {topicName: NOTIFICATION_EVENT_TOPIC, streamName: ORCHESTRATOR_STREAM, queueName: NOTIFICATION_EVENT_GROUP, consumerName: NOTIFICATION_EVENT_DURABLE},
 }
 
 var NatsStreamWiseConfigMapping = map[string]NatsStreamConfig{
@@ -186,6 +190,7 @@ var NatsConsumerWiseConfigMapping = map[string]NatsConsumerConfig{
 	DEVTRON_TEST_CONSUMER:               {},
 	CD_STAGE_SUCCESS_EVENT_DURABLE:      {},
 	CD_PIPELINE_DELETE_EVENT_DURABLE:    {},
+	NOTIFICATION_EVENT_DURABLE:          {},
 }
 
 // getConsumerConfigMap will fetch the consumer wise config from the json string
@@ -307,6 +312,7 @@ func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, stream
 	var err error
 	for _, streamName := range streamNames {
 		streamInfo, err := js.StreamInfo(streamName)
+		isClustered := (streamInfo.Cluster != nil)
 		if err == nats.ErrStreamNotFound || streamInfo == nil {
 			log.Print("No stream was created already. Need to create one. ", "Stream name: ", streamName)
 			// Stream doesn't already exist. Create a new stream from jetStreamContext
@@ -322,7 +328,7 @@ func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, stream
 		} else {
 			config := streamInfo.Config
 			streamConfig.Name = streamName
-			if checkConfigChangeReqd(&config, streamConfig) {
+			if checkConfigChangeReqd(&config, streamConfig, isClustered) {
 				_, err1 := js.UpdateStream(&config)
 				if err1 != nil {
 					log.Println("error occurred while updating stream config. ", "streamName: ", streamName, "streamConfig: ", config, "error: ", err1)
@@ -333,16 +339,25 @@ func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, stream
 	return err
 }
 
-func checkConfigChangeReqd(existingConfig *nats.StreamConfig, toUpdateConfig *nats.StreamConfig) bool {
+func checkConfigChangeReqd(existingConfig *nats.StreamConfig, toUpdateConfig *nats.StreamConfig, isClustered bool) bool {
 	configChanged := false
 	newStreamSubjects := GetStreamSubjects(toUpdateConfig.Name)
-	if ((toUpdateConfig.MaxAge != time.Duration(0)) && (toUpdateConfig.MaxAge != existingConfig.MaxAge)) || (len(newStreamSubjects) != len(existingConfig.Subjects) || (toUpdateConfig.Replicas != existingConfig.Replicas)) {
+	if ((toUpdateConfig.MaxAge != time.Duration(0)) && (toUpdateConfig.MaxAge != existingConfig.MaxAge)) || (len(newStreamSubjects) != len(existingConfig.Subjects)) {
 		existingConfig.MaxAge = toUpdateConfig.MaxAge
 		existingConfig.Subjects = newStreamSubjects
-		existingConfig.Replicas = toUpdateConfig.Replicas
 		configChanged = true
 	}
+	if replicas := toUpdateConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
+		if replicas > 1 && isClustered {
+			existingConfig.Replicas = replicas
+			configChanged = true
+		} else {
+			if replicas > 1 {
+				log.Println("replicas >1 is not possible in non-clustered mode ")
+			}
+		}
 
+	}
 	return configChanged
 }
 

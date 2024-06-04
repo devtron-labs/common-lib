@@ -127,7 +127,7 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *m
 
 	// Update consumer config if new changes detected
 	impl.updateConsumer(natsClient, streamName, consumerName, &consumerConfig)
-
+	impl.Logger.Infow("queue name", "quename", queueName)
 	channel := make(chan *nats.Msg, msgBufferSize)
 	_, err := natsClient.JetStrCtxt.ChanQueueSubscribe(topic, queueName, channel,
 		nats.Durable(consumerName),
@@ -286,6 +286,7 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 		existingConfig.MaxAckPending = messageBufferSize
 		updatesDetected = true
 	}
+	impl.Logger.Infow("info----", "got", info)
 	if replicas := overrideConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
 		if replicas > 1 && impl.isClustered(streamName) {
 			existingConfig.Replicas = replicas
