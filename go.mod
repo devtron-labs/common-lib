@@ -32,7 +32,7 @@ require (
 	k8s.io/client-go v0.29.0
 	k8s.io/kube-aggregator v0.0.0
 	k8s.io/kubectl v0.29.0
-	k8s.io/kubernetes v1.27.13
+	k8s.io/kubernetes v1.26.11
 	k8s.io/metrics v0.24.2
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 	sigs.k8s.io/yaml v1.3.0
