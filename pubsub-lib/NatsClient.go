@@ -78,7 +78,7 @@ func (ncc NatsClientConfig) GetDefaultNatsStreamConfig() NatsStreamConfig {
 type StreamConfig struct {
 	MaxAge time.Duration `json:"max_age"`
 	//it will show the instances created for the consumers on a particular subject(topic)
-	Replicas int `json:"replicas"`
+	Replicas int `json:"num_replicas"`
 }
 type NatsStreamConfig struct {
 	StreamConfig StreamConfig `json:"streamConfig"`
@@ -93,7 +93,7 @@ type NatsConsumerConfig struct {
 	// AckWaitInSecs is the time in seconds for which the message can be in unacknowledged state
 	AckWaitInSecs int `json:"ackWaitInSecs"`
 	//it will show the instances created for the consumers on a particular subject(topic)
-	Replicas int `json:"replicas"`
+	Replicas int `json:"num_replicas"`
 }
 
 func (consumerConf NatsConsumerConfig) GetNatsMsgBufferSize() int {
