@@ -243,7 +243,6 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() error {
 
 	// fetch the consumer configs that were given explicitly in the configJson.ConsumerConfigJson
 	consumerConfigMap := getConsumerConfigMap(configJson.ConsumerConfigJson)
-	log.Println(consumerConfigMap)
 	// fetch the stream configs that were given explicitly in the configJson.StreamConfigJson
 	streamConfigMap := getStreamConfigMap(configJson.StreamConfigJson)
 
@@ -264,7 +263,6 @@ func ParseAndFillStreamWiseAndConsumerWiseConfigMaps() error {
 
 	// initialise all the stream wise config with default values or user defined values
 	updateNatsStreamConfigMapping(defaultStreamConfigVal, streamConfigMap)
-	log.Println(NatsConsumerWiseConfigMapping["CHART_SCAN_DURABLE"])
 	return nil
 }
 
@@ -280,10 +278,8 @@ func updateNatsConsumerConfigMapping(defaultConsumerConfigVal NatsConsumerConfig
 		consumerConfig := defaultConsumerConfigVal
 		if _, ok := consumerConfigMap[key]; ok {
 			consumerConfig = consumerConfigMap[key]
-			log.Println("actual mapi", consumerConfig)
 		}
 		NatsConsumerWiseConfigMapping[key] = consumerConfig
-		log.Println("mapi", NatsConsumerWiseConfigMapping[key])
 	}
 }
 
@@ -312,22 +308,17 @@ func GetStreamSubjects(streamName string) []string {
 	return subjArr
 }
 
-func AddStream(js nats.JetStreamContext, streamConfig *nats.StreamConfig, streamNames ...string) error {
+func AddStream(isClustered bool, js nats.JetStreamContext, streamConfig *nats.StreamConfig, streamNames ...string) error {
 	var err error
 	for _, streamName := range streamNames {
 		streamInfo, err := js.StreamInfo(streamName)
-		//log.Println("stream replica", streamInfo.Config.Replicas)
-		isClustered := false
-		if err == nil {
-			isClustered = (streamInfo.Cluster != nil)
-		}
-		log.Println("isclustered", isClustered)
 		if err == nats.ErrStreamNotFound || streamInfo == nil {
 			log.Print("No stream was created already. Need to create one. ", "Stream name: ", streamName)
 			// Stream doesn't already exist. Create a new stream from jetStreamContext
 			cfgToSet := getNewConfig(streamName, streamConfig)
 			if cfgToSet.Replicas > 1 && !isClustered {
 				cfgToSet.Replicas = 0
+				log.Println("replicas > 1 not possible in non clustered mode")
 			}
 			_, err = js.AddStream(cfgToSet)
 			if err != nil {

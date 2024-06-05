@@ -58,11 +58,12 @@ func NewPubSubClientServiceImpl(logger *zap.SugaredLogger) (*PubSubClientService
 	}
 	return pubSubClient, nil
 }
-func (impl PubSubClientServiceImpl) isClustered(streamName string) bool {
+func (impl PubSubClientServiceImpl) isClustered() bool {
 	// This is only ever set, no need for lock here.
-	streamInfo, _ := impl.NatsClient.JetStrCtxt.StreamInfo(streamName)
-	return streamInfo.Cluster != nil
+	clusterInfo := impl.NatsClient.Conn.ConnectedClusterName()
+	return clusterInfo != ""
 }
+
 func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	impl.Logger.Debugw("Published message on pubsub client", "topic", topic, "msg", msg)
 	status := model.PUBLISH_FAILURE
@@ -74,8 +75,9 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	natsTopic := GetNatsTopic(topic)
 	streamName := natsTopic.streamName
 	streamConfig := impl.getStreamConfig(streamName)
-	// streamConfig := natsClient.streamConfig
-	_ = AddStream(jetStrCtxt, streamConfig, streamName)
+	isClustered := impl.isClustered()
+	_ = AddStream(isClustered, jetStrCtxt, streamConfig, streamName)
+
 	// Generate random string for passing as Header Id in message
 	randString := "MsgHeaderId-" + utils.Generate(10)
 
@@ -112,8 +114,8 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *m
 	consumerName := natsTopic.consumerName
 	natsClient := impl.NatsClient
 	streamConfig := impl.getStreamConfig(streamName)
-	// streamConfig := natsClient.streamConfig
-	_ = AddStream(natsClient.JetStrCtxt, streamConfig, streamName)
+	isClustered := impl.isClustered()
+	_ = AddStream(isClustered, natsClient.JetStrCtxt, streamConfig, streamName)
 	deliveryOption := nats.DeliverLast()
 	if streamConfig.Retention == nats.WorkQueuePolicy {
 		deliveryOption = nats.DeliverAll()
@@ -290,7 +292,7 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 	}
 	if replicas := overrideConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
 		impl.Logger.Infow("replicas of consumer", "replica", replicas, "overrideConfig", overrideConfig.Replicas)
-		if replicas > 1 && impl.isClustered(streamName) {
+		if replicas > 1 && impl.isClustered() {
 			existingConfig.Replicas = replicas
 			updatesDetected = true
 		} else {
