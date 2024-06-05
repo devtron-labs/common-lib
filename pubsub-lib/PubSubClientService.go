@@ -96,7 +96,6 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	}
 
 	// if reached here, means publish was successful
-	impl.Logger.Infow("published")
 	status = model.PUBLISH_SUCCESS
 	return nil
 }
