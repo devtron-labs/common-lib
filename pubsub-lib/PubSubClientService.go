@@ -94,6 +94,7 @@ func (impl PubSubClientServiceImpl) Publish(topic string, msg string) error {
 	}
 
 	// if reached here, means publish was successful
+	impl.Logger.Infow("published")
 	status = model.PUBLISH_SUCCESS
 	return nil
 }
@@ -268,6 +269,7 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 
 	// Get the current Consumer config from NATS-server
 	info, err := natsClient.JetStrCtxt.ConsumerInfo(streamName, consumerName)
+	//impl.Logger.Infow("replica of consumer", "replica", info.Config.Replicas, "overrideConfig", overrideConfig.Replicas)
 	if err != nil {
 		impl.Logger.Errorw("unable to retrieve consumer info from NATS-server", "stream", streamName, "consumer", consumerName, "err", err)
 		return
@@ -286,14 +288,17 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 		existingConfig.MaxAckPending = messageBufferSize
 		updatesDetected = true
 	}
-	impl.Logger.Infow("info----", "got", info)
 	if replicas := overrideConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
+		impl.Logger.Infow("replicas of consumer", "replica", replicas, "overrideConfig", overrideConfig.Replicas)
 		if replicas > 1 && impl.isClustered(streamName) {
 			existingConfig.Replicas = replicas
 			updatesDetected = true
 		} else {
 			if replicas > 1 {
-				impl.Logger.Errorw("replicas >1 is not possible in non-clustered mode ")
+				impl.Logger.Warnw("replicas >1 is not possible in non-clustered mode ")
+			} else {
+				existingConfig.Replicas = replicas
+				updatesDetected = true
 			}
 		}
 
@@ -304,6 +309,9 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 			impl.Logger.Errorw("failed to update Consumer config", "received consumer config", info.Config, "err", err)
 		}
 	}
+	// Get the current Consumer config from NATS-server
+	info, err = natsClient.JetStrCtxt.ConsumerInfo(streamName, consumerName)
+	impl.Logger.Errorw("final info consumer", "info", info)
 	return
 }
 
