@@ -1083,8 +1083,8 @@ k8s.io/kube-openapi/pkg/validation/spec
 # k8s.io/kubectl v0.29.0 => k8s.io/kubectl v0.24.2
 ## explicit; go 1.16
 k8s.io/kubectl/pkg/util/podutils
-# k8s.io/kubernetes v1.27.13
-## explicit; go 1.20
+# k8s.io/kubernetes v1.26.11
+## explicit; go 1.19
 k8s.io/kubernetes/pkg/api/legacyscheme
 # k8s.io/metrics v0.24.2 => k8s.io/metrics v0.24.2
 ## explicit; go 1.16
