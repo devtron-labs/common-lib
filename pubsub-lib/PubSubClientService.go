@@ -129,7 +129,6 @@ func (impl PubSubClientServiceImpl) Subscribe(topic string, callback func(msg *m
 
 	// Update consumer config if new changes detected
 	impl.updateConsumer(natsClient, streamName, consumerName, &consumerConfig)
-	impl.Logger.Infow("queue name", "quename", queueName)
 	channel := make(chan *nats.Msg, msgBufferSize)
 	_, err := natsClient.JetStrCtxt.ChanQueueSubscribe(topic, queueName, channel,
 		nats.Durable(consumerName),
@@ -270,7 +269,6 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 
 	// Get the current Consumer config from NATS-server
 	info, err := natsClient.JetStrCtxt.ConsumerInfo(streamName, consumerName)
-	//impl.Logger.Infow("replica of consumer", "replica", info.Config.Replicas, "overrideConfig", overrideConfig.Replicas)
 	if err != nil {
 		impl.Logger.Errorw("unable to retrieve consumer info from NATS-server", "stream", streamName, "consumer", consumerName, "err", err)
 		return
@@ -290,7 +288,6 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 		updatesDetected = true
 	}
 	if replicas := overrideConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
-		impl.Logger.Infow("replicas of consumer", "replica", replicas, "overrideConfig", overrideConfig.Replicas)
 		if replicas > 1 && impl.isClustered() {
 			existingConfig.Replicas = replicas
 			updatesDetected = true
@@ -310,9 +307,6 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 			impl.Logger.Errorw("failed to update Consumer config", "received consumer config", info.Config, "err", err)
 		}
 	}
-	// Get the current Consumer config from NATS-server
-	info, err = natsClient.JetStrCtxt.ConsumerInfo(streamName, consumerName)
-	impl.Logger.Errorw("final info consumer", "info", info)
 	return
 }
 
