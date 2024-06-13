@@ -41,6 +41,7 @@ const (
 	DEVTRON_APP_LABEL_KEY    = "app"
 	DEVTRON_APP_LABEL_VALUE1 = "devtron"
 	DEVTRON_APP_LABEL_VALUE2 = "orchestrator"
+	DnsLookupNoSuchHostError = "no such host"
 )
 
 type ClusterConfig struct {
