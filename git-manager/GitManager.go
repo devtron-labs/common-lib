@@ -119,10 +119,11 @@ func (impl *GitManager) CloneAndCheckout(ciProjectDetails []CiProjectDetails, wo
 		default:
 			auth = &BasicAuth{}
 		}
-
+		tlsData := BuildTlsData(prj.GitOptions.TlsKey, prj.GitOptions.TlsCert, prj.GitOptions.CaCert, prj.GitOptions.TlsVerificationEnabled)
 		gitContext := GitContext{
 			Auth:       auth,
 			WorkingDir: workingDir,
+			TLSData:    tlsData,
 		}
 		// create ssh private key on disk
 		if authMode == AUTH_MODE_SSH {
