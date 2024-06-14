@@ -62,3 +62,17 @@ func (prj *CiProjectDetails) GetCheckoutBranchName() string {
 	}
 	return checkoutBranch
 }
+
+type TlsPathInfo struct {
+	CaCertPath  string
+	TlsKeyPath  string
+	TlsCertPath string
+}
+
+const (
+	GIT_BASE_DIR       = "/git-base/"
+	TLS_FILES_DIR      = GIT_BASE_DIR + "tls-files/"
+	TLS_KEY_FILE_NAME  = "tls_key.key"
+	TLS_CERT_FILE_NAME = "tls_cert.pem"
+	CA_CERT_FILE_NAME  = "ca_cert.pem"
+)
