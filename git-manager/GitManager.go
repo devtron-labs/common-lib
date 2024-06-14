@@ -202,7 +202,7 @@ func (impl *GitManager) CloneAndCheckout(ciProjectDetails []CiProjectDetails, wo
 	return nil
 }
 
-func createFilesForTlsData(gitContext GitContext) (*TlsPathInfo, error) {
+func CreateFilesForTlsData(gitContext GitContext) (*TlsPathInfo, error) {
 
 	if gitContext.TLSData == nil {
 		return nil, nil
@@ -235,7 +235,7 @@ func createFilesForTlsData(gitContext GitContext) (*TlsPathInfo, error) {
 	return nil, nil
 }
 
-func deleteTlsFiles(pathInfo *TlsPathInfo) {
+func DeleteTlsFiles(pathInfo *TlsPathInfo) {
 	if pathInfo == nil {
 		return
 	}
