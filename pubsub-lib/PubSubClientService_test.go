@@ -1,6 +1,23 @@
+/*
+ * Copyright (c) 2024. Devtron Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package pubsub_lib
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/devtron-labs/common-lib/pubsub-lib/model"
@@ -23,6 +40,12 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 
 	// t.SkipNow()
 	t.Run("PubAndSub", func(t *testing.T) {
+		//	err := os.Setenv("STREAM_CONFIG_JSON", "{\"Devtron_Test_Stream\":{\"streamConfig\":{\"max_age\":900000000000,\"num_replicas\":4}}}")
+		//	fmt.Println(err)
+		//err := os.Setenv("CONSUMER_CONFIG_JSON", "{\"Test_Topic_Consumer\":{\"replicas\":2}}")
+		//err := os.Setenv("CONSUMER_CONFIG_JSON", "{\"Test_Topic_Consumer\":{\"natsMsgProcessingBatchSize\":3,\"natsMsgBufferSize\":64,\"replicas\":2}}")
+
+		//fmt.Println(err)
 		sugaredLogger, _ := utils.NewSugardLogger()
 		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"num_replicas\":1}}}")
 		fmt.Println(err)
@@ -43,7 +66,7 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while publishing to topic")
 		}
-		time.Sleep(time.Duration(5) * time.Second)
+		time.Sleep(time.Duration(10) * time.Second)
 	})
 
 	//t.Run("SubOnly", func(t *testing.T) {
