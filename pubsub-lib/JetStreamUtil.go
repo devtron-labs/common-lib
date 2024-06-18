@@ -350,18 +350,12 @@ func checkConfigChangeReqd(existingConfig *nats.StreamConfig, toUpdateConfig *na
 		configChanged = true
 	}
 	if replicas := toUpdateConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
-		if replicas > 1 && isClustered {
+		if replicas > 1 && !isClustered {
+			log.Println("replicas >1 is not possible in non-clustered mode ")
+		} else {
 			existingConfig.Replicas = replicas
 			configChanged = true
-		} else {
-			if replicas > 1 {
-				log.Println("replicas >1 is not possible in non-clustered mode ")
-			} else {
-				existingConfig.Replicas = replicas
-				configChanged = true
-			}
 		}
-
 	}
 	return configChanged
 }
