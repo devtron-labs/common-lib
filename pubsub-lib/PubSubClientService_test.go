@@ -17,7 +17,6 @@
 package pubsub_lib
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/caarlos0/env"
 	"github.com/devtron-labs/common-lib/pubsub-lib/model"
