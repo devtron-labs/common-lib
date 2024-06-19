@@ -29,6 +29,7 @@ import (
 	"io"
 	v13 "k8s.io/api/policy/v1"
 	v1beta12 "k8s.io/api/policy/v1beta1"
+	utilnet "k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
@@ -36,6 +37,7 @@ import (
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 	"k8s.io/utils/pointer"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os/user"
@@ -135,6 +137,7 @@ type K8sService interface {
 	GetResourceIf(restConfig *rest.Config, groupVersionKind schema.GroupVersionKind) (resourceIf dynamic.NamespaceableResourceInterface, namespaced bool, err error)
 	FetchConnectionStatusForCluster(k8sClientSet *kubernetes.Clientset) error
 	CreateK8sClientSet(restConfig *rest.Config) (*kubernetes.Clientset, error)
+	CreateK8sClientSetWithCustomHttpTransport(restConfig *rest.Config) (*kubernetes.Clientset, error)
 }
 
 func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) *K8sServiceImpl {
@@ -1084,8 +1087,49 @@ func UpdateNodeUnschedulableProperty(desiredUnschedulable bool, node *v1.Node, k
 	node, err := k8sClientSet.CoreV1().Nodes().Update(context.Background(), node, metav1.UpdateOptions{})
 	return node, err
 }
+
 func (impl K8sServiceImpl) CreateK8sClientSet(restConfig *rest.Config) (*kubernetes.Clientset, error) {
 	k8sHttpClient, err := OverrideK8sHttpClientWithTracer(restConfig)
+	if err != nil {
+		impl.logger.Errorw("service err, OverrideK8sHttpClientWithTracer", "err", err)
+		return nil, err
+	}
+	k8sClientSet, err := kubernetes.NewForConfigAndClient(restConfig, k8sHttpClient)
+	if err != nil {
+		impl.logger.Errorw("error in getting client set by rest config", "err", err)
+		return nil, err
+	}
+	return k8sClientSet, err
+}
+
+func GetK8sHttpClientWithCustomTransport(config *rest.Config) (*http.Client, error) {
+
+	dial := (&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).DialContext
+
+	// Get the TLS options for this client config
+	tlsConfig, err := rest.TLSConfigFor(config)
+	if err != nil {
+		return nil, err
+	}
+
+	transport := utilnet.SetTransportDefaults(&http.Transport{
+		Proxy:               http.ProxyFromEnvironment,
+		TLSHandshakeTimeout: 10 * time.Second,
+		TLSClientConfig:     tlsConfig,
+		MaxIdleConnsPerHost: 25,
+		DialContext:         dial,
+		DisableCompression:  config.DisableCompression,
+	})
+
+	config.Transport = transport
+	return rest.HTTPClientFor(config)
+}
+
+func (impl K8sServiceImpl) CreateK8sClientSetWithCustomHttpTransport(restConfig *rest.Config) (*kubernetes.Clientset, error) {
+	k8sHttpClient, err := GetK8sHttpClientWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("service err, OverrideK8sHttpClientWithTracer", "err", err)
 		return nil, err
