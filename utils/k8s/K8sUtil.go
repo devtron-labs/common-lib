@@ -1125,7 +1125,16 @@ func GetK8sHttpClientWithCustomTransport(config *rest.Config) (*http.Client, err
 	})
 
 	config.Transport = transport
-	return rest.HTTPClientFor(config)
+
+	rt, err := rest.HTTPWrappersForConfig(config, transport)
+	if err != nil {
+		return nil, err
+	}
+
+	return &http.Client{
+		Transport: rt,
+		Timeout:   config.Timeout,
+	}, nil
 }
 
 func (impl K8sServiceImpl) CreateK8sClientSetWithCustomHttpTransport(restConfig *rest.Config) (*kubernetes.Clientset, error) {
