@@ -178,10 +178,10 @@ type CustomK8sHttpTransportConfig struct {
 	MaxIdleConnsPerHost int  `env:"K8s_CLIENT_MAX_IDLE_CONNS_PER_SECOND" envDefault:"25"`
 }
 
-// overrideConfigWithCustomTransport
+// OverrideConfigWithCustomTransport
 // overrides the given rest config with custom transport if UseCustomTransport is enabled.
 // if the config already has a defined transport, we dont override it.
-func (impl CustomK8sHttpTransportConfig) overrideConfigWithCustomTransport(config *rest.Config) (*rest.Config, error) {
+func (impl *CustomK8sHttpTransportConfig) OverrideConfigWithCustomTransport(config *rest.Config) (*rest.Config, error) {
 	if !impl.UseCustomTransport || config.Transport != nil {
 		return config, nil
 	}

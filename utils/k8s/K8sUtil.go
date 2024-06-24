@@ -198,7 +198,7 @@ func (impl K8sServiceImpl) GetClientForInCluster() (*v12.CoreV1Client, error) {
 		return nil, err
 	}
 
-	config, err = impl.httpClientConfig.overrideConfigWithCustomTransport(config)
+	config, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(config)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -225,7 +225,7 @@ func (impl K8sServiceImpl) GetK8sDiscoveryClient(clusterConfig *ClusterConfig) (
 		return nil, err
 	}
 
-	cfg, err = impl.httpClientConfig.overrideConfigWithCustomTransport(cfg)
+	cfg, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(cfg)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -251,7 +251,7 @@ func (impl K8sServiceImpl) GetK8sDiscoveryClientInCluster() (*discovery.Discover
 		return nil, err
 	}
 
-	config, err = impl.httpClientConfig.overrideConfigWithCustomTransport(config)
+	config, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(config)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -494,7 +494,7 @@ func (impl K8sServiceImpl) GetK8sInClusterConfigAndClients() (*rest.Config, *htt
 		return nil, nil, nil, err
 	}
 
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, nil, nil, err
@@ -515,7 +515,7 @@ func (impl K8sServiceImpl) GetK8sInClusterConfigAndDynamicClients() (*rest.Confi
 		return nil, nil, nil, err
 	}
 
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, nil, nil, err
@@ -550,7 +550,7 @@ func (impl K8sServiceImpl) GetK8sConfigAndClients(clusterConfig *ClusterConfig) 
 		return nil, nil, nil, err
 	}
 
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, nil, nil, err
@@ -566,7 +566,7 @@ func (impl K8sServiceImpl) GetK8sConfigAndClients(clusterConfig *ClusterConfig) 
 
 func (impl K8sServiceImpl) GetK8sConfigAndClientsByRestConfig(restConfig *rest.Config) (*http.Client, *kubernetes.Clientset, error) {
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, nil, err
@@ -1003,7 +1003,7 @@ func (impl K8sServiceImpl) GetCoreV1ClientInCluster() (*v12.CoreV1Client, error)
 func (impl K8sServiceImpl) GetCoreV1ClientByRestConfig(restConfig *rest.Config) (*v12.CoreV1Client, error) {
 
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1148,7 +1148,7 @@ func UpdateNodeUnschedulableProperty(desiredUnschedulable bool, node *v1.Node, k
 
 func (impl K8sServiceImpl) CreateK8sClientSet(restConfig *rest.Config) (*kubernetes.Clientset, error) {
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1213,7 +1213,7 @@ func CheckIfValidLabel(labelKey string, labelValue string) error {
 }
 
 func (impl K8sServiceImpl) GetResourceIf(restConfig *rest.Config, groupVersionKind schema.GroupVersionKind) (resourceIf dynamic.NamespaceableResourceInterface, namespaced bool, err error) {
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, false, err
@@ -1244,7 +1244,7 @@ func (impl K8sServiceImpl) GetResourceIf(restConfig *rest.Config, groupVersionKi
 
 func (impl K8sServiceImpl) ListEvents(restConfig *rest.Config, namespace string, groupVersionKind schema.GroupVersionKind, ctx context.Context, name string) (*v1.EventList, error) {
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1289,7 +1289,7 @@ func (impl K8sServiceImpl) ListEvents(restConfig *rest.Config, namespace string,
 
 func (impl K8sServiceImpl) GetPodLogs(ctx context.Context, restConfig *rest.Config, name string, namespace string, sinceTime *metav1.Time, tailLines int, sinceSeconds int, follow bool, containerName string, isPrevContainerLogsEnabled bool) (io.ReadCloser, error) {
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1334,7 +1334,7 @@ func (impl K8sServiceImpl) GetPodLogs(ctx context.Context, restConfig *rest.Conf
 }
 func (impl K8sServiceImpl) GetResourceIfWithAcceptHeader(restConfig *rest.Config, groupVersionKind schema.GroupVersionKind, asTable bool) (resourceIf dynamic.NamespaceableResourceInterface, namespaced bool, err error) {
 
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, false, err
@@ -1394,7 +1394,7 @@ func ServerResourceForGroupVersionKind(discoveryClient discovery.DiscoveryInterf
 }
 func (impl K8sServiceImpl) GetResourceList(ctx context.Context, restConfig *rest.Config, gvk schema.GroupVersionKind, namespace string, asTable bool, listOptions *metav1.ListOptions) (*ResourceListResponse, bool, error) {
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, false, err
@@ -1429,7 +1429,7 @@ func (impl K8sServiceImpl) GetResourceList(ctx context.Context, restConfig *rest
 func (impl K8sServiceImpl) PatchResourceRequest(ctx context.Context, restConfig *rest.Config, pt types.PatchType, manifest string, name string, namespace string, gvk schema.GroupVersionKind) (*ManifestResponse, error) {
 
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1457,7 +1457,7 @@ func (impl K8sServiceImpl) PatchResourceRequest(ctx context.Context, restConfig 
 // if verb is supplied empty, that means - return all
 func (impl K8sServiceImpl) GetApiResources(restConfig *rest.Config, includeOnlyVerb string) ([]*K8sApiResource, error) {
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1533,7 +1533,7 @@ func (impl K8sServiceImpl) GetApiResources(restConfig *rest.Config, includeOnlyV
 func (impl *K8sServiceImpl) CreateResources(ctx context.Context, restConfig *rest.Config, manifest string, gvk schema.GroupVersionKind, namespace string) (*ManifestResponse, error) {
 
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1565,7 +1565,7 @@ func (impl *K8sServiceImpl) CreateResources(ctx context.Context, restConfig *res
 func (impl *K8sServiceImpl) GetResource(ctx context.Context, namespace string, name string, gvk schema.GroupVersionKind, restConfig *rest.Config) (*ManifestResponse, error) {
 
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1591,7 +1591,7 @@ func (impl *K8sServiceImpl) GetResource(ctx context.Context, namespace string, n
 func (impl *K8sServiceImpl) UpdateResource(ctx context.Context, restConfig *rest.Config, gvk schema.GroupVersionKind, namespace string, k8sRequestPatch string) (*ManifestResponse, error) {
 
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
@@ -1624,7 +1624,7 @@ func (impl *K8sServiceImpl) UpdateResource(ctx context.Context, restConfig *rest
 func (impl *K8sServiceImpl) DeleteResource(ctx context.Context, restConfig *rest.Config, gvk schema.GroupVersionKind, namespace string, name string, forceDelete bool) (*ManifestResponse, error) {
 
 	var err error
-	restConfig, err = impl.httpClientConfig.overrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, err
