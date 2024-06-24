@@ -25,6 +25,11 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	utilnet "k8s.io/apimachinery/pkg/util/net"
+	"k8s.io/client-go/rest"
+	"net"
+	"net/http"
+	"time"
 )
 
 const (
@@ -171,4 +176,44 @@ type CustomK8sHttpTransportConfig struct {
 	KeepAlive           int  `env:"K8s_TCP_KEEPALIVE" envDefault:"30"`
 	TLSHandshakeTimeout int  `env:"K8s_TLS_HANDSHAKE_TIMEOUT" envDefault:"10"`
 	MaxIdleConnsPerHost int  `env:"K8s_CLIENT_MAX_IDLE_CONNS_PER_SECOND" envDefault:"25"`
+}
+
+// overrideConfigWithCustomTransport
+// overrides the given rest config with custom transport if UseCustomTransport is enabled.
+// if the config already has a defined transport, we dont override it.
+func (impl CustomK8sHttpTransportConfig) overrideConfigWithCustomTransport(config *rest.Config) (*rest.Config, error) {
+	if !impl.UseCustomTransport || config.Transport != nil {
+		return config, nil
+	}
+
+	dial := (&net.Dialer{
+		Timeout:   time.Duration(impl.TimeOut) * time.Second,
+		KeepAlive: time.Duration(impl.KeepAlive) * time.Second,
+	}).DialContext
+
+	// Get the TLS options for this client config
+	tlsConfig, err := rest.TLSConfigFor(config)
+	if err != nil {
+		return nil, err
+	}
+
+	transport := utilnet.SetTransportDefaults(&http.Transport{
+		Proxy:               http.ProxyFromEnvironment,
+		TLSHandshakeTimeout: time.Duration(impl.TLSHandshakeTimeout) * time.Second,
+		TLSClientConfig:     tlsConfig,
+		MaxIdleConnsPerHost: impl.MaxIdleConnsPerHost,
+		DialContext:         dial,
+		DisableCompression:  config.DisableCompression,
+	})
+
+	config.Transport = transport
+
+	rt, err := rest.HTTPWrappersForConfig(config, transport)
+	if err != nil {
+		return nil, err
+	}
+
+	config.Transport = rt
+	config.Timeout = time.Duration(impl.TimeOut) * time.Second
+	return config, nil
 }
