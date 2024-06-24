@@ -164,3 +164,11 @@ func GetResourceKey(obj *unstructured.Unstructured) ResourceKey {
 	gvk := obj.GroupVersionKind()
 	return NewResourceKey(gvk.Group, gvk.Kind, obj.GetNamespace(), obj.GetName())
 }
+
+type CustomK8sHttpTransportConfig struct {
+	UseCustomTransport  bool `env:"USE_CUSTOM_HTTP_TRANSPORT" envDefault:"false"`
+	TimeOut             int  `env:"K8s_TCP_TIMEOUT" envDefault:"30"`
+	KeepAlive           int  `env:"K8s_TCP_KEEPALIVE" envDefault:"30"`
+	TLSHandshakeTimeout int  `env:"K8s_TLS_HANDSHAKE_TIMEOUT" envDefault:"10"`
+	MaxIdleConnsPerHost int  `env:"K8s_CLIENT_MAX_IDLE_CONNS_PER_SECOND" envDefault:"25"`
+}
