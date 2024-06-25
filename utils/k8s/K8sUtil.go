@@ -173,7 +173,11 @@ func (impl K8sServiceImpl) GetRestConfigByCluster(clusterConfig *ClusterConfig) 
 			restConfig.TLSClientConfig.CAData = []byte(clusterConfig.CAData)
 		}
 	}
-	return restConfig, nil
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
+	if err != nil {
+		impl.logger.Errorw("error in overriding rest config with custom transport configurations", "err", err)
+	}
+	return restConfig, err
 }
 
 func (impl K8sServiceImpl) GetCoreV1Client(clusterConfig *ClusterConfig) (*v12.CoreV1Client, error) {
@@ -489,12 +493,6 @@ func (impl K8sServiceImpl) GetK8sInClusterConfigAndClients() (*rest.Config, *htt
 		return nil, nil, nil, err
 	}
 
-	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
-	if err != nil {
-		impl.logger.Errorw("error in overriding reset config", "err", err)
-		return nil, nil, nil, err
-	}
-
 	k8sHttpClient, k8sClientSet, err := impl.GetK8sConfigAndClientsByRestConfig(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in getting client set by rest config for in cluster", "err", err)
@@ -542,12 +540,6 @@ func (impl K8sServiceImpl) GetK8sConfigAndClients(clusterConfig *ClusterConfig) 
 	restConfig, err := impl.GetRestConfigByCluster(clusterConfig)
 	if err != nil {
 		impl.logger.Errorw("error in getting rest config by cluster", "err", err, "clusterName", clusterConfig.ClusterName)
-		return nil, nil, nil, err
-	}
-
-	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
-	if err != nil {
-		impl.logger.Errorw("error in overriding reset config", "err", err)
 		return nil, nil, nil, err
 	}
 
