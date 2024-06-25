@@ -22,7 +22,6 @@ import (
 	error2 "errors"
 	"flag"
 	"fmt"
-	"github.com/caarlos0/env"
 	"github.com/devtron-labs/common-lib/utils"
 	http2 "github.com/devtron-labs/common-lib/utils/http"
 	"github.com/devtron-labs/common-lib/utils/k8s/commonBean"
@@ -150,11 +149,7 @@ func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) 
 		kubeconfig = flag.String("kubeconfig-authenticator-xyz", filepath.Join(usr.HomeDir, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	}
 
-	httpClientConfig := &CustomK8sHttpTransportConfig{}
-	err = env.Parse(httpClientConfig)
-	if err != nil {
-		logger.Warnw("error in parsing httpClientConfig, continuing with default values", "err", err)
-	}
+	httpClientConfig := NewCustomK8sHttpTransportConfig()
 	flag.Parse()
 	return &K8sServiceImpl{logger: logger, runTimeConfig: runTimeConfig, kubeconfig: kubeconfig, httpClientConfig: httpClientConfig}
 }
