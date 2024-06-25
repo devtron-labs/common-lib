@@ -22,6 +22,16 @@ func (tr TimeRange) ValidateTimeRange() error {
 		}
 
 	}
+
+	if !tr.TimeFrom.IsZero() && !tr.TimeTo.IsZero() {
+		if tr.TimeFrom.After(tr.TimeTo) {
+			return errors.New(string(TimeFromLessThanTimeTo))
+		}
+		if tr.TimeFrom.Equal(tr.TimeTo) {
+			return errors.New(string(TimeFromEqualToTimeTo))
+		}
+	}
+
 	switch tr.Frequency {
 	case Daily:
 		if tr.HourMinuteFrom == "" || tr.HourMinuteTo == "" {
@@ -30,12 +40,6 @@ func (tr TimeRange) ValidateTimeRange() error {
 	case Fixed:
 		if tr.TimeFrom.IsZero() || tr.TimeTo.IsZero() {
 			return errors.New(string(TimeFromOrToNotPresent))
-		}
-		if tr.TimeFrom.After(tr.TimeTo) {
-			return errors.New(string(TimeFromLessThanTimeTo))
-		}
-		if tr.TimeFrom.Equal(tr.TimeTo) {
-			return errors.New(string(TimeFromEqualToTimeTo))
 		}
 	case Weekly:
 		if len(tr.Weekdays) == 0 {
