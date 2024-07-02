@@ -306,6 +306,11 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 		return
 	}
 
+	streamInfo, err := natsClient.JetStrCtxt.StreamInfo(streamName)
+	if err != nil {
+		impl.Logger.Errorw("unable to retrieve stream info from NATS-server", "stream", streamName, "consumer", consumerName, "err", err)
+		return
+	}
 	existingConfig := info.Config
 	updatesDetected := false
 
@@ -317,6 +322,11 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 
 	if messageBufferSize := overrideConfig.GetNatsMsgBufferSize(); messageBufferSize > 0 && existingConfig.MaxAckPending != messageBufferSize {
 		existingConfig.MaxAckPending = messageBufferSize
+		updatesDetected = true
+	}
+
+	if info.Config.Replicas != streamInfo.Config.Replicas {
+		existingConfig.Replicas = streamInfo.Config.Replicas
 		updatesDetected = true
 	}
 

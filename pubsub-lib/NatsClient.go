@@ -32,7 +32,7 @@ type NatsClient struct {
 }
 
 type NatsClientConfig struct {
-	NatsServerHost string `env:"NATS_SERVER_HOST" envDefault:"localhost:4222"`
+	NatsServerHost string `env:"NATS_SERVER_HOST" envDefault:"nats://devtron-nats.devtroncd:4222"`
 
 	// consumer wise
 	// NatsMsgProcessingBatchSize is the number of messages that will be processed in one go
