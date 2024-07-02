@@ -319,14 +319,7 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 		existingConfig.MaxAckPending = messageBufferSize
 		updatesDetected = true
 	}
-	if replicas := overrideConfig.Replicas; replicas > 0 && existingConfig.Replicas != replicas && replicas < 5 {
-		if replicas > 1 && !impl.isClustered() {
-			impl.Logger.Warnw("replicas > 1 is not possible in non-clustered mode")
-		} else {
-			existingConfig.Replicas = replicas
-			updatesDetected = true
-		}
-	}
+
 	if updatesDetected {
 		_, err = natsClient.JetStrCtxt.UpdateConsumer(streamName, &existingConfig)
 		if err != nil {

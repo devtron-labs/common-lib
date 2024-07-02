@@ -26,7 +26,6 @@ import (
 	"go.uber.org/zap"
 	"log"
 	"os"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -46,26 +45,38 @@ func TestNewPubSubClientServiceImpl(t *testing.T) {
 
 		//fmt.Println(err)
 		sugaredLogger, _ := utils.NewSugardLogger()
-		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"num_replicas\":1}}}")
+		err := os.Setenv("STREAM_CONFIG_JSON", "{\"ORCHESTRATOR\":{\"streamConfig\":{\"num_replicas\":3}}}")
 		fmt.Println(err)
-		err = os.Setenv("CONSUMER_CONFIG_JSON", "{\"NOTIFICATION_EVENT_DURABLE\":{\"num_replicas\":1}}")
+		err = os.Setenv("CONSUMER_CONFIG_JSON", "{\"NOTIFICATION_EVENT_DURABLE\":{\"natsMsgBufferSize\":2,\"natsMsgProcessingBatchSize\":1}}")
 		fmt.Println(err)
 		fmt.Println(os.Getenv("CONSUMER_CONFIG_JSON"))
 		fmt.Println(os.Getenv("STREAM_CONFIG_JSON"))
 		err = ParseAndFillStreamWiseAndConsumerWiseConfigMaps()
 		pubSubClient, err := NewPubSubClientServiceImpl(sugaredLogger)
-		err = pubSubClient.Subscribe(NOTIFICATION_EVENT_TOPIC, func(msg *model.PubSubMsg) {
-			fmt.Println("Data received:", msg.Data)
-		},
-			func(msg model.PubSubMsg) (logMsg string, keysAndValues []interface{}) { return logMsg, keysAndValues }, func(msg model.PubSubMsg) bool { return true })
-		if err != nil {
-			sugaredLogger.Fatalw("error occurred while subscribing to topic")
-		}
-		err = pubSubClient.Publish(NOTIFICATION_EVENT_TOPIC, "published Msg "+strconv.Itoa(time.Now().Second()))
+
+		//for i := 0; i < 10; i++ {
+		//	//time.Sleep(1 * time.Second)
+		//	err = pubSubClient.Publish(NOTIFICATION_EVENT_TOPIC, fmt.Sprintf("published Msg %d", i))
+		//}
 		if err != nil {
 			sugaredLogger.Fatalw("error occurred while publishing to topic")
 		}
-		time.Sleep(time.Duration(10) * time.Second)
+
+		err = pubSubClient.Subscribe(NOTIFICATION_EVENT_TOPIC,
+			func(msg *model.PubSubMsg) {
+				fmt.Println("Data received:", msg.Data)
+			},
+			func(msg model.PubSubMsg) (logMsg string, keysAndValues []interface{}) {
+				return logMsg, keysAndValues
+			},
+			func(msg model.PubSubMsg) bool {
+				return true
+			})
+		if err != nil {
+			sugaredLogger.Fatalw("error occurred while subscribing to topic")
+		}
+
+		time.Sleep(time.Duration(1000) * time.Second)
 	})
 
 	//t.Run("SubOnly", func(t *testing.T) {
