@@ -55,8 +55,8 @@ func TestNewPubSubClient(t *testing.T) {
 	t.Run("pullSubscriber", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		pubSubClient, _ := NewNatsClient(sugaredLogger)
-		streamConfig := &nats.StreamConfig{}
-		_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
+		//streamConfig := &nats.StreamConfig{}
+		//_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
 		subs, err := pubSubClient.JetStrCtxt.PullSubscribe("hello.world", WORKFLOW_STATUS_UPDATE_DURABLE, nats.BindStream("New_Stream_2"))
 		if err != nil {
 			fmt.Println("error occurred while subscribing pull reason: ", err)
@@ -122,8 +122,8 @@ func queueSubscriber(payload string, durable1 bool) {
 	sugaredLogger, _ := utils.NewSugardLogger()
 	pubSubClient, _ := NewNatsClient(sugaredLogger)
 	globalVar := false
-	streamConfig := &nats.StreamConfig{}
-	_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
+	//streamConfig := &nats.StreamConfig{}
+	//_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
 	durable := "WORKFLOW_STATUS_UPDATE_DURABLE-1"
 	if durable1 {
 		durable = "WORKFLOW_STATUS_UPDATE_DURABLE-2"
@@ -150,8 +150,8 @@ func queueSubscriber(payload string, durable1 bool) {
 }
 
 func WriteNatsEvent(psc *NatsClient, topic string, payload string, streamName string) {
-	streamConfig := &nats.StreamConfig{}
-	_ = AddStream(psc.JetStrCtxt, streamConfig, streamName)
+	//streamConfig := &nats.StreamConfig{}
+	///_ = AddStream(psc.JetStrCtxt, streamConfig, streamName)
 	// Generate random string for passing as Header Id in message
 	randString := "MsgHeaderId-" + utils.Generate(10)
 	_, err := psc.JetStrCtxt.Publish(topic, []byte(payload), nats.MsgId(randString))
