@@ -16,7 +16,10 @@
 
 package constants
 
-const PanicLogIdentifier = "DEVTRON_PANIC_RECOVER"
+const (
+	PanicLogIdentifier         = "DEVTRON_PANIC_RECOVER"
+	GoRoutinePanicMsgLogPrefix = "GO_ROUTINE_PANIC_LOG:"
+)
 
 // metrics name constants
 
