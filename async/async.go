@@ -10,7 +10,7 @@ import (
 	"runtime/debug"
 )
 
-type Async struct {
+type Runnable struct {
 	logger      *zap.SugaredLogger
 	serviceName ServiceName
 }
@@ -26,8 +26,8 @@ type RunAsyncMetaData struct {
 	Path   string
 }
 
-func NewAsync(logger *zap.SugaredLogger, serviceName ServiceName) *Async {
-	return &Async{
+func NewAsyncRunnable(logger *zap.SugaredLogger, serviceName ServiceName) *Runnable {
+	return &Runnable{
 		logger:      logger,
 		serviceName: serviceName,
 	}
@@ -51,14 +51,14 @@ func CallerPath(pathName string) NewUpdateMetaData {
 
 type NewUpdateMetaData func(*RunAsyncMetaData)
 
-func (impl *Async) Execute(runnable func()) {
-	impl.run(runnable,
+func (impl *Runnable) Execute(runnableFunc func()) {
+	impl.run(runnableFunc,
 		CallerMethod(runTime.GetCallerFunctionName()),
 		CallerPath(fmt.Sprintf("%s:%d", runTime.GetCallerFileName(), runTime.GetCallerLineNumber())),
 	)
 }
 
-func (impl *Async) run(fn func(), metadataOpts ...NewUpdateMetaData) {
+func (impl *Runnable) run(fn func(), metadataOpts ...NewUpdateMetaData) {
 	metaData := NewRunAsyncMetaData()
 	for _, metadataOpt := range metadataOpts {
 		// updating meta data
