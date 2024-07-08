@@ -12,13 +12,7 @@ import (
 
 type Runnable struct {
 	logger      *zap.SugaredLogger
-	serviceName ServiceName
-}
-
-type ServiceName string
-
-func (m ServiceName) ToString() string {
-	return string(m)
+	serviceName constants.ServiceName
 }
 
 type RunAsyncMetaData struct {
@@ -26,7 +20,7 @@ type RunAsyncMetaData struct {
 	Path   string
 }
 
-func NewAsyncRunnable(logger *zap.SugaredLogger, serviceName ServiceName) *Runnable {
+func NewAsyncRunnable(logger *zap.SugaredLogger, serviceName constants.ServiceName) *Runnable {
 	return &Runnable{
 		logger:      logger,
 		serviceName: serviceName,
