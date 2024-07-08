@@ -6,7 +6,6 @@ import (
 	"github.com/devtron-labs/common-lib/pubsub-lib/metrics"
 	"github.com/devtron-labs/common-lib/utils/runTime"
 	"go.uber.org/zap"
-	"log"
 	"runtime/debug"
 )
 
@@ -64,11 +63,7 @@ func (impl *Runnable) run(fn func(), metadataOpts ...NewUpdateMetaData) {
 		defer func() {
 			if r := recover(); r != nil {
 				metrics.IncPanicRecoveryCount("go-routine", impl.serviceName.ToString(), metaData.Method, metaData.Path)
-				if impl.logger == nil {
-					log.Println(constants.GoRoutinePanicMsgLogPrefix, "go-routine recovered from panic", "err:", r, "stack:", string(debug.Stack()))
-				} else {
-					impl.logger.Errorw(fmt.Sprintf("%s %s", constants.GoRoutinePanicMsgLogPrefix, "go-routine recovered from panic"), "err", r, "stack", string(debug.Stack()))
-				}
+				impl.logger.Errorw(fmt.Sprintf("%s %s", constants.GoRoutinePanicMsgLogPrefix, "go-routine recovered from panic"), "err", r, "stack", string(debug.Stack()))
 			}
 		}()
 		if fn != nil {
