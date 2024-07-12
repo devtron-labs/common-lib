@@ -14,7 +14,7 @@ func NewK8sRequestBean(opts ...RequestOptions) *K8sRequestBean {
 	return req
 }
 
-func (k8s *K8sRequestBean) WithResourceIdentifier(resourceIdentifier *ResourceIdentifier) RequestOptions {
+func WithResourceIdentifier(resourceIdentifier *ResourceIdentifier) RequestOptions {
 	if resourceIdentifier == nil {
 		resourceIdentifier = &ResourceIdentifier{}
 	}
@@ -34,35 +34,35 @@ func NewResourceIdentifier(opts ...IdentifierOptions) *ResourceIdentifier {
 	return req
 }
 
-func (r *ResourceIdentifier) WithName(name string) IdentifierOptions {
+func WithName(name string) IdentifierOptions {
 	return func(req *ResourceIdentifier) *ResourceIdentifier {
 		req.Name = name
 		return req
 	}
 }
 
-func (r *ResourceIdentifier) WithNameSpace(namespace string) IdentifierOptions {
+func WithNameSpace(namespace string) IdentifierOptions {
 	return func(req *ResourceIdentifier) *ResourceIdentifier {
 		req.Namespace = namespace
 		return req
 	}
 }
 
-func (r *ResourceIdentifier) WithGroup(group string) IdentifierOptions {
+func WithGroup(group string) IdentifierOptions {
 	return func(req *ResourceIdentifier) *ResourceIdentifier {
 		req.GroupVersionKind.Group = group
 		return req
 	}
 }
 
-func (r *ResourceIdentifier) WithVersion(version string) IdentifierOptions {
+func WithVersion(version string) IdentifierOptions {
 	return func(req *ResourceIdentifier) *ResourceIdentifier {
 		req.GroupVersionKind.Version = version
 		return req
 	}
 }
 
-func (r *ResourceIdentifier) WithKind(kind string) IdentifierOptions {
+func WithKind(kind string) IdentifierOptions {
 	return func(req *ResourceIdentifier) *ResourceIdentifier {
 		req.GroupVersionKind.Kind = kind
 		return req
