@@ -1042,7 +1042,7 @@ func (impl *K8sServiceImpl) GetPreferredVersionForAPIGroup(k8sClientSet *kuberne
 	}
 	for _, group := range serverGroups.Groups {
 		if group.Name == groupName && len(group.Versions) > 0 {
-			return group.PreferredVersion.GroupVersion, nil
+			return group.PreferredVersion.Version, nil
 		}
 	}
 	return "", NotFoundError
