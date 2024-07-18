@@ -79,7 +79,7 @@ type K8sService interface {
 	GetNmList(ctx context.Context, metricsClientSet *metrics.Clientset) (*v1beta1.NodeMetricsList, error)
 	GetPodsListForNamespace(ctx context.Context, k8sClientSet *kubernetes.Clientset, namespace string) (*v1.PodList, error)
 	GetServerVersionFromDiscoveryClient(k8sClientSet *kubernetes.Clientset) (*version.Info, error)
-	GetPreferredVersionForAPIGroup(k8sClientSet *kubernetes.Clientset, groupName string) (string, error)
+	GetServerGroups(k8sClientSet *kubernetes.Clientset) (*metav1.APIGroupList, error)
 	GetNodeByName(ctx context.Context, k8sClientSet *kubernetes.Clientset, name string) (*v1.Node, error)
 	GetNodesList(ctx context.Context, k8sClientSet *kubernetes.Clientset) (*v1.NodeList, error)
 	GetCoreV1ClientByRestConfig(restConfig *rest.Config) (*v12.CoreV1Client, error)
@@ -1031,21 +1031,16 @@ func (impl *K8sServiceImpl) GetServerVersionFromDiscoveryClient(k8sClientSet *ku
 	return serverVersion, err
 }
 
-func (impl *K8sServiceImpl) GetPreferredVersionForAPIGroup(k8sClientSet *kubernetes.Clientset, groupName string) (string, error) {
+func (impl *K8sServiceImpl) GetServerGroups(k8sClientSet *kubernetes.Clientset) (*metav1.APIGroupList, error) {
 	serverGroups, err := k8sClientSet.DiscoveryClient.ServerGroups()
 	if err != nil {
 		impl.logger.Errorw("error in retrieving server groups", "err", err)
-		return "", err
+		return nil, err
 	} else if serverGroups == nil {
 		impl.logger.Errorw("server groups are empty", "err", err)
-		return "", NotFoundError
+		return nil, NotFoundError
 	}
-	for _, group := range serverGroups.Groups {
-		if group.Name == groupName && len(group.Versions) > 0 {
-			return group.PreferredVersion.Version, nil
-		}
-	}
-	return "", NotFoundError
+	return serverGroups, nil
 }
 
 func (impl *K8sServiceImpl) GetPodsListForNamespace(ctx context.Context, k8sClientSet *kubernetes.Clientset, namespace string) (*v1.PodList, error) {
