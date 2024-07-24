@@ -34,12 +34,14 @@ func NewWorkerPool[T any](maxWorkers int, serviceName constants.ServiceName, log
 	return wp
 }
 
-func (wp *WorkerPool[T]) InitializeResponse() {
+func (wp *WorkerPool[T]) InitializeResponse() *WorkerPool[T] {
 	wp.response = []T{}
+	return wp
 }
 
-func (wp *WorkerPool[_]) IncludeZeroValue() {
+func (wp *WorkerPool[T]) IncludeZeroValue() *WorkerPool[T] {
 	wp.includeZeroValue = true
+	return wp
 }
 
 func (wp *WorkerPool[T]) Submit(task func() (T, error)) {
