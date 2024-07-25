@@ -1484,6 +1484,7 @@ func (impl K8sServiceImpl) GetApiResources(restConfig *rest.Config, includeOnlyV
 				}
 				var group string
 				var version string
+				var shortNames []string
 				gv := apiResourceListFromK8s.GroupVersion
 				if len(gv) > 0 {
 					splitGv := strings.Split(gv, "/")
@@ -1493,6 +1494,9 @@ func (impl K8sServiceImpl) GetApiResources(restConfig *rest.Config, includeOnlyV
 						group = splitGv[0]
 						version = splitGv[1]
 					}
+				}
+				if len(apiResourceFromK8s.ShortNames) > 0 {
+					shortNames = apiResourceFromK8s.ShortNames
 				}
 				apiResources = append(apiResources, &K8sApiResource{
 					Gvk: schema.GroupVersionKind{
@@ -1506,6 +1510,7 @@ func (impl K8sServiceImpl) GetApiResources(restConfig *rest.Config, includeOnlyV
 						Resource: apiResourceFromK8s.Name,
 					},
 					Namespaced: apiResourceFromK8s.Namespaced,
+					ShortNames: shortNames,
 				})
 			}
 		}
