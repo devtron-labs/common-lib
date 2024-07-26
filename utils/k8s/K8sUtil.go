@@ -1509,9 +1509,6 @@ func (impl *K8sServiceImpl) GetApiResources(restConfig *rest.Config, includeOnly
 						version = splitGv[1]
 					}
 				}
-				if len(apiResourceFromK8s.ShortNames) > 0 {
-					shortNames = apiResourceFromK8s.ShortNames
-				}
 				apiResources = append(apiResources, &K8sApiResource{
 					Gvk: schema.GroupVersionKind{
 						Group:   group,
