@@ -47,9 +47,9 @@ const (
 	PANIC_RECOVERY_COUNT        = "panic_recovery_count"
 )
 
-// metrics lables constant
+// metrics labels constant
 const (
-	PANIC_TYPE = "panicType"
+	PANIC_TYPE = "panic_type"
 	HOST       = "host"
 	METHOD     = "method"
 	PATH       = "path"
