@@ -1,6 +1,40 @@
+/*
+ * Copyright (c) 2024. Devtron Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package constants
 
-const PanicLogIdentifier = "DEVTRON_PANIC_RECOVER"
+const (
+	PanicLogIdentifier         = "DEVTRON_PANIC_RECOVER"
+	GoRoutinePanicMsgLogPrefix = "GO_ROUTINE_PANIC_LOG:"
+)
+
+// service names constant
+
+type ServiceName string
+
+func (m ServiceName) ToString() string {
+	return string(m)
+}
+
+const (
+	Orchestrator ServiceName = "ORCHESTRATOR"
+	Kubelink     ServiceName = "KUBELINK"
+	GitSensor    ServiceName = "GITSENSOR"
+	Kubewatch    ServiceName = "KUBEWATCH"
+)
 
 // metrics name constants
 const (

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2024. Devtron Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package timeRangeLib
 
 import (
@@ -22,6 +38,16 @@ func (tr TimeRange) ValidateTimeRange() error {
 		}
 
 	}
+
+	if !tr.TimeFrom.IsZero() && !tr.TimeTo.IsZero() {
+		if tr.TimeFrom.After(tr.TimeTo) {
+			return errors.New(string(TimeFromLessThanTimeTo))
+		}
+		if tr.TimeFrom.Equal(tr.TimeTo) {
+			return errors.New(string(TimeFromEqualToTimeTo))
+		}
+	}
+
 	switch tr.Frequency {
 	case Daily:
 		if tr.HourMinuteFrom == "" || tr.HourMinuteTo == "" {
@@ -30,12 +56,6 @@ func (tr TimeRange) ValidateTimeRange() error {
 	case Fixed:
 		if tr.TimeFrom.IsZero() || tr.TimeTo.IsZero() {
 			return errors.New(string(TimeFromOrToNotPresent))
-		}
-		if tr.TimeFrom.After(tr.TimeTo) {
-			return errors.New(string(TimeFromLessThanTimeTo))
-		}
-		if tr.TimeFrom.Equal(tr.TimeTo) {
-			return errors.New(string(TimeFromEqualToTimeTo))
 		}
 	case Weekly:
 		if len(tr.Weekdays) == 0 {

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2024. Devtron Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package pubsub_lib
 
 import (
@@ -39,8 +55,8 @@ func TestNewPubSubClient(t *testing.T) {
 	t.Run("pullSubscriber", func(t *testing.T) {
 		sugaredLogger, _ := utils.NewSugardLogger()
 		pubSubClient, _ := NewNatsClient(sugaredLogger)
-		streamConfig := &nats.StreamConfig{}
-		_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
+		//streamConfig := &nats.StreamConfig{}
+		//_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
 		subs, err := pubSubClient.JetStrCtxt.PullSubscribe("hello.world", WORKFLOW_STATUS_UPDATE_DURABLE, nats.BindStream("New_Stream_2"))
 		if err != nil {
 			fmt.Println("error occurred while subscribing pull reason: ", err)
@@ -106,8 +122,8 @@ func queueSubscriber(payload string, durable1 bool) {
 	sugaredLogger, _ := utils.NewSugardLogger()
 	pubSubClient, _ := NewNatsClient(sugaredLogger)
 	globalVar := false
-	streamConfig := &nats.StreamConfig{}
-	_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
+	//streamConfig := &nats.StreamConfig{}
+	//_ = AddStream(pubSubClient.JetStrCtxt, streamConfig, "New_Stream_2")
 	durable := "WORKFLOW_STATUS_UPDATE_DURABLE-1"
 	if durable1 {
 		durable = "WORKFLOW_STATUS_UPDATE_DURABLE-2"
@@ -134,8 +150,8 @@ func queueSubscriber(payload string, durable1 bool) {
 }
 
 func WriteNatsEvent(psc *NatsClient, topic string, payload string, streamName string) {
-	streamConfig := &nats.StreamConfig{}
-	_ = AddStream(psc.JetStrCtxt, streamConfig, streamName)
+	//streamConfig := &nats.StreamConfig{}
+	///_ = AddStream(psc.JetStrCtxt, streamConfig, streamName)
 	// Generate random string for passing as Header Id in message
 	randString := "MsgHeaderId-" + utils.Generate(10)
 	_, err := psc.JetStrCtxt.Publish(topic, []byte(payload), nats.MsgId(randString))
