@@ -138,6 +138,10 @@ type K8sService interface {
 	FetchConnectionStatusForCluster(k8sClientSet *kubernetes.Clientset) error
 	CreateK8sClientSet(restConfig *rest.Config) (*kubernetes.Clientset, error)
 	//CreateK8sClientSetWithCustomHttpTransport(restConfig *rest.Config) (*kubernetes.Clientset, error)
+
+	//below functions are exposed for K8sUtilExtended
+	GetRestConfigByClusterWithoutCustomTransport(clusterConfig *ClusterConfig) (*restclient.Config, error)
+	OverrideRestConfigWithCustomTransport(restConfig *rest.Config) (*restclient.Config, error)
 }
 
 func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) *K8sServiceImpl {
