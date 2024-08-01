@@ -176,6 +176,33 @@ func (impl *K8sServiceImpl) GetRestConfigByCluster(clusterConfig *ClusterConfig)
 	return restConfig, err
 }
 
+func (impl *K8sServiceImpl) GetRestConfigByClusterWithoutCustomTransport(clusterConfig *ClusterConfig) (*restclient.Config, error) {
+	bearerToken := clusterConfig.BearerToken
+	var restConfig *rest.Config
+	var err error
+	if clusterConfig.Host == DefaultClusterUrl && len(bearerToken) == 0 {
+		restConfig, err = impl.GetK8sInClusterRestConfig()
+		if err != nil {
+			impl.logger.Errorw("error in getting rest config for default cluster", "err", err)
+			return nil, err
+		}
+	} else {
+		restConfig = &rest.Config{Host: clusterConfig.Host, BearerToken: bearerToken}
+		clusterConfig.PopulateTlsConfigurationsInto(restConfig)
+	}
+	return restConfig, nil
+}
+
+func (impl *K8sServiceImpl) OverrideRestConfigWithCustomTransport(restConfig *rest.Config) (*restclient.Config, error) {
+	var err error
+	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
+	if err != nil {
+		impl.logger.Errorw("error in overriding rest config with custom transport configurations", "err", err)
+		return nil, err
+	}
+	return restConfig, nil
+}
+
 func (impl *K8sServiceImpl) GetCoreV1Client(clusterConfig *ClusterConfig) (*v12.CoreV1Client, error) {
 	cfg, err := impl.GetRestConfigByCluster(clusterConfig)
 	if err != nil {
