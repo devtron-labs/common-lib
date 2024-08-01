@@ -156,20 +156,12 @@ func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) 
 }
 
 func (impl *K8sServiceImpl) GetRestConfigByCluster(clusterConfig *ClusterConfig) (*restclient.Config, error) {
-	bearerToken := clusterConfig.BearerToken
-	var restConfig *rest.Config
-	var err error
-	if clusterConfig.Host == DefaultClusterUrl && len(bearerToken) == 0 {
-		restConfig, err = impl.GetK8sInClusterRestConfig()
-		if err != nil {
-			impl.logger.Errorw("error in getting rest config for default cluster", "err", err)
-			return nil, err
-		}
-	} else {
-		restConfig = &rest.Config{Host: clusterConfig.Host, BearerToken: bearerToken}
-		clusterConfig.PopulateTlsConfigurationsInto(restConfig)
+	restConfig, err := impl.GetRestConfigByClusterWithoutCustomTransport(clusterConfig)
+	if err != nil {
+		impl.logger.Errorw("error, GetRestConfigByClusterWithoutCustomTransport", "err", err)
+		return nil, err
 	}
-	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
+	restConfig, err = impl.OverrideRestConfigWithCustomTransport(restConfig)
 	if err != nil {
 		impl.logger.Errorw("error in overriding rest config with custom transport configurations", "err", err)
 	}
