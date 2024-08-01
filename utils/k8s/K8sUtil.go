@@ -60,7 +60,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/yaml"
 )
@@ -73,7 +72,7 @@ type K8sServiceImpl struct {
 }
 
 type K8sService interface {
-	GetLogsForAPod(kubeClient *kubernetes.Clientset, namespace string, podName string, container string, follow bool) *restclient.Request
+	GetLogsForAPod(kubeClient *kubernetes.Clientset, namespace string, podName string, container string, follow bool) *rest.Request
 	GetMetricsClientSet(restConfig *rest.Config, k8sHttpClient *http.Client) (*metrics.Clientset, error)
 	GetNmByName(ctx context.Context, metricsClientSet *metrics.Clientset, name string) (*v1beta1.NodeMetrics, error)
 	GetNmList(ctx context.Context, metricsClientSet *metrics.Clientset) (*v1beta1.NodeMetricsList, error)
@@ -119,7 +118,7 @@ type K8sService interface {
 	GetK8sDiscoveryClient(clusterConfig *ClusterConfig) (*discovery.DiscoveryClient, error)
 	GetClientForInCluster() (*v12.CoreV1Client, error)
 	GetCoreV1Client(clusterConfig *ClusterConfig) (*v12.CoreV1Client, error)
-	GetRestConfigByCluster(clusterConfig *ClusterConfig) (*restclient.Config, error)
+	GetRestConfigByCluster(clusterConfig *ClusterConfig) (*rest.Config, error)
 	GetResource(ctx context.Context, namespace string, name string, gvk schema.GroupVersionKind, restConfig *rest.Config) (*ManifestResponse, error)
 	UpdateResource(ctx context.Context, restConfig *rest.Config, gvk schema.GroupVersionKind, namespace string, k8sRequestPatch string) (*ManifestResponse, error)
 	DeleteResource(ctx context.Context, restConfig *rest.Config, gvk schema.GroupVersionKind, namespace string, name string, forceDelete bool) (*ManifestResponse, error)
@@ -140,8 +139,8 @@ type K8sService interface {
 	//CreateK8sClientSetWithCustomHttpTransport(restConfig *rest.Config) (*kubernetes.Clientset, error)
 
 	//below functions are exposed for K8sUtilExtended
-	GetRestConfigByClusterWithoutCustomTransport(clusterConfig *ClusterConfig) (*restclient.Config, error)
-	OverrideRestConfigWithCustomTransport(restConfig *rest.Config) (*restclient.Config, error)
+	GetRestConfigByClusterWithoutCustomTransport(clusterConfig *ClusterConfig) (*rest.Config, error)
+	OverrideRestConfigWithCustomTransport(restConfig *rest.Config) (*rest.Config, error)
 }
 
 func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) *K8sServiceImpl {
@@ -159,7 +158,7 @@ func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) 
 	return &K8sServiceImpl{logger: logger, runTimeConfig: runTimeConfig, kubeconfig: kubeconfig, httpClientConfig: httpClientConfig}
 }
 
-func (impl *K8sServiceImpl) GetRestConfigByCluster(clusterConfig *ClusterConfig) (*restclient.Config, error) {
+func (impl *K8sServiceImpl) GetRestConfigByCluster(clusterConfig *ClusterConfig) (*rest.Config, error) {
 	restConfig, err := impl.GetRestConfigByClusterWithoutCustomTransport(clusterConfig)
 	if err != nil {
 		impl.logger.Errorw("error, GetRestConfigByClusterWithoutCustomTransport", "err", err)
@@ -172,7 +171,7 @@ func (impl *K8sServiceImpl) GetRestConfigByCluster(clusterConfig *ClusterConfig)
 	return restConfig, err
 }
 
-func (impl *K8sServiceImpl) GetRestConfigByClusterWithoutCustomTransport(clusterConfig *ClusterConfig) (*restclient.Config, error) {
+func (impl *K8sServiceImpl) GetRestConfigByClusterWithoutCustomTransport(clusterConfig *ClusterConfig) (*rest.Config, error) {
 	bearerToken := clusterConfig.BearerToken
 	var restConfig *rest.Config
 	var err error
@@ -189,7 +188,7 @@ func (impl *K8sServiceImpl) GetRestConfigByClusterWithoutCustomTransport(cluster
 	return restConfig, nil
 }
 
-func (impl *K8sServiceImpl) OverrideRestConfigWithCustomTransport(restConfig *rest.Config) (*restclient.Config, error) {
+func (impl *K8sServiceImpl) OverrideRestConfigWithCustomTransport(restConfig *rest.Config) (*rest.Config, error) {
 	var err error
 	restConfig, err = impl.httpClientConfig.OverrideConfigWithCustomTransport(restConfig)
 	if err != nil {
@@ -1098,7 +1097,7 @@ func (impl *K8sServiceImpl) GetMetricsClientSet(restConfig *rest.Config, k8sHttp
 	}
 	return metricsClientSet, err
 }
-func (impl *K8sServiceImpl) GetLogsForAPod(kubeClient *kubernetes.Clientset, namespace string, podName string, container string, follow bool) *restclient.Request {
+func (impl *K8sServiceImpl) GetLogsForAPod(kubeClient *kubernetes.Clientset, namespace string, podName string, container string, follow bool) *rest.Request {
 	podLogOpts := &v1.PodLogOptions{
 		Container: container,
 		Follow:    follow,
