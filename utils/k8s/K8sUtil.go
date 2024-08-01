@@ -141,6 +141,7 @@ type K8sService interface {
 	//below functions are exposed for K8sUtilExtended
 	GetRestConfigByClusterWithoutCustomTransport(clusterConfig *ClusterConfig) (*rest.Config, error)
 	OverrideRestConfigWithCustomTransport(restConfig *rest.Config) (*rest.Config, error)
+	CreateNs(namespace string, client *v12.CoreV1Client) (ns *v1.Namespace, err error)
 }
 
 func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) *K8sServiceImpl {
@@ -303,7 +304,7 @@ func (impl *K8sServiceImpl) CreateNsIfNotExists(namespace string, clusterConfig 
 		return nil
 	}
 	impl.logger.Infow("ns not exists creating", "ns", namespace)
-	_, err = impl.createNs(namespace, v12Client)
+	_, err = impl.CreateNs(namespace, v12Client)
 	return err
 }
 
@@ -322,7 +323,7 @@ func (impl *K8sServiceImpl) CheckIfNsExists(namespace string, client *v12.CoreV1
 
 }
 
-func (impl *K8sServiceImpl) createNs(namespace string, client *v12.CoreV1Client) (ns *v1.Namespace, err error) {
+func (impl *K8sServiceImpl) CreateNs(namespace string, client *v12.CoreV1Client) (ns *v1.Namespace, err error) {
 	nsSpec := &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}
 	ns, err = client.Namespaces().Create(context.Background(), nsSpec, metav1.CreateOptions{})
 	if err != nil {
