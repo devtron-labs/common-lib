@@ -325,7 +325,8 @@ func (impl PubSubClientServiceImpl) updateConsumer(natsClient *NatsClient, strea
 		updatesDetected = true
 	}
 
-	if info.Config.Replicas != streamInfo.Config.Replicas {
+	// sync consumer replicas with stream. ignore if stream replicas are 1 and consumer is 0
+	if info.Config.Replicas != streamInfo.Config.Replicas && !(info.Config.Replicas == 0 && streamInfo.Config.Replicas == 1) {
 		existingConfig.Replicas = streamInfo.Config.Replicas
 		updatesDetected = true
 	}
