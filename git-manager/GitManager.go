@@ -18,18 +18,24 @@ package git_manager
 
 import (
 	"context"
+	"fmt"
 	"github.com/devtron-labs/common-lib/git-manager/util"
+	"github.com/devtron-labs/common-lib/utils"
 	"log"
 	"os"
 	"path/filepath"
 )
 
 type GitOptions struct {
-	UserName      string   `json:"userName"`
-	Password      string   `json:"password"`
-	SshPrivateKey string   `json:"sshPrivateKey"`
-	AccessToken   string   `json:"accessToken"`
-	AuthMode      AuthMode `json:"authMode"`
+	UserName               string   `json:"userName"`
+	Password               string   `json:"password"`
+	SshPrivateKey          string   `json:"sshPrivateKey"`
+	AccessToken            string   `json:"accessToken"`
+	AuthMode               AuthMode `json:"authMode"`
+	TlsKey                 string   `json:"tlsKey"`
+	TlsCert                string   `json:"tlsCert"`
+	CaCert                 string   `json:"caCert"`
+	TlsVerificationEnabled bool     `json:"tlsVerificationEnabled"`
 }
 
 type WebhookData struct {
@@ -42,9 +48,17 @@ type GitContext struct {
 	context.Context // Embedding original Go context
 	Auth            *BasicAuth
 	WorkingDir      string
+	TLSData         *TLSData
 }
 type BasicAuth struct {
 	Username, Password string
+}
+
+type TLSData struct {
+	TLSKey                 string
+	TLSCertificate         string
+	CACert                 string
+	TlsVerificationEnabled bool
 }
 
 type AuthMode string
@@ -104,10 +118,11 @@ func (impl *GitManager) CloneAndCheckout(ciProjectDetails []CiProjectDetails, wo
 		default:
 			auth = &BasicAuth{}
 		}
-
+		tlsData := BuildTlsData(prj.GitOptions.TlsKey, prj.GitOptions.TlsCert, prj.GitOptions.CaCert, prj.GitOptions.TlsVerificationEnabled)
 		gitContext := GitContext{
 			Auth:       auth,
 			WorkingDir: workingDir,
+			TLSData:    tlsData,
 		}
 		// create ssh private key on disk
 		if authMode == AUTH_MODE_SSH {
@@ -184,4 +199,62 @@ func (impl *GitManager) CloneAndCheckout(ciProjectDetails []CiProjectDetails, wo
 
 	}
 	return nil
+}
+
+func CreateFilesForTlsData(tlsData *TLSData, directoryPath string) (*TlsPathInfo, error) {
+
+	if tlsData == nil {
+		return nil, nil
+	}
+	if tlsData.TlsVerificationEnabled {
+		var tlsKeyFilePath string
+		var tlsCertFilePath string
+		var caCertFilePath string
+		var err error
+		// this is to avoid concurrency issue, random number is appended at the end of file, where this file is read/created/deleted by multiple commands simultaneously.
+		if tlsData.TLSKey != "" && tlsData.TLSCertificate != "" {
+			tlsKeyFilePath, err = utils.CreateFolderAndFileWithContent(tlsData.TLSKey, getTLSKeyFileName(), directoryPath)
+			if err != nil {
+				return nil, err
+			}
+			tlsCertFilePath, err = utils.CreateFolderAndFileWithContent(tlsData.TLSCertificate, getCertFileName(), directoryPath)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if tlsData.CACert != "" {
+			caCertFilePath, err = utils.CreateFolderAndFileWithContent(tlsData.CACert, getCertFileName(), directoryPath)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return &TlsPathInfo{caCertFilePath, tlsKeyFilePath, tlsCertFilePath}, nil
+	}
+	return nil, nil
+}
+
+func DeleteTlsFiles(pathInfo *TlsPathInfo) {
+	if pathInfo == nil {
+		return
+	}
+	if pathInfo.TlsKeyPath != "" {
+		err := utils.DeleteAFileIfExists(pathInfo.TlsKeyPath)
+		if err != nil {
+			fmt.Println("error in deleting file", "tlsKeyPath", pathInfo.TlsKeyPath, "err", err)
+		}
+	}
+
+	if pathInfo.TlsCertPath != "" {
+		err := utils.DeleteAFileIfExists(pathInfo.TlsCertPath)
+		if err != nil {
+			fmt.Println("error in deleting file", "TlsCertPath", pathInfo.TlsCertPath, "err", err)
+		}
+	}
+	if pathInfo.CaCertPath != "" {
+		err := utils.DeleteAFileIfExists(pathInfo.CaCertPath)
+		if err != nil {
+			fmt.Println("error in deleting file", "CaCertPath", pathInfo.CaCertPath, "err", err)
+		}
+	}
+	return
 }
