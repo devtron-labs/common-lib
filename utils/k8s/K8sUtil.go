@@ -48,7 +48,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/version"
 
-	"github.com/devtron-labs/authenticator/client"
 	"go.uber.org/zap"
 	v14 "k8s.io/api/apps/v1"
 	batchV1 "k8s.io/api/batch/v1"
@@ -66,7 +65,7 @@ import (
 
 type K8sServiceImpl struct {
 	logger           *zap.SugaredLogger
-	runTimeConfig    *client.RuntimeConfig
+	runTimeConfig    *RuntimeConfig
 	httpClientConfig *CustomK8sHttpTransportConfig
 	kubeconfig       *string
 }
@@ -107,11 +106,13 @@ type K8sService interface {
 	CreateSecretData(namespace string, secret *v1.Secret, v1Client *v12.CoreV1Client) (*v1.Secret, error)
 	CreateSecret(namespace string, data map[string][]byte, secretName string, secretType v1.SecretType, client *v12.CoreV1Client, labels map[string]string, stringData map[string]string) (*v1.Secret, error)
 	GetSecret(namespace string, name string, client *v12.CoreV1Client) (*v1.Secret, error)
+	GetSecretWithCtx(ctx context.Context, namespace string, name string, client *v12.CoreV1Client) (*v1.Secret, error)
 	PatchConfigMapJsonType(namespace string, clusterConfig *ClusterConfig, name string, data interface{}, path string) (*v1.ConfigMap, error)
 	PatchConfigMap(namespace string, clusterConfig *ClusterConfig, name string, data map[string]interface{}) (*v1.ConfigMap, error)
 	UpdateConfigMap(namespace string, cm *v1.ConfigMap, client *v12.CoreV1Client) (*v1.ConfigMap, error)
 	CreateConfigMap(namespace string, cm *v1.ConfigMap, client *v12.CoreV1Client) (*v1.ConfigMap, error)
 	GetConfigMap(namespace string, name string, client *v12.CoreV1Client) (*v1.ConfigMap, error)
+	GetConfigMapWithCtx(ctx context.Context, namespace string, name string, client *v12.CoreV1Client) (*v1.ConfigMap, error)
 	CheckIfNsExists(namespace string, client *v12.CoreV1Client) (exists bool, err error)
 	CreateNsIfNotExists(namespace string, clusterConfig *ClusterConfig) (err error)
 	GetK8sDiscoveryClientInCluster() (*discovery.DiscoveryClient, error)
@@ -136,6 +137,7 @@ type K8sService interface {
 	GetResourceIf(restConfig *rest.Config, groupVersionKind schema.GroupVersionKind) (resourceIf dynamic.NamespaceableResourceInterface, namespaced bool, err error)
 	FetchConnectionStatusForCluster(k8sClientSet *kubernetes.Clientset) error
 	CreateK8sClientSet(restConfig *rest.Config) (*kubernetes.Clientset, error)
+	CreateOrUpdateSecretByName(client *v12.CoreV1Client, namespace, uniqueSecretName string, secretLabel map[string]string, secretData map[string]string) error
 	//CreateK8sClientSetWithCustomHttpTransport(restConfig *rest.Config) (*kubernetes.Clientset, error)
 
 	//below functions are exposed for K8sUtilExtended
@@ -144,7 +146,7 @@ type K8sService interface {
 	CreateNs(namespace string, client *v12.CoreV1Client) (ns *v1.Namespace, err error)
 }
 
-func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *client.RuntimeConfig) *K8sServiceImpl {
+func NewK8sUtil(logger *zap.SugaredLogger, runTimeConfig *RuntimeConfig) *K8sServiceImpl {
 	usr, err := user.Current()
 	if err != nil {
 		return nil
@@ -340,7 +342,11 @@ func (impl *K8sServiceImpl) deleteNs(namespace string, client *v12.CoreV1Client)
 }
 
 func (impl *K8sServiceImpl) GetConfigMap(namespace string, name string, client *v12.CoreV1Client) (*v1.ConfigMap, error) {
-	cm, err := client.ConfigMaps(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	return impl.GetConfigMapWithCtx(context.Background(), namespace, name, client)
+}
+
+func (impl *K8sServiceImpl) GetConfigMapWithCtx(ctx context.Context, namespace string, name string, client *v12.CoreV1Client) (*v1.ConfigMap, error) {
+	cm, err := client.ConfigMaps(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		impl.logger.Errorw("error in getting config map", "err", err)
 		return nil, err
@@ -378,6 +384,7 @@ func (impl *K8sServiceImpl) PatchConfigMap(namespace string, clusterConfig *Clus
 	b, err := json.Marshal(data)
 	if err != nil {
 		impl.logger.Errorw("error in marshalling data", "err", err)
+		// TODO: why panic
 		panic(err)
 	}
 	cm, err := k8sClient.ConfigMaps(namespace).Patch(context.Background(), name, types.PatchType(types.MergePatchType), b, metav1.PatchOptions{})
@@ -406,6 +413,7 @@ func (impl *K8sServiceImpl) PatchConfigMapJsonType(namespace string, clusterConf
 	b, err := json.Marshal(patches)
 	if err != nil {
 		impl.logger.Errorw("error in getting marshalling pacthes", "err", err, "namespace", namespace)
+		// TODO: why panic
 		panic(err)
 	}
 
@@ -426,7 +434,11 @@ type JsonPatchType struct {
 }
 
 func (impl *K8sServiceImpl) GetSecret(namespace string, name string, client *v12.CoreV1Client) (*v1.Secret, error) {
-	secret, err := client.Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	return impl.GetSecretWithCtx(context.Background(), namespace, name, client)
+}
+
+func (impl *K8sServiceImpl) GetSecretWithCtx(ctx context.Context, namespace string, name string, client *v12.CoreV1Client) (*v1.Secret, error) {
+	secret, err := client.Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		impl.logger.Errorw("error in getting secrets", "err", err, "namespace", namespace)
 		return nil, err
@@ -1834,4 +1846,30 @@ func isStatefulSetChild(un *unstructured.Unstructured) (func(ResourceKey) bool, 
 		}
 		return false
 	}, nil
+}
+
+func (impl *K8sServiceImpl) CreateOrUpdateSecretByName(client *v12.CoreV1Client, namespace, uniqueSecretName string, secretLabel map[string]string, secretData map[string]string) error {
+
+	secret, err := impl.GetSecret(namespace, uniqueSecretName, client)
+	statusError, ok := err.(*errors.StatusError)
+	if err != nil && (ok && statusError != nil && statusError.Status().Code != http.StatusNotFound) {
+		impl.logger.Errorw("error in fetching secret", "err", err)
+		return err
+	}
+
+	if ok && statusError != nil && statusError.Status().Code == http.StatusNotFound {
+		_, err = impl.CreateSecret(namespace, nil, uniqueSecretName, "", client, secretLabel, secretData)
+		if err != nil {
+			impl.logger.Errorw("Error in creating secret for chart repo", "uniqueSecretName", uniqueSecretName, "err", err)
+			return err
+		}
+	} else {
+		secret.StringData = secretData
+		_, err = impl.UpdateSecret(namespace, secret, client)
+		if err != nil {
+			impl.logger.Errorw("Error in creating secret for chart repo", "uniqueSecretName", uniqueSecretName, "err", err)
+			return err
+		}
+	}
+	return nil
 }

@@ -4,10 +4,6 @@ go 1.21
 
 toolchain go1.21.8
 
-require github.com/nats-io/nats.go v1.28.0
-
-require go.uber.org/zap v1.21.0
-
 require (
 	cloud.google.com/go/storage v1.30.1
 	github.com/Azure/go-autorest/autorest v0.11.29
@@ -15,15 +11,16 @@ require (
 	github.com/arl/statsviz v0.6.0
 	github.com/aws/aws-sdk-go v1.44.116
 	github.com/caarlos0/env v3.5.0+incompatible
-	github.com/devtron-labs/authenticator v0.4.31
 	github.com/gammazero/workerpool v1.1.3
 	github.com/google/wire v0.6.0
 	github.com/gorilla/mux v1.8.0
+	github.com/nats-io/nats.go v1.28.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.45.0
+	go.uber.org/zap v1.21.0
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
 	google.golang.org/api v0.126.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -33,7 +30,7 @@ require (
 	k8s.io/client-go v0.29.0
 	k8s.io/kube-aggregator v0.0.0
 	k8s.io/kubectl v0.29.0
-	k8s.io/kubernetes v1.26.11
+	k8s.io/kubernetes v1.27.13
 	k8s.io/metrics v0.24.2
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 	sigs.k8s.io/yaml v1.3.0
@@ -41,8 +38,7 @@ require (
 
 require (
 	cloud.google.com/go v0.110.6 // indirect
-	cloud.google.com/go/compute v1.23.0 // indirect
-	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	cloud.google.com/go/iam v1.1.1 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
 	github.com/Azure/azure-pipeline-go v0.2.3 // indirect
@@ -54,11 +50,9 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Microsoft/hcsshim v0.11.4 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/caarlos0/env/v6 v6.7.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/containerd/containerd v1.7.12 // indirect
 	github.com/containerd/log v0.1.0 // indirect
-	github.com/coreos/go-oidc v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/cli v24.0.6+incompatible // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
@@ -104,7 +98,6 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/pquerna/cachecontrol v0.1.0 // indirect
 	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.1 // indirect
@@ -114,12 +107,12 @@ require (
 	go.opentelemetry.io/otel v1.19.0 // indirect
 	go.opentelemetry.io/otel/metric v1.19.0 // indirect
 	go.opentelemetry.io/otel/trace v1.19.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/oauth2 v0.10.0 // indirect
-	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/term v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/oauth2 v0.21.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/term v0.22.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -128,7 +121,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/grpc v1.58.3 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
@@ -145,7 +137,7 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )
 
