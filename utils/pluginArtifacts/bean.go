@@ -35,7 +35,7 @@ func (g *GenericImageDetail) SetLastUpdatedOn(imagePushedAt *time.Time) *Generic
 	return g
 }
 
-func NewGenericImageDetailsFromPlugin() *GenericImageDetail {
+func NewGenericImageDetailFromPlugin() *GenericImageDetail {
 	return &GenericImageDetail{}
 }
 
@@ -46,10 +46,10 @@ const (
 	Descending = "DSC" // default
 )
 
-// SortGenericImageDetailsByCreatedOn is used to sort the list of GenericImageDetail by GenericImageDetail.LastUpdatedOn
+// SortGenericImageDetailByCreatedOn is used to sort the list of GenericImageDetail by GenericImageDetail.LastUpdatedOn
 //   - OrderBy - default value Descending
 //   - Original Slice is not manipulated, returns a new slice
-func SortGenericImageDetailsByCreatedOn(images []*GenericImageDetail, orderBy OrderBy) []*GenericImageDetail {
+func SortGenericImageDetailByCreatedOn(images []*GenericImageDetail, orderBy OrderBy) []*GenericImageDetail {
 	if len(images) == 0 {
 		return images
 	}
