@@ -27,7 +27,7 @@ func (g *GenericImageDetail) SetImageDigest(imageDigest *string) *GenericImageDe
 	return g
 }
 
-func (g *GenericImageDetail) SetImagePushedAt(imagePushedAt *time.Time) *GenericImageDetail {
+func (g *GenericImageDetail) SetLastUpdatedOn(imagePushedAt *time.Time) *GenericImageDetail {
 	if imagePushedAt == nil {
 		return g
 	}
