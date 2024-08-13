@@ -6,15 +6,9 @@ import (
 )
 
 type GenericImageDetail struct {
-	PluginName    string    `json:"pluginName"`
 	Image         string    `json:"image"`
 	ImageDigest   string    `json:"imageDigest"`
 	LastUpdatedOn time.Time `json:"imagePushedAt"`
-}
-
-func (g *GenericImageDetail) SetPluginName(pluginName string) *GenericImageDetail {
-	g.PluginName = pluginName
-	return g
 }
 
 func (g *GenericImageDetail) SetImage(image *string) *GenericImageDetail {
@@ -41,9 +35,8 @@ func (g *GenericImageDetail) SetImagePushedAt(imagePushedAt *time.Time) *Generic
 	return g
 }
 
-func NewGenericImageDetailsFromPlugin(pluginName string, image, digest *string, createdOn *time.Time) *GenericImageDetail {
-	imageDetails := &GenericImageDetail{}
-	return imageDetails.SetPluginName(pluginName).SetImage(image).SetImageDigest(digest).SetImagePushedAt(createdOn)
+func NewGenericImageDetailsFromPlugin() *GenericImageDetail {
+	return &GenericImageDetail{}
 }
 
 type OrderBy string
@@ -54,8 +47,8 @@ const (
 )
 
 // SortGenericImageDetailsByCreatedOn is used to sort the list of GenericImageDetail by GenericImageDetail.LastUpdatedOn
-//	- OrderBy - default value Descending
-//	- Original Slice is not manipulated, returns a new slice
+//   - OrderBy - default value Descending
+//   - Original Slice is not manipulated, returns a new slice
 func SortGenericImageDetailsByCreatedOn(images []*GenericImageDetail, orderBy OrderBy) []*GenericImageDetail {
 	if len(images) == 0 {
 		return images
