@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+type ImageDetailsFromCR struct {
+	ImageDetails []*GenericImageDetail `json:"imageDetails"`
+}
+
 type GenericImageDetail struct {
 	Image         string    `json:"image"`
 	ImageDigest   string    `json:"imageDigest"`
