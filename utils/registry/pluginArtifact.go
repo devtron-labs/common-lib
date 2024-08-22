@@ -1,4 +1,4 @@
-package pluginArtifacts
+package registry
 
 import (
 	"sort"
