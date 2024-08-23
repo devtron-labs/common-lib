@@ -8,7 +8,7 @@ import (
 type version string
 
 const (
-	v2 version = "v2"
+	V2 version = "v2"
 )
 
 type ImageDetailsFromCR struct {
@@ -18,7 +18,7 @@ type ImageDetailsFromCR struct {
 
 func NewImageDetailsFromCR(version version) *ImageDetailsFromCR {
 	if len(version) == 0 {
-		version = v2 // default version
+		version = V2 // default version
 	}
 	return &ImageDetailsFromCR{
 		Version: version,
