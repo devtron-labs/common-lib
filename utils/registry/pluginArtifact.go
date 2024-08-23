@@ -5,8 +5,32 @@ import (
 	"time"
 )
 
+type version string
+
+const (
+	v2 version = "v2"
+)
+
 type ImageDetailsFromCR struct {
+	Version      version               `json:"version"`
 	ImageDetails []*GenericImageDetail `json:"imageDetails"`
+}
+
+func NewImageDetailsFromCR(version version) *ImageDetailsFromCR {
+	if len(version) == 0 {
+		version = v2 // default version
+	}
+	return &ImageDetailsFromCR{
+		Version: version,
+	}
+}
+
+func (i *ImageDetailsFromCR) AddImageDetails(imageDetails ...*GenericImageDetail) *ImageDetailsFromCR {
+	if i == nil {
+		return i
+	}
+	i.ImageDetails = append(i.ImageDetails, imageDetails...)
+	return i
 }
 
 type GenericImageDetail struct {
