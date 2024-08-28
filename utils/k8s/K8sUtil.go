@@ -95,6 +95,7 @@ type K8sService interface {
 	DeletePodByLabel(namespace string, labels string, clusterConfig *ClusterConfig) error
 	CreateJob(namespace string, name string, clusterConfig *ClusterConfig, job *batchV1.Job) error
 	GetLiveZCall(path string, k8sClientSet *kubernetes.Clientset) ([]byte, error)
+	GetLiveZCallWithCtx(ctx context.Context, path string, k8sClientSet *kubernetes.Clientset) ([]byte, error)
 	DiscoveryClientGetLiveZCall(cluster *ClusterConfig) ([]byte, error)
 	GetK8sConfigAndClientsByRestConfig(restConfig *rest.Config) (*http.Client, *kubernetes.Clientset, error)
 	GetK8sConfigAndClients(clusterConfig *ClusterConfig) (*rest.Config, *http.Client, *kubernetes.Clientset, error)
@@ -618,8 +619,13 @@ func (impl *K8sServiceImpl) DiscoveryClientGetLiveZCall(cluster *ClusterConfig) 
 	return response, err
 
 }
+
 func (impl *K8sServiceImpl) GetLiveZCall(path string, k8sClientSet *kubernetes.Clientset) ([]byte, error) {
-	response, err := k8sClientSet.Discovery().RESTClient().Get().AbsPath(path).DoRaw(context.Background())
+	return impl.GetLiveZCallWithCtx(context.Background(), path, k8sClientSet)
+}
+
+func (impl *K8sServiceImpl) GetLiveZCallWithCtx(ctx context.Context, path string, k8sClientSet *kubernetes.Clientset) ([]byte, error) {
+	response, err := k8sClientSet.Discovery().RESTClient().Get().AbsPath(path).DoRaw(ctx)
 	if err != nil {
 		impl.logger.Errorw("error in getting response from discovery client", "err", err)
 		return nil, err
