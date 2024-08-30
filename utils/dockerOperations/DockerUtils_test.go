@@ -87,16 +87,16 @@ func TestGetImageDigestByImage(t *testing.T) {
 			want:    "sha256:b116c920fba7845ab3721c0355eefe10dd0803277ff9c7616543b1e6b2982459",
 			wantErr: false,
 		},
-		//{
-		//	name: PrivateHarborRegistryImageTest,
-		//	args: args{
-		//		ctx:        context.Background(),
-		//		image:      "stage-harbor.devtron.info/devtron-test/pk:3fdcd758-1-40",
-		//		dockerAuth: &bean.DockerAuthConfig{IsRegistryPrivate: true},
-		//	},
-		//	want:    "sha256:14c62c4fa09f02b3131ea4e6c48c152ac83b4ee05a7eec9d544105b7feb2a40a",
-		//	wantErr: false,
-		//},
+		{
+			name: PrivateHarborRegistryImageTest,
+			args: args{
+				ctx:        context.Background(),
+				image:      "stage-harbor.devtron.info/devtron-test/pk:3fdcd758-1-40",
+				dockerAuth: &bean.DockerAuthConfig{IsRegistryPrivate: true},
+			},
+			want:    "sha256:14c62c4fa09f02b3131ea4e6c48c152ac83b4ee05a7eec9d544105b7feb2a40a",
+			wantErr: false,
+		},
 		{
 			name: PrivateAzureRegistryImageTest,
 			args: args{
