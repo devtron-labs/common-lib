@@ -48,6 +48,13 @@ github.com/Azure/go-autorest/tracing
 # github.com/Masterminds/semver/v3 v3.2.1
 ## explicit; go 1.18
 github.com/Masterminds/semver/v3
+# github.com/Microsoft/go-winio v0.6.1
+## explicit; go 1.17
+github.com/Microsoft/go-winio
+github.com/Microsoft/go-winio/internal/fs
+github.com/Microsoft/go-winio/internal/socket
+github.com/Microsoft/go-winio/internal/stringbuffer
+github.com/Microsoft/go-winio/pkg/guid
 # github.com/Microsoft/hcsshim v0.11.4
 ## explicit; go 1.18
 github.com/Microsoft/hcsshim/osversion
@@ -169,10 +176,12 @@ github.com/docker/distribution/registry/client/auth/challenge
 github.com/docker/distribution/registry/client/transport
 github.com/docker/distribution/registry/storage/cache
 github.com/docker/distribution/registry/storage/cache/memory
-# github.com/docker/docker v27.2.0+incompatible
+# github.com/docker/docker v27.1.2+incompatible
 ## explicit
+github.com/docker/docker/api
 github.com/docker/docker/api/types
 github.com/docker/docker/api/types/blkiodev
+github.com/docker/docker/api/types/checkpoint
 github.com/docker/docker/api/types/container
 github.com/docker/docker/api/types/events
 github.com/docker/docker/api/types/filters
@@ -183,8 +192,11 @@ github.com/docker/docker/api/types/registry
 github.com/docker/docker/api/types/strslice
 github.com/docker/docker/api/types/swarm
 github.com/docker/docker/api/types/swarm/runtime
+github.com/docker/docker/api/types/system
+github.com/docker/docker/api/types/time
 github.com/docker/docker/api/types/versions
 github.com/docker/docker/api/types/volume
+github.com/docker/docker/client
 github.com/docker/docker/errdefs
 github.com/docker/docker/internal/multierror
 github.com/docker/docker/pkg/homedir
@@ -197,6 +209,7 @@ github.com/docker/docker-credential-helpers/credentials
 # github.com/docker/go-connections v0.4.0
 ## explicit
 github.com/docker/go-connections/nat
+github.com/docker/go-connections/sockets
 github.com/docker/go-connections/tlsconfig
 # github.com/docker/go-metrics v0.0.1
 ## explicit; go 1.11
@@ -507,6 +520,9 @@ golang.org/x/crypto/salsa20/salsa
 ## explicit; go 1.20
 golang.org/x/exp/constraints
 golang.org/x/exp/slices
+# golang.org/x/mod v0.17.0
+## explicit; go 1.18
+golang.org/x/mod/semver
 # golang.org/x/net v0.27.0
 ## explicit; go 1.18
 golang.org/x/net/context
@@ -515,7 +531,9 @@ golang.org/x/net/http/httpproxy
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
+golang.org/x/net/internal/socks
 golang.org/x/net/internal/timeseries
+golang.org/x/net/proxy
 golang.org/x/net/trace
 # golang.org/x/oauth2 v0.21.0
 ## explicit; go 1.18
@@ -553,6 +571,26 @@ golang.org/x/text/unicode/norm
 # golang.org/x/time v0.3.0
 ## explicit
 golang.org/x/time/rate
+# golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
+## explicit; go 1.19
+golang.org/x/tools/cmd/stringer
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/packagesdriver
+golang.org/x/tools/go/packages
+golang.org/x/tools/go/types/objectpath
+golang.org/x/tools/internal/aliases
+golang.org/x/tools/internal/event
+golang.org/x/tools/internal/event/core
+golang.org/x/tools/internal/event/keys
+golang.org/x/tools/internal/event/label
+golang.org/x/tools/internal/gcimporter
+golang.org/x/tools/internal/gocommand
+golang.org/x/tools/internal/packagesinternal
+golang.org/x/tools/internal/pkgbits
+golang.org/x/tools/internal/stdlib
+golang.org/x/tools/internal/tokeninternal
+golang.org/x/tools/internal/typesinternal
+golang.org/x/tools/internal/versions
 # golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 ## explicit; go 1.17
 golang.org/x/xerrors
