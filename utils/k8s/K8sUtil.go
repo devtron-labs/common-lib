@@ -318,7 +318,7 @@ func (impl *K8sServiceImpl) UpdateNSLabels(namespace *v1.Namespace, labels map[s
 		return nil, err
 	}
 	namespace.Labels = labels
-	ns, err = v12Client.Namespaces().Update(context.Background(), ns, metav1.UpdateOptions{})
+	ns, err = v12Client.Namespaces().Update(context.Background(), namespace, metav1.UpdateOptions{})
 	if err != nil {
 		impl.logger.Errorw("error in updating ns", "namespace", namespace, "err", err)
 		return nil, err
