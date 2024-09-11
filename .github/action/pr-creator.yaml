@@ -1,0 +1,41 @@
+name: PR Created - Run Multi-Gitter
+
+on:
+  pull_request:
+    types: [opened, reopened]
+    branches:
+      - develop
+      - main
+
+jobs:
+  run-multi-gitter:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install multi-gitter
+        run: npm install -g multi-gitter
+
+      - name: Get PR details
+        id: pr_details
+        run: |
+          echo "::set-output name=sha::${{ github.event.pull_request.head.sha }}"
+          echo "::set-output name=branch::${{ github.event.pull_request.head.ref }}"
+
+      - name: Run multi-gitter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          multi-gitter run ./update-version.sh \
+            --dry-run \
+            --token $GITHUB_TOKEN \
+            --config multi-gitter-config \
+            --env PR_SHA=${{ steps.pr_details.outputs.sha }} \
+            --env PR_BRANCH=${{ steps.pr_details.outputs.branch }}
