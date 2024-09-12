@@ -43,5 +43,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
         run: |
           multi-gitter run .github/scripts/update-version.sh \
-            --token $GITHUBTOKEN \
+            --token $GITHUB_TOKEN \
             --config .github/config/multi-gitter-config.yaml
