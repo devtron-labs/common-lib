@@ -40,8 +40,8 @@ jobs:
 
       - name: Run multi-gitter
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
 
-          multi-gitter run .github/scripts/update-version.sh --dry-run --token "$GITHUB_TOKEN"  --config .github/config/multi-gitter-config   
+          multi-gitter run .github/scripts/update-version.sh --dry-run --token "$GITEA_TOKEN"  --config .github/config/multi-gitter-config   
 
