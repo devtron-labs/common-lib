@@ -34,7 +34,7 @@ jobs:
 
       - name: Update script with PR details
         run: |
-          sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/config/multi-gitter-config.yaml
+          sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/config/multi-gitter-config
           sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/scripts/update-version.sh
           sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ env.BASE_BRANCH }}/' .github/scripts/update-version.sh
 
@@ -42,6 +42,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
         run: |
-          multi-gitter run .github/scripts/update-version.sh \
-            --token $GITHUBTOKEN \
-            --config .github/config/multi-gitter-config.yaml
+          multi-gitter run .github/scripts/update-version.sh --dry-run --token $GITHUBTOKEN  --config .github/config/multi-gitter-config
+        
