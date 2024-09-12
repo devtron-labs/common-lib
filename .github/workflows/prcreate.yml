@@ -26,12 +26,10 @@ jobs:
         env:
           HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
           BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
           echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
           echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Update script with PR details
@@ -39,7 +37,6 @@ jobs:
           sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/scripts/update-version.sh
           sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/scripts/update-version.sh
           sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ env.BASE_BRANCH }}/' .github/scripts/update-version.sh
-          sed -i 's/PR_NUMBER=.*/PR_NUMBER=${{ env.PR_NUMBER }}/' .github/scripts/update-version.sh
 
       - name: Run multi-gitter
         env:
