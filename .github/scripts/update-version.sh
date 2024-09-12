@@ -9,7 +9,7 @@ VERSION=${COMMIT_SHA}
 echo "Commit SHA: ${VERSION}"
         
 # Stop the script if any command fails
-set -e
+set -ex
 
 # Check if the module already exists, abort if it does not
 go list -m $MODULE &> /dev/null
