@@ -23,19 +23,23 @@ jobs:
         run: go install github.com/lindell/multi-gitter@latest
 
       - name: Get PR details
-        id: pr_details
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          echo "::set-output name=head_branch::${{ github.event.pull_request.head.ref }}"
-          echo "::set-output name=base_branch::${{ github.event.pull_request.base.ref }}"
-          echo "::set-output name=pr_number::${{ github.event.pull_request.number }}"
-          echo "::set-output name=commit_sha::${{ github.event.pull_request.head.sha }}"
+          echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
+          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Update script with PR details
         run: |
-          sed -i 's/VERSION=.*/VERSION=${{ steps.pr_details.outputs.commit_sha }}/' .github/scripts/update-version.sh
-          sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ steps.pr_details.outputs.head_branch }}/' .github/scripts/update-version.sh
-          sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ steps.pr_details.outputs.base_branch }}/' .github/scripts/update-version.sh
-          sed -i 's/PR_NUMBER=.*/PR_NUMBER=${{ steps.pr_details.outputs.pr_number }}/' .github/scripts/update-version.sh
+          sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/scripts/update-version.sh
+          sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/scripts/update-version.sh
+          sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ env.BASE_BRANCH }}/' .github/scripts/update-version.sh
+          sed -i 's/PR_NUMBER=.*/PR_NUMBER=${{ env.PR_NUMBER }}/' .github/scripts/update-version.sh
 
       - name: Run multi-gitter
         env:
