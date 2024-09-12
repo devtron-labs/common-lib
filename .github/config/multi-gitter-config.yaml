@@ -9,18 +9,18 @@ assignees:
 # author-name: prakhar
 
 # The branch which the changes will be based on.
-base-branch: develop 
+base-branch: "{{BASE_BRANCH}}"
 #jaha se branch kategi
 
 # Base URL of the target platform, needs to be changed for GitHub enterprise, a self-hosted GitLab instance, Gitea or BitBucket.
 base-url:
 
 # The name of the branch where changes are committed.
-branch: multi-gitter-branch
+branch: "{{HEAD_BRANCH}}"
 #branch ka naam jo kattige
 
 # The temporary directory where the repositories will be cloned. If not set, the default os temporary directory will be used.
-clone-dir: /tmp/multi-gitter
+clone-dir: /tmp/"{{HEAD_BRANCH}}"
 
 # Use a code search to find a set of repositories to target (GitHub only). Repeated results from a given repository will be ignored, forks are NOT included by default (use `fork:true` to include them). See the GitHub documentation for full syntax: https://docs.github.com/en/search-github/searching-on-github/searching-code.
 code-search:
@@ -115,11 +115,7 @@ repo:
   # - devtron-labs/ci-runner-enterprise
   # - devtron-labs/git-sensor-enterprise
   # - devtron-labs/common-lib-private
-  - devtron-labs/devtron
-  - devtron-labs/kubelink
-  - devtron-labs/image-scanner
-  - devtron-labs/ci-runner
-  - devtron-labs/git-sensor
+  - demoDVTNorg/kubewatch
 
 # Exclude repositories that match with a given Regular Expression
 repo-exclude:
@@ -132,9 +128,8 @@ repo-search:
 
 # The username of the reviewers to be added on the pull request.
 reviewers:
-  - iamayushm
-  - prkhrkat
-
+  - yashasvi17
+ 
 # Skip repositories which are forks.
 skip-forks: false
 
