@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.16'
+          go-version: '1.21'
 
       - name: Install multi-gitter
         run: go install github.com/lindell/multi-gitter@latest
@@ -34,7 +34,7 @@ jobs:
 
       - name: Update script with PR details
         run: |
-          sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/config/multi-gitter-config.yaml
+          sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/config/multi-gitter-config
           sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/scripts/update-version.sh
           sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ env.BASE_BRANCH }}/' .github/scripts/update-version.sh
 
@@ -42,6 +42,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
         run: |
-          multi-gitter run .github/scripts/update-version.sh \
-            --token $GITHUB_TOKEN \
-            --config .github/config/multi-gitter-config.yaml
+
+          multi-gitter run .github/scripts/update-version.sh --dry-run --token $GITHUB_TOKEN  --config .github/config/multi-gitter-config   
+
