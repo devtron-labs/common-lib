@@ -19,7 +19,7 @@ jobs:
 
       - name: Create new tag
         env:
-          TOKEN: ${{ secrets.TAG_CREATION_TOKEN }}
+          TOKEN: ${{ secrets.TAG_CREATION_TOKEN_PUBLIC }}
         run: |
           echo $TOKEN | gh auth login --with-token
           latest_tag=$(git tag --sort=refname | tail -n 1)
