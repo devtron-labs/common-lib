@@ -3,7 +3,7 @@
 # Title: Updates a go module to a new (patch/minor) version
 
 ### Change these values ###
-MODULE=github.com/ddvs/fawvjo
+MODULE=github.com/demoDVTNorg/common-lib
 VERSION=${COMMIT_SHA}
 
 echo "Commit SHA: ${VERSION}"
