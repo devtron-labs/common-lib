@@ -1,4 +1,4 @@
-name: PR Created - Run Multi-Gitter
+name: Update Dependencies with Multi-Gitter
 
 on:
   pull_request:
@@ -8,34 +8,39 @@ on:
       - main
 
 jobs:
-  run-multi-gitter:
+  update-dependencies:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
-          node-version: '14'
+          go-version: '1.16'
 
       - name: Install multi-gitter
-        run: npm install -g multi-gitter
+        run: go install github.com/lindell/multi-gitter@latest
 
       - name: Get PR details
         id: pr_details
         run: |
-          echo "::set-output name=sha::${{ github.event.pull_request.head.sha }}"
-          echo "::set-output name=branch::${{ github.event.pull_request.head.ref }}"
+          echo "::set-output name=head_branch::${{ github.event.pull_request.head.ref }}"
+          echo "::set-output name=base_branch::${{ github.event.pull_request.base.ref }}"
+          echo "::set-output name=pr_number::${{ github.event.pull_request.number }}"
+          echo "::set-output name=commit_sha::${{ github.event.pull_request.head.sha }}"
+
+      - name: Update script with PR details
+        run: |
+          sed -i 's/VERSION=.*/VERSION=${{ steps.pr_details.outputs.commit_sha }}/' .github/scripts/update-version.sh
+          sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ steps.pr_details.outputs.head_branch }}/' .github/scripts/update-version.sh
+          sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ steps.pr_details.outputs.base_branch }}/' .github/scripts/update-version.sh
+          sed -i 's/PR_NUMBER=.*/PR_NUMBER=${{ steps.pr_details.outputs.pr_number }}/' .github/scripts/update-version.sh
 
       - name: Run multi-gitter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          multi-gitter run ./update-version.sh \
-            --dry-run \
+          multi-gitter run .github/scripts/update-version.sh \
             --token $GITHUB_TOKEN \
-            --config multi-gitter-config \
-            --env PR_SHA=${{ steps.pr_details.outputs.sha }} \
-            --env PR_BRANCH=${{ steps.pr_details.outputs.branch }}
+            --config .github/config/multi-gitter-config.yaml
