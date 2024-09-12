@@ -4,7 +4,9 @@
 
 ### Change these values ###
 MODULE=github.com/ddvs/fawvjo
-VERSION=9ab7ngfx,ctudlyffsDEGJ
+VERSION=${COMMIT_SHA}
+
+echo "Commit SHA: ${VERSION}"
         
 # Stop the script if any command fails
 set -e
