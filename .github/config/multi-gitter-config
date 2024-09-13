@@ -20,7 +20,7 @@ branch:
 #branch ka naam jo kattige
 
 # The temporary directory where the repositories will be cloned. If not set, the default os temporary directory will be used.
-clone-dir: /tmp/develop
+clone-dir: 
 
 # Use a code search to find a set of repositories to target (GitHub only). Repeated results from a given repository will be ignored, forks are NOT included by default (use `fork:true` to include them). See the GitHub documentation for full syntax: https://docs.github.com/en/search-github/searching-on-github/searching-code.
 code-search:
