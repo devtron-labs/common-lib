@@ -43,5 +43,5 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
           chmod +x .github/scripts/update-version.sh
-          multi-gitter run .github/scripts/update-version.sh --dry-run --token "$GITEA_TOKEN"  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --config .github/config/multi-gitter-config   
+          multi-gitter run .github/scripts/update-version.sh --token "$GITEA_TOKEN"  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --config .github/config/multi-gitter-config   
 
