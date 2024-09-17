@@ -861,16 +861,27 @@ func (impl *K8sServiceImpl) BuildK8sObjectListTableData(manifest *unstructured.U
 			var cellObj map[string]interface{}
 			if cellObjUncast != nil {
 				cellObj = cellObjUncast.(map[string]interface{})
-				if cellObj != nil && cellObj[commonBean.K8sClusterResourceMetadataKey] != nil {
-					metadata := cellObj[commonBean.K8sClusterResourceMetadataKey].(map[string]interface{})
-					if metadata[commonBean.K8sClusterResourceNamespaceKey] != nil {
-						namespace = metadata[commonBean.K8sClusterResourceNamespaceKey].(string)
-						if namespaced {
-							rowIndex[commonBean.K8sClusterResourceNamespaceKey] = namespace
+				if cellObj != nil {
+					if cellObj[commonBean.K8sClusterResourceMetadataKey] != nil {
+						metadata := cellObj[commonBean.K8sClusterResourceMetadataKey].(map[string]interface{})
+						if metadata[commonBean.K8sClusterResourceNamespaceKey] != nil {
+							namespace = metadata[commonBean.K8sClusterResourceNamespaceKey].(string)
+							if namespaced {
+								rowIndex[commonBean.K8sClusterResourceNamespaceKey] = namespace
+							}
+						}
+						if includeMetadata {
+							rowIndex[commonBean.K8sClusterResourceMetadataKey] = metadata
 						}
 					}
-					if includeMetadata {
-						rowIndex[commonBean.K8sClusterResourceMetadataKey] = metadata
+
+					if cellObj[commonBean.K8sClusterResourceSpecKey] != nil {
+						spec, ok := cellObj[commonBean.K8sClusterResourceSpecKey].(map[string]interface{})
+						if ok {
+							rowIndex[commonBean.K8sClusterResourceSpecKey] = spec
+						} else {
+							impl.logger.Warnw("Not able to cast spec key of manifest to map")
+						}
 					}
 				}
 			}
