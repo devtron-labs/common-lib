@@ -862,6 +862,9 @@ func (impl *K8sServiceImpl) BuildK8sObjectListTableData(manifest *unstructured.U
 			if cellObjUncast != nil {
 				cellObj = cellObjUncast.(map[string]interface{})
 				if cellObj != nil {
+					rowIndex[commonBean.K8sClusterResourceKindKey] = cellObj[commonBean.K8sClusterResourceKindKey].(string)
+					rowIndex[commonBean.K8sClusterResourceApiVersionKey] = cellObj[commonBean.K8sClusterResourceApiVersionKey].(string)
+
 					if cellObj[commonBean.K8sClusterResourceMetadataKey] != nil {
 						metadata := cellObj[commonBean.K8sClusterResourceMetadataKey].(map[string]interface{})
 						if metadata[commonBean.K8sClusterResourceNamespaceKey] != nil {
