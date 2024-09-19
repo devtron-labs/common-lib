@@ -20,7 +20,7 @@ import (
 
 func GetLoggedInClient(client *registry.Client, config *Configuration) (*registry.Client, error) {
 
-	username, pwd, err := extractCredentialsForRegistry(config)
+	username, pwd, err := ExtractCredentialsForRegistry(config)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func DeleteCertificateFolder(filePath string) error {
 	return nil
 }
 
-func extractCredentialsForRegistry(config *Configuration) (string, string, error) {
+func ExtractCredentialsForRegistry(config *Configuration) (string, string, error) {
 	username := config.Username
 	pwd := config.Password
 	if (config.RegistryType == REGISTRYTYPE_GCR || config.RegistryType == REGISTRYTYPE_ARTIFACT_REGISTRY) && username == JSON_KEY_USERNAME {
