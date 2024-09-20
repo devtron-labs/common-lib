@@ -93,7 +93,7 @@ platform: github
 pr-body: "This PR was created by multi-gitter to sync common-lib changes across multiple repositories."
 
 # The title of the PR. Will default to the first line of the commit message if none is set.
-pr-title: "fix: sync with common-lib changes"
+pr-title: 
 
 # The name, including owner of a GitLab project in the format "ownerName/repoName".
 project:
