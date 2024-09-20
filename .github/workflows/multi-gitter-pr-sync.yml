@@ -50,4 +50,4 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
           chmod +x .github/scripts/update-version.sh
-          multi-gitter run .github/scripts/update-version.sh --token "$GITEA_TOKEN"  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --author-name "$PR_AUTHOR" --author-email "$PR_AUTHOR_EMAIL"  --pr-title "Sync with changes from the $HEAD_BRANCH of common-lib" --config .github/config/multi-gitter-config  
+          multi-gitter run .github/scripts/update-version.sh --token "$GITEA_TOKEN"  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --author-name "$PR_AUTHOR" --author-email "$PR_AUTHOR_EMAIL"  --pr-title "Sync with changes from the $HEAD_BRANCH branch of common-lib" --config .github/config/multi-gitter-config  
