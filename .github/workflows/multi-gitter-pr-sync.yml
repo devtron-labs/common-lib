@@ -20,7 +20,7 @@ jobs:
           go-version: '>=1.17.0'
 
       - name: Install multi-gitter
-        run: curl -s https://raw.githubusercontent.com/lindell/multi-gitter/master/install.sh | sh
+        run: curl -s https://raw.githubusercontent.com/lindell/multi-gitter/b62a2dfda0ed266502f7c71f7ce79f8fd9c26bf6/install.sh | sh
 
       - name: Get PR details
         env:
