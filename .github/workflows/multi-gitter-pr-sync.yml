@@ -2,7 +2,7 @@ name: Creating PR using Multi-Gitter
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened]
     branches:
       - develop
       - main
@@ -41,6 +41,7 @@ jobs:
         run: |
           sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/config/multi-gitter-config
           sed -i 's/PR_AUTHOR=.*/PR_AUTHOR=${{ env.PR_AUTHOR }}/' .github/config/multi-gitter-config
+          sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/config/multi-gitter-config
           sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/scripts/update-version.sh
           sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ env.BASE_BRANCH }}/' .github/scripts/update-version.sh
 
@@ -49,4 +50,4 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
           chmod +x .github/scripts/update-version.sh
-          multi-gitter run .github/scripts/update-version.sh --token "$GITEA_TOKEN"  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --author-name "$PR_AUTHOR" --author-email "$PR_AUTHOR_EMAIL" --config .github/config/multi-gitter-config  
+          multi-gitter run .github/scripts/update-version.sh --token "$GITEA_TOKEN"  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --author-name "$PR_AUTHOR" --author-email "$PR_AUTHOR_EMAIL"  --pr-title "Sync with changes from the $HEAD_BRANCH of common-lib" --config .github/config/multi-gitter-config  
