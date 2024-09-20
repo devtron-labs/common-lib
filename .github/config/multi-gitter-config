@@ -112,13 +112,13 @@ repo:
   - devtron-labs/lens
   - devtron-labs/ci-runner-enterprise
   - devtron-labs/git-sensor-enterprise
-  - chart-sync-enterprise
+  - devtron-labs/chart-sync-enterprise
   - devtron-labs/devtron
   - devtron-labs/kubelink
   - devtron-labs/image-scanner
   - devtron-labs/ci-runner
   - devtron-labs/git-sensor
-  - chart-sync 
+  - devtron-labs/chart-sync 
 
 
 
