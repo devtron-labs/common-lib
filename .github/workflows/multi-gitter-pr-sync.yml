@@ -40,10 +40,6 @@ jobs:
       - name: Update script with PR details
         run: |
           sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/scripts/update-version.sh
-          sed -i 's/PR_AUTHOR=.*/PR_AUTHOR=${{ env.PR_AUTHOR }}/' .github/config/multi-gitter-config
-          sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/config/multi-gitter-config
-          sed -i 's/HEAD_BRANCH=.*/HEAD_BRANCH=${{ env.HEAD_BRANCH }}/' .github/config/multi-gitter-config
-          sed -i 's/BASE_BRANCH=.*/BASE_BRANCH=${{ env.BASE_BRANCH }}/' .github/config/multi-gitter-config
 
       - name: Run multi-gitter
         env:
