@@ -1,0 +1,49 @@
+name: Creating PR using Multi-Gitter
+
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - develop
+      - main
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.17.0'
+
+      - name: Install multi-gitter
+        run: curl -s https://raw.githubusercontent.com/lindell/multi-gitter/b62a2dfda0ed266502f7c71f7ce79f8fd9c26bf6/install.sh | sh
+
+      - name: Get PR details
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_AUTHOR_ID: ${{ github.event.pull_request.user.id }}
+        run: |
+          echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
+          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
+          echo "PR_AUTHOR_ID=$PR_AUTHOR_ID" >> $GITHUB_ENV
+          echo "PR_AUTHOR_EMAIL=${PR_AUTHOR_ID}+${PR_AUTHOR}@users.noreply.github.com" >> $GITHUB_ENV
+
+      - name: Update script with PR details
+        run: |
+          sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/scripts/update-version.sh
+
+      - name: Run multi-gitter
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          chmod +x .github/scripts/update-version.sh
+          multi-gitter run .github/scripts/update-version.sh --token "$GITEA_TOKEN"  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --author-name "$PR_AUTHOR" --author-email "$PR_AUTHOR_EMAIL"  --pr-title "fix: sync with changes from $HEAD_BRANCH of common-lib" --config .github/config/multi-gitter-config  
