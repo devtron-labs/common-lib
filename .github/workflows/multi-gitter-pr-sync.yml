@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
+        
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -34,10 +34,19 @@ jobs:
           echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
           echo "PR_AUTHOR_ID=$PR_AUTHOR_ID" >> $GITHUB_ENV
           echo "PR_AUTHOR_EMAIL=${PR_AUTHOR_ID}+${PR_AUTHOR}@users.noreply.github.com" >> $GITHUB_ENV
-
-      - name: Update script with PR details
+    
+      - name: Setup SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          sed -i 's/VERSION=.*/VERSION=${{ env.COMMIT_SHA }}/' .github/scripts/update-version.sh
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+
+      - name: Configure Git for SSH
+        run: git config --global url."git@github.com:"
+
 
       - name: Run multi-gitter
         env:
