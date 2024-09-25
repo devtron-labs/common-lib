@@ -44,9 +44,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
-      - name: Configure Git for SSH
-        run:   git config --global url."git@github.com:".insteadOf "https://github.com/"
-
       - name: Run multi-gitter
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
