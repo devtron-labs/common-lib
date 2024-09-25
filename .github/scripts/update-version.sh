@@ -3,7 +3,7 @@
 # Title: Updates a go module to a new (patch/minor) version
 
 ### Change these values ###
-MODULE=github.com/devtron-labs/common-lib
+MODULE=github.com/demoDVTNorg/my-private-validator
 VERSION=$VERSION
 
 echo "Commit SHA: $VERSION"
