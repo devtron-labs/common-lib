@@ -3,8 +3,8 @@
 # Title: Updates a go module to a new (patch/minor) version
 
 ### Change these values ###
-MODULE=github.com/demoDVTNorg/validator
-VERSION=$VERSION
+MODULE=github.com/go-playground/validator
+VERSION=c7e85182ab05a4b302bca82a86f1f09530bd2bc1
 
 echo "Commit SHA: $VERSION"
         
