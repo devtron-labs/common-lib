@@ -45,8 +45,7 @@ jobs:
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
       - name: Configure Git for SSH
-        run: git config --global url."git@github.com:"
-
+        run:   git config --global url."git@github.com:".insteadOf "https://github.com/"
 
       - name: Run multi-gitter
         env:
