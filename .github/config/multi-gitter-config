@@ -104,21 +104,7 @@ push-only: false
 
 # The name, including owner of a GitHub repository in the format "ownerName/repoName".
 repo:
-  - devtron-labs/common-lib-private
-  - devtron-labs/devtron-enterprise
-  - devtron-labs/kubewatch
-  - devtron-labs/kubelink-enterprise
-  - devtron-labs/image-scanner-enterprise
-  - devtron-labs/lens
-  - devtron-labs/ci-runner-enterprise
-  - devtron-labs/git-sensor-enterprise
-  - devtron-labs/chart-sync-enterprise
-  - devtron-labs/devtron
-  - devtron-labs/kubelink
-  - devtron-labs/image-scanner
-  - devtron-labs/ci-runner
-  - devtron-labs/git-sensor
-  - devtron-labs/chart-sync 
+ - demoDVTNorg/my-private-validator
 
 
 
