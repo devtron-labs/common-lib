@@ -4,7 +4,7 @@
 
 ### Change these values ###
 MODULE=github.com/demoDVTNorg/validator
-VERSION=v10@v10.11.0
+VERSION=$VERSION
 
 echo "Commit SHA: $VERSION"
         
