@@ -3,8 +3,8 @@
 # Title: Updates a go module to a new (patch/minor) version
 
 ### Change these values ###
-MODULE=github.com/go-playground/validator
-VERSION=c7e85182ab05a4b302bca82a86f1f09530bd2bc1
+MODULE=github.com/devtron-labs/devtron-enterprise
+VERSION=896ecc992b91b71b09c3585a2d68fb0a59719686
 
 echo "Commit SHA: $VERSION"
         
