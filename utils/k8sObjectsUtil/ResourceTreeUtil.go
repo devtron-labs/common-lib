@@ -55,7 +55,7 @@ func GetNodeFromResource(manifest *unstructured.Unstructured, resourceReference 
 	}
 	// hibernate set ends
 
-	if k8s.IsPod(gvk) {
+	if IsPod(gvk.Kind, gvk.Group) {
 		infoItems, _ := PopulatePodInfo(manifest)
 		node.Info = infoItems
 	}
@@ -158,7 +158,7 @@ func GetHookMetadata(manifest *unstructured.Unstructured) (bool, string) {
 }
 
 func SetHealthStatusForNode(res *commonBean.ResourceNode, un *unstructured.Unstructured, gvk schema.GroupVersionKind) {
-	if k8s.IsService(gvk) && un.GetName() == k8s.DEVTRON_SERVICE_NAME && k8s.IsDevtronApp(res.NetworkingInfo.Labels) {
+	if k8s.IsService(gvk) && un.GetName() == commonBean.DEVTRON_SERVICE_NAME && IsDevtronApp(res.NetworkingInfo.Labels) {
 		res.Health = &commonBean.HealthStatus{
 			Status: commonBean.HealthStatusHealthy,
 		}
@@ -641,4 +641,14 @@ func GetReplicaSetPodHash(replicasetObj *v1beta1.ReplicaSet, collisionCount *int
 	replicasetObj.Spec.Template.Labels = labels
 	podHash := ComputePodHash(&replicasetObj.Spec.Template, collisionCount)
 	return podHash
+}
+
+func IsDevtronApp(labels map[string]string) bool {
+	isDevtronApp := false
+	if val, ok := labels[commonBean.DEVTRON_APP_LABEL_KEY]; ok {
+		if val == commonBean.DEVTRON_APP_LABEL_VALUE1 || val == commonBean.DEVTRON_APP_LABEL_VALUE2 {
+			isDevtronApp = true
+		}
+	}
+	return isDevtronApp
 }
