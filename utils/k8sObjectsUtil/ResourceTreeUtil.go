@@ -15,10 +15,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/rand"
-	"k8s.io/client-go/rest"
 )
 
-func GetNodeFromResource(manifest *unstructured.Unstructured, resourceReference v1.ObjectReference, OwnerRefs []metav1.OwnerReference, requestedNamespace string) (*commonBean.ResourceNode, error) {
+func GetNodeFromResource(manifest *unstructured.Unstructured, resourceReference v1.ObjectReference, ownerRefs []metav1.OwnerReference, requestedNamespace string) (*commonBean.ResourceNode, error) {
 	gvk := manifest.GroupVersionKind()
 	_namespace := manifest.GetNamespace()
 	if _namespace == "" {
@@ -47,7 +46,7 @@ func GetNodeFromResource(manifest *unstructured.Unstructured, resourceReference 
 	SetHealthStatusForNode(node, manifest, gvk)
 
 	// hibernate set starts
-	if len(OwnerRefs) == 0 {
+	if len(ownerRefs) == 0 {
 
 		// set CanBeHibernated
 		SetHibernationRules(node, &node.Manifest)
@@ -381,19 +380,6 @@ func ConvertToV1Deployment(nodeObj map[string]interface{}) (*v1beta1.Deployment,
 	return &deploymentObj, nil
 }
 
-//func GetRolloutPodHash(rollout map[string]interface{}) string {
-//	if s, ok := rollout["status"]; ok {
-//		if sm, ok := s.(map[string]interface{}); ok {
-//			if cph, ok := sm["currentPodHash"]; ok {
-//				if cphs, ok := cph.(string); ok {
-//					return cphs
-//				}
-//			}
-//		}
-//	}
-//	return ""
-//}
-
 func GetUpdateRevisionForStatefulSet(obj map[string]interface{}) string {
 	updateRevisionFromManifest, found, _ := unstructured.NestedString(obj, "status", "updateRevision")
 	if found {
@@ -419,7 +405,7 @@ func DeepHashObject(hasher hash.Hash, objectToWrite interface{}) {
 	}
 }
 
-func BuildPodMetadata(nodes []*commonBean.ResourceNode, restConfig *rest.Config) ([]*commonBean.PodMetadata, error) {
+func BuildPodMetadata(nodes []*commonBean.ResourceNode) ([]*commonBean.PodMetadata, error) {
 	podsMetadata := make([]*commonBean.PodMetadata, 0, len(nodes))
 	for _, node := range nodes {
 
@@ -502,7 +488,7 @@ func GetExtraNodeInfoMappings(nodes []*commonBean.ResourceNode) (map[string]stri
 }
 
 func IsPodNew(nodes []*commonBean.ResourceNode, node *commonBean.ResourceNode, deploymentPodHashMap map[string]string, rolloutMap map[string]*commonBean.ExtraNodeInfo,
-	uidVsExtraNodeInfoMap map[string]*commonBean.ExtraNodeInfo, restConfig *rest.Config) (bool, error) {
+	uidVsExtraNodeInfoMap map[string]*commonBean.ExtraNodeInfo) (bool, error) {
 
 	isNew := false
 	parentRef := node.ParentRefs[0]
@@ -526,7 +512,7 @@ func IsPodNew(nodes []*commonBean.ResourceNode, node *commonBean.ResourceNode, d
 		// if parent of replicaset is deployment, compare label pod-template-hash
 		if replicaSetParent := replicaSetNode.ParentRefs[0]; replicaSetNode != nil && len(replicaSetNode.ParentRefs) > 0 && replicaSetParent.Kind == commonBean.DeploymentKind {
 			deploymentPodHash := deploymentPodHashMap[replicaSetParent.Name]
-			replicaSetObj, err := GetReplicaSetObject(restConfig, replicaSetNode)
+			replicaSetObj, err := GetReplicaSetObject(replicaSetNode)
 			if err != nil {
 				return isNew, err
 			}
@@ -609,7 +595,7 @@ func GetMatchingNodes(nodes []*commonBean.ResourceNode, kind string) []*commonBe
 	return nodesRes
 }
 
-func GetReplicaSetObject(restConfig *rest.Config, replicaSetNode *commonBean.ResourceNode) (*v1beta1.ReplicaSet, error) {
+func GetReplicaSetObject(replicaSetNode *commonBean.ResourceNode) (*v1beta1.ReplicaSet, error) {
 	var replicaSetNodeObj map[string]interface{}
 	var err error
 	replicaSetNodeObj = replicaSetNode.Manifest.Object
