@@ -482,7 +482,7 @@ func BuildPodMetadata(nodes []*commonBean.ResourceNode, restConfig *rest.Config)
 	return podsMetadata, nil
 }
 
-func getExtraNodeInfoMappings(nodes []*commonBean.ResourceNode) (map[string]string, map[string]*commonBean.ExtraNodeInfo, map[string]*commonBean.ExtraNodeInfo) {
+func GetExtraNodeInfoMappings(nodes []*commonBean.ResourceNode) (map[string]string, map[string]*commonBean.ExtraNodeInfo, map[string]*commonBean.ExtraNodeInfo) {
 	deploymentPodHashMap := make(map[string]string)
 	rolloutNameVsExtraNodeInfoMapping := make(map[string]*commonBean.ExtraNodeInfo)
 	uidVsExtraNodeInfoMapping := make(map[string]*commonBean.ExtraNodeInfo)
@@ -522,16 +522,16 @@ func IsPodNew(nodes []*commonBean.ResourceNode, node *commonBean.ResourceNode, d
 
 	// if parent kind is replica set then
 	if parentKind == commonBean.ReplicaSetKind {
-		replicaSetNode := getMatchingNode(nodes, parentKind, parentRef.Name)
+		replicaSetNode := GetMatchingNode(nodes, parentKind, parentRef.Name)
 
 		// if parent of replicaset is deployment, compare label pod-template-hash
 		if replicaSetParent := replicaSetNode.ParentRefs[0]; replicaSetNode != nil && len(replicaSetNode.ParentRefs) > 0 && replicaSetParent.Kind == commonBean.DeploymentKind {
 			deploymentPodHash := deploymentPodHashMap[replicaSetParent.Name]
-			replicaSetObj, err := getReplicaSetObject(restConfig, replicaSetNode)
+			replicaSetObj, err := GetReplicaSetObject(restConfig, replicaSetNode)
 			if err != nil {
 				return isNew, err
 			}
-			deploymentNode := getMatchingNode(nodes, replicaSetParent.Kind, replicaSetParent.Name)
+			deploymentNode := GetMatchingNode(nodes, replicaSetParent.Kind, replicaSetParent.Name)
 			// TODO: why do we need deployment object for collisionCount ??
 			var deploymentCollisionCount *int32
 			if deploymentNode != nil && deploymentNode.DeploymentCollisionCount != nil {
@@ -558,7 +558,7 @@ func IsPodNew(nodes []*commonBean.ResourceNode, node *commonBean.ResourceNode, d
 
 	// if parent kind is DaemonSet then compare DaemonSet's Child ControllerRevision's label controller-revision-hash with pod label controller-revision-hash
 	if parentKind == commonBean.DaemonSetKind {
-		controllerRevisionNodes := getMatchingNodes(nodes, "ControllerRevision")
+		controllerRevisionNodes := GetMatchingNodes(nodes, "ControllerRevision")
 		for _, controllerRevisionNode := range controllerRevisionNodes {
 			if len(controllerRevisionNode.ParentRefs) > 0 && controllerRevisionNode.ParentRefs[0].Kind == parentKind &&
 				controllerRevisionNode.ParentRefs[0].Name == parentRef.Name && uidVsExtraNodeInfoMap[parentRef.UID].ResourceNetworkingInfo != nil &&
@@ -591,7 +591,7 @@ func getDeploymentCollisionCount(deploymentInfo *commonBean.ResourceRef) (*int32
 	return deploymentObj.Status.CollisionCount, nil
 }
 
-func getMatchingNode(nodes []*commonBean.ResourceNode, kind string, name string) *commonBean.ResourceNode {
+func GetMatchingNode(nodes []*commonBean.ResourceNode, kind string, name string) *commonBean.ResourceNode {
 	for _, node := range nodes {
 		if node.Kind == kind && node.Name == name {
 			return node
@@ -600,7 +600,7 @@ func getMatchingNode(nodes []*commonBean.ResourceNode, kind string, name string)
 	return nil
 }
 
-func getMatchingNodes(nodes []*commonBean.ResourceNode, kind string) []*commonBean.ResourceNode {
+func GetMatchingNodes(nodes []*commonBean.ResourceNode, kind string) []*commonBean.ResourceNode {
 	nodesRes := make([]*commonBean.ResourceNode, 0, len(nodes))
 	for _, node := range nodes {
 		if node.Kind == kind {
@@ -610,7 +610,7 @@ func getMatchingNodes(nodes []*commonBean.ResourceNode, kind string) []*commonBe
 	return nodesRes
 }
 
-func getReplicaSetObject(restConfig *rest.Config, replicaSetNode *commonBean.ResourceNode) (*v1beta1.ReplicaSet, error) {
+func GetReplicaSetObject(restConfig *rest.Config, replicaSetNode *commonBean.ResourceNode) (*v1beta1.ReplicaSet, error) {
 	var replicaSetNodeObj map[string]interface{}
 	var err error
 	replicaSetNodeObj = replicaSetNode.Manifest.Object
