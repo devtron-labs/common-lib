@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/devtron-labs/common-lib/utils/k8s"
 	"github.com/devtron-labs/common-lib/utils/k8s/commonBean"
 	"github.com/devtron-labs/common-lib/utils/k8s/health"
 	"hash"
@@ -158,7 +157,7 @@ func GetHookMetadata(manifest *unstructured.Unstructured) (bool, string) {
 }
 
 func SetHealthStatusForNode(res *commonBean.ResourceNode, un *unstructured.Unstructured, gvk schema.GroupVersionKind) {
-	if k8s.IsService(gvk) && un.GetName() == commonBean.DEVTRON_SERVICE_NAME && IsDevtronApp(res.NetworkingInfo.Labels) {
+	if IsService(gvk) && un.GetName() == commonBean.DEVTRON_SERVICE_NAME && IsDevtronApp(res.NetworkingInfo.Labels) {
 		res.Health = &commonBean.HealthStatus{
 			Status: commonBean.HealthStatusHealthy,
 		}
@@ -651,4 +650,12 @@ func IsDevtronApp(labels map[string]string) bool {
 		}
 	}
 	return isDevtronApp
+}
+
+func IsService(gvk schema.GroupVersionKind) bool {
+	return gvk.Group == "" && gvk.Kind == commonBean.ServiceKind
+}
+
+func IsPod(kind string, group string) bool {
+	return kind == "Pod" && group == ""
 }

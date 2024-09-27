@@ -1750,10 +1750,6 @@ func (impl *K8sServiceImpl) GetPodListByLabel(namespace, label string, clientSet
 	return podList.Items, nil
 }
 
-func IsService(gvk schema.GroupVersionKind) bool {
-	return gvk.Group == "" && gvk.Kind == commonBean.ServiceKind
-}
-
 //func GetHealthCheckFunc(gvk schema.GroupVersionKind) func(obj *unstructured.Unstructured) (*health.HealthStatus, error) {
 //	return health.GetHealthCheckFunc(gvk)
 //}
