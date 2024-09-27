@@ -26,7 +26,7 @@ func GetNodeFromResource(manifest *unstructured.Unstructured, resourceReference 
 		_namespace = requestedNamespace
 	}
 	ports := GetPorts(manifest, gvk)
-	resourceRef := buildResourceRef(gvk, *manifest, _namespace)
+	resourceRef := BuildResourceRef(gvk, *manifest, _namespace)
 
 	creationTimeStamp := ""
 	val, found, err := unstructured.NestedString(manifest.Object, "metadata", "creationTimestamp")
@@ -42,24 +42,24 @@ func GetNodeFromResource(manifest *unstructured.Unstructured, resourceReference 
 		CreatedAt: creationTimeStamp,
 		Port:      ports,
 	}
-	node.IsHook, node.HookType = getHookMetadata(manifest)
+	node.IsHook, node.HookType = GetHookMetadata(manifest)
 
 	// set health of Node
-	setHealthStatusForNode(node, manifest, gvk)
+	SetHealthStatusForNode(node, manifest, gvk)
 
 	// hibernate set starts
 	if len(OwnerRefs) == 0 {
 
 		// set CanBeHibernated
-		setHibernationRules(node, &node.Manifest)
+		SetHibernationRules(node, &node.Manifest)
 	}
 	// hibernate set ends
 
 	if k8s.IsPod(gvk) {
-		infoItems, _ := populatePodInfo(manifest)
+		infoItems, _ := PopulatePodInfo(manifest)
 		node.Info = infoItems
 	}
-	addSelectiveInfoInResourceNode(node, gvk, manifest.Object)
+	AddSelectiveInfoInResourceNode(node, gvk, manifest.Object)
 
 	return node, nil
 }
@@ -134,7 +134,7 @@ func getPortsFromEndpointsKind(manifest *unstructured.Unstructured) []int64 {
 	return ports
 }
 
-func buildResourceRef(gvk schema.GroupVersionKind, manifest unstructured.Unstructured, namespace string) *commonBean.ResourceRef {
+func BuildResourceRef(gvk schema.GroupVersionKind, manifest unstructured.Unstructured, namespace string) *commonBean.ResourceRef {
 	resourceRef := &commonBean.ResourceRef{
 		Group:     gvk.Group,
 		Version:   gvk.Version,
@@ -147,7 +147,7 @@ func buildResourceRef(gvk schema.GroupVersionKind, manifest unstructured.Unstruc
 	return resourceRef
 }
 
-func getHookMetadata(manifest *unstructured.Unstructured) (bool, string) {
+func GetHookMetadata(manifest *unstructured.Unstructured) (bool, string) {
 	annotations, found, _ := unstructured.NestedStringMap(manifest.Object, "metadata", "annotations")
 	if found {
 		if hookType, ok := annotations[commonBean.HelmHookAnnotation]; ok {
@@ -157,7 +157,7 @@ func getHookMetadata(manifest *unstructured.Unstructured) (bool, string) {
 	return false, ""
 }
 
-func setHealthStatusForNode(res *commonBean.ResourceNode, un *unstructured.Unstructured, gvk schema.GroupVersionKind) {
+func SetHealthStatusForNode(res *commonBean.ResourceNode, un *unstructured.Unstructured, gvk schema.GroupVersionKind) {
 	if k8s.IsService(gvk) && un.GetName() == k8s.DEVTRON_SERVICE_NAME && k8s.IsDevtronApp(res.NetworkingInfo.Labels) {
 		res.Health = &commonBean.HealthStatus{
 			Status: commonBean.HealthStatusHealthy,
@@ -180,7 +180,7 @@ func setHealthStatusForNode(res *commonBean.ResourceNode, un *unstructured.Unstr
 	}
 }
 
-func setHibernationRules(res *commonBean.ResourceNode, un *unstructured.Unstructured) {
+func SetHibernationRules(res *commonBean.ResourceNode, un *unstructured.Unstructured) {
 	if un.GetOwnerReferences() == nil {
 		// set CanBeHibernated
 		replicas, found, _ := unstructured.NestedInt64(un.UnstructuredContent(), "spec", "replicas")
@@ -200,7 +200,7 @@ func setHibernationRules(res *commonBean.ResourceNode, un *unstructured.Unstruct
 	}
 }
 
-func populatePodInfo(un *unstructured.Unstructured) ([]commonBean.InfoItem, error) {
+func PopulatePodInfo(un *unstructured.Unstructured) ([]commonBean.InfoItem, error) {
 	var infoItems []commonBean.InfoItem
 
 	pod := v1.Pod{}
@@ -336,7 +336,7 @@ func getContainersInfo(pod v1.Pod) ([]string, []string, []commonBean.EphemeralCo
 	return containerNames, initContainerNames, ephemeralContainers, ephemeralContainerStatus
 }
 
-func addSelectiveInfoInResourceNode(resourceNode *commonBean.ResourceNode, gvk schema.GroupVersionKind, obj map[string]interface{}) {
+func AddSelectiveInfoInResourceNode(resourceNode *commonBean.ResourceNode, gvk schema.GroupVersionKind, obj map[string]interface{}) {
 	if gvk.Kind == commonBean.StatefulSetKind {
 		resourceNode.UpdateRevision = GetUpdateRevisionForStatefulSet(obj)
 	}
