@@ -1,8 +1,11 @@
-name: Creating PR using Multi-Gitter
+name: Creating PR using Multi-Gitter (Debug Version)
 
 on:
   pull_request:
     types: [opened]
+
+env:
+  ACTIONS_STEP_DEBUG: true
 
 jobs:
   update-dependencies:
@@ -35,7 +38,7 @@ jobs:
           echo "PR_AUTHOR_ID=$PR_AUTHOR_ID" >> $GITHUB_ENV
           echo "PR_AUTHOR_EMAIL=${PR_AUTHOR_ID}+${PR_AUTHOR}@users.noreply.github.com" >> $GITHUB_ENV
     
-      - name: Setup SSH
+      - name: Setup SSH with Debugging
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
@@ -43,10 +46,39 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+          echo "Testing SSH connection to GitHub:"
+          ssh -vvT git@github.com || true
 
-      - name: Run multi-gitter
+      - name: Test repository access
+        run: |
+          echo "Attempting to clone a test repository:"
+          git clone git@github.com:YourOrg/YourRepo.git test-repo || echo "Clone failed"
+          ls -la test-repo || echo "No test-repo directory"
+
+      - name: Debug multi-gitter configuration
+        run: |
+          echo "Contents of multi-gitter config file:"
+          cat .github/config/multi-gitter-config || echo "Config file not found"
+
+      - name: Run multi-gitter with debugging
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GIT_SSH_COMMAND: "ssh -vvv"
         run: |
           chmod +x .github/scripts/update-version.sh
-          multi-gitter run .github/scripts/update-version.sh  --base-branch "$BASE_BRANCH" --branch "$HEAD_BRANCH" --author-name "$PR_AUTHOR" --author-email "$PR_AUTHOR_EMAIL"  --pr-title "fix: sync with changes from $HEAD_BRANCH of common-lib" --config .github/config/multi-gitter-config  
+          echo "Running multi-gitter with verbose SSH:"
+          multi-gitter run .github/scripts/update-version.sh \
+            --base-branch "$BASE_BRANCH" \
+            --branch "$HEAD_BRANCH" \
+            --author-name "$PR_AUTHOR" \
+            --author-email "$PR_AUTHOR_EMAIL" \
+            --pr-title "fix: sync with changes from $HEAD_BRANCH of common-lib" \
+            --config .github/config/multi-gitter-config \
+            --debug
+
+      - name: Output Git and SSH version info
+        run: |
+          echo "Git version:"
+          git --version
+          echo "OpenSSH version:"
+          ssh -V
