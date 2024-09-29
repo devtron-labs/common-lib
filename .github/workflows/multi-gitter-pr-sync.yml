@@ -52,7 +52,7 @@ jobs:
       - name: Test repository access
         run: |
           echo "Attempting to clone a test repository:"
-          git clone git@github.com:YourOrg/YourRepo.git test-repo || echo "Clone failed"
+          git clone git@github.com:demoDVTNorg/demo-ent.git test-repo | echo "Clone failed"
           ls -la test-repo || echo "No test-repo directory"
 
       - name: Debug multi-gitter configuration
@@ -73,9 +73,8 @@ jobs:
             --author-name "$PR_AUTHOR" \
             --author-email "$PR_AUTHOR_EMAIL" \
             --pr-title "fix: sync with changes from $HEAD_BRANCH of common-lib" \
-            --config .github/config/multi-gitter-config \
-            --debug
-
+            --config .github/config/multi-gitter-config 
+            
       - name: Output Git and SSH version info
         run: |
           echo "Git version:"
