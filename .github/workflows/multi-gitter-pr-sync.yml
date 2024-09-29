@@ -42,12 +42,16 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-          echo "Testing SSH connection to GitHub:"
-          ssh -vvT git@github.com || true
+           mkdir -p ~/.ssh
+           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+           chmod 600 ~/.ssh/id_rsa
+           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+           echo "SSH key file permissions:"
+           ls -l ~/.ssh/id_rsa
+           echo "SSH directory contents:"
+           ls -la ~/.ssh
+           echo "Testing SSH connection to GitHub:"
+           ssh -vvT git@github.com || true
 
       - name: Test repository access
         run: |
