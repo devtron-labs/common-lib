@@ -105,6 +105,7 @@ push-only: false
 # The name, including owner of a GitHub repository in the format "ownerName/repoName".
 repo:
  - demoDVTNorg/demo-ent
+ - demoDVTNorg/ci-runner-test
 
 
 
