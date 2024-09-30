@@ -48,6 +48,7 @@ jobs:
            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
            echo "SSH key file permissions:"
            ls -l ~/.ssh/id_rsa
+           git config --global url."git@github.com:".insteadOf "https://github.com/"
            echo "SSH directory contents:"
            ls -la ~/.ssh
            echo "Testing SSH connection to GitHub:"
