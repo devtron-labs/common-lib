@@ -49,6 +49,7 @@ jobs:
            echo "SSH key file permissions:"
            ls -l ~/.ssh/id_rsa
            git config --global url."git@github.com:".insteadOf "https://github.com/"
+           echo "git-config content:"
            cat ~/.gitconfig
            echo "SSH directory contents:"
            ls -la ~/.ssh
