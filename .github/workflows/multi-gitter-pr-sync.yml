@@ -42,23 +42,24 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-          echo "Testing SSH connection to GitHub:"
-          ssh -vvT git@github.com || true
+           mkdir -p ~/.ssh
+           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+           chmod 600 ~/.ssh/id_rsa
+           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+           echo "SSH key file permissions:"
+           ls -l ~/.ssh/id_rsa
+           git config --global url."git@github.com:".insteadOf "https://github.com/"
+           cat ~/.gitconfig
+           echo "SSH directory contents:"
+           ls -la ~/.ssh
+           echo "Testing SSH connection to GitHub:"
+           ssh -vvT git@github.com || true
 
       - name: Test repository access
         run: |
           echo "Attempting to clone a test repository:"
           git clone git@github.com:demoDVTNorg/demo-ent.git test-repo | echo "Clone failed"
           ls -la test-repo || echo "No test-repo directory"
-
-      - name: Debug multi-gitter configuration
-        run: |
-          echo "Contents of multi-gitter config file:"
-          cat .github/config/multi-gitter-config || echo "Config file not found"
 
       - name: Run multi-gitter with debugging
         env:
