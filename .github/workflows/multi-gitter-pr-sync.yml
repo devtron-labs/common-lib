@@ -63,7 +63,7 @@ jobs:
               echo "Clone succeeded"
            else
               echo "Clone failed"
-          fi
+           fi
           git clone git@github.com:demoDVTNorg/demo-ent.git test-repo | echo "Clone failed"
           ls -la test-repo || echo "No test-repo directory"
 
