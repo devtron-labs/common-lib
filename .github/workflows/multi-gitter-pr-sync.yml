@@ -2,14 +2,14 @@ name: Creating PR using Multi-Gitter (Debug Version)
 
 on:
   pull_request:
-    types: [opened, edited]
+    types: [opened]
+  workflow_dispatch:
 
 env:
   ACTIONS_STEP_DEBUG: true
 
 jobs:
   update-dependencies:
-    if: github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
