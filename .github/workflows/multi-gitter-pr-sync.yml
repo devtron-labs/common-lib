@@ -59,6 +59,11 @@ jobs:
       - name: Test repository access
         run: |
           echo "Attempting to clone a test repository:"
+           if git clone git@github.com:demoDVTNorg/demo-ent.git test-repo; then
+              echo "Clone succeeded"
+           else
+              echo "Clone failed"
+          fi
           git clone git@github.com:demoDVTNorg/demo-ent.git test-repo | echo "Clone failed"
           ls -la test-repo || echo "No test-repo directory"
 
