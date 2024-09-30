@@ -71,6 +71,7 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
           GIT_SSH_COMMAND: "ssh -vvv"
         run: |
+          ls -lhrt ~/.ssh
           chmod +x .github/scripts/update-version.sh
           echo "Running multi-gitter with verbose SSH:"
           multi-gitter run .github/scripts/update-version.sh \
