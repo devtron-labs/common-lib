@@ -10,6 +10,7 @@ env:
 
 jobs:
   update-dependencies:
+    if: github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
