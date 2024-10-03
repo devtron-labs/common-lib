@@ -78,8 +78,8 @@ jobs:
           multi-gitter run .github/scripts/update-version.sh \
             --base-branch "$BASE_BRANCH" \
             --branch "$HEAD_BRANCH" \
-            --author-name "Pawan" \
-            --author-email "pawan@github.com" \
+            --author-name "$PR_AUTHOR" \
+            --author-email "$PR_AUTHOR_EMAIL" \
             --pr-title "fix: sync with changes from $HEAD_BRANCH of common-lib" \
             --config .github/config/multi-gitter-config 
          
