@@ -51,12 +51,12 @@ jobs:
            chmod 644 ~/.ssh/known_hosts
            echo "SSH key file permissions:"
            ls -l ~/.ssh/id_rsa
-            cat > ~/.ssh/config << EOF
-            Host github.com
-              User git
-              IdentityFile ~/.ssh/id_rsa
-              StrictHostKeyChecking yes
-            EOF
+           cat > ~/.ssh/config << EOF
+           Host github.com
+             User git
+             IdentityFile ~/.ssh/id_rsa
+             StrictHostKeyChecking yes
+           EOF
            chmod 600 ~/.ssh/config
            
            git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
