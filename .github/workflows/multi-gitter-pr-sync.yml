@@ -38,54 +38,18 @@ jobs:
           echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
           echo "PR_AUTHOR_ID=$PR_AUTHOR_ID" >> $GITHUB_ENV
           echo "PR_AUTHOR_EMAIL=${PR_AUTHOR_ID}+${PR_AUTHOR}@users.noreply.github.com" >> $GITHUB_ENV
-    
-      - name: Setup SSH with Debugging
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-           mkdir -p ~/.ssh
-           chmod 700 ~/.ssh
-           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-           chmod 600 ~/.ssh/id_rsa
-           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-           chmod 644 ~/.ssh/known_hosts
-           echo "SSH key file permissions:"
-           ls -l ~/.ssh/id_rsa
-           cat > ~/.ssh/config << EOF
-           Host github.com
-             User git
-             IdentityFile ~/.ssh/id_rsa
-             StrictHostKeyChecking yes
-           EOF
-           chmod 600 ~/.ssh/config
-           
-           git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
-           echo "git-config content:"
-           cat ~/.gitconfig
-           echo "SSH directory contents:"
-           ls -la ~/.ssh
-           echo "Testing SSH connection to GitHub:"
-           ssh -vvT git@github.com || true
-              
-      - name: Test repository access
-        run: |
-          echo "Attempting to clone a test repository:"
-           if git clone git@github.com:demoDVTNorg/demo-ent.git test-repo-t12; then
-              echo "Clone succeeded"
-           else
-              echo "Clone failed"
-           fi
-          ls -la test-repo-t12 || echo "No test-repo directory"
+
 
       - name: Run multi-gitter with debugging
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
-          GIT_SSH_COMMAND: "ssh -vvv"
         run: |
-          ls -lhrt ~/.ssh
+          
+          git config --global url.https://$GITEA_TOKEN@github.com/.insteadOf https://github.com/
           chmod +x .github/scripts/update-version.sh
           echo "Running multi-gitter with verbose SSH:"
           multi-gitter run .github/scripts/update-version.sh \
+            --token "$GITEA_TOKEN"
             --base-branch "$BASE_BRANCH" \
             --branch "$HEAD_BRANCH" \
             --author-name "$PR_AUTHOR" \
@@ -93,10 +57,3 @@ jobs:
             --pr-title "fix: sync with changes from $HEAD_BRANCH of common-lib" \
             --config .github/config/multi-gitter-config 
          
-            
-      - name: Output Git and SSH version info
-        run: |
-          echo "Git version:"
-          git --version
-          echo "OpenSSH version:"
-          ssh -V
