@@ -4,7 +4,7 @@
 
 ### Change these values ###
 MODULE=github.com/devtron-labs/common-lib
-VERSION=5654ff99a9c1250bf456549b94e01c720df0d8a2
+VERSION=2779febf594ff5975f55fa5eca24069a23adf50e
 
 echo "Commit SHA: $VERSION"
         
