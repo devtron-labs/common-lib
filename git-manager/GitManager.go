@@ -119,6 +119,7 @@ func (impl *GitManager) CloneAndCheckout(ciProjectDetails []CiProjectDetails, wo
 		default:
 			auth = &BasicAuth{}
 		}
+
 		tlsData := BuildTlsData(prj.GitOptions.TlsKey, prj.GitOptions.TlsCert, prj.GitOptions.CaCert, prj.GitOptions.TlsVerificationEnabled)
 		gitContext := GitContext{
 			Auth:       auth,
