@@ -37,6 +37,37 @@ func (tr TimeRange) GetTimeRangeWindow(targetTime time.Time) (nextWindowEdge tim
 	return windowStart, false, nil
 }
 
+func (tr TimeRange) GetTimeRangeWindowForFixedWindow(targetTime time.Time, location *time.Location) (nextWindowEdge time.Time, isTimeBetween bool, err error) {
+	err = tr.ValidateTimeRange()
+	if err != nil {
+		return nextWindowEdge, false, err
+	}
+	windowStart, windowEnd, err := tr.getWindowForFixedTargetTimeAndZone(targetTime, location)
+	if err != nil {
+		return nextWindowEdge, isTimeBetween, err
+	}
+	if isTimeInBetween(targetTime, windowStart, windowEnd) {
+		return windowEnd, true, nil
+	}
+	return windowStart, false, nil
+
+}
+
+func (tr TimeRange) getWindowForFixedTargetTimeAndZone(targetTime time.Time, location *time.Location) (time.Time, time.Time, error) {
+	var windowStartOrEnd time.Time
+	offset := 5*time.Hour + 30*time.Minute
+
+	// Correct the TimeFrom and TimeTo by adding the offset
+	correctedTimeFrom := tr.TimeFrom.Add(offset)
+	correctedTimeTo := tr.TimeTo.Add(offset)
+	correctedTimeFromInLocation := correctedTimeFrom.In(location)
+	correctedTimeToInLocation := correctedTimeTo.In(location)
+	if targetTime.After(correctedTimeToInLocation) {
+		return windowStartOrEnd, windowStartOrEnd, nil
+	}
+	return correctedTimeFromInLocation, correctedTimeToInLocation, nil
+}
+
 func (tr TimeRange) getWindowForTargetTime(targetTime time.Time) (time.Time, time.Time, error) {
 
 	if tr.Frequency == Fixed {
